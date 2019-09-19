@@ -172,8 +172,8 @@ bool MainCamera::initCAM(){
 ///////////////////////////////////////////////////////////////
 
     cout<<"Sensor Mode Index: "<< sensorModeIndex <<endl;
-    SensorMode *sensorMode = sensorModes[sensorModeIndex]; //2 is 60fps, 0 is 30 fps
-    ISensorMode *iSensorMode = interface_cast<ISensorMode>(sensorModes[sensorModeIndex]);
+    SensorMode *sensorMode = modes[sensorModeIndex]; //2 is 60fps, 0 is 30 fps
+    ISensorMode *iSensorMode = interface_cast<ISensorMode>(sensorMode);
     EXIT_IF_NULL(iSensorMode, "Failed to get sensor mode interface");
 
     emit return_Resolution(iSensorMode->getResolution().height());

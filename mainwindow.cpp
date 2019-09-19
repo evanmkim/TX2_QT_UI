@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //RADIO
     ui->radioOriginal->setChecked(true);
     //SPINBOX
-    ui->sensorModespinBox->setMaximum(2);
+    ui->sensorModespinBox->setMaximum(3);
 
     ///THREAD INITIALIZATION
     ArgusCamera1 = new MainCamera(0);

@@ -348,7 +348,6 @@ void MainWindow::get_QImage(QImage img_temp)
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    ui->QimageLabel->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->QimageLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -403,7 +402,6 @@ void MainWindow::get_QImageCAM2(QImage img_temp)
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    ui->Qimage2Label->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->Qimage2Label->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void MainWindow::get_DefectImage(QImage img_temp)

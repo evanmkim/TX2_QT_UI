@@ -853,80 +853,12 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QFrame" name="frame_3">
+   <widget class="QFrame" name="frame_4">
     <property name="geometry">
      <rect>
       <x>20</x>
       <y>80</y>
-      <width>361</width>
-      <height>541</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="QimageLabel">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>341</width>
-       <height>201</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="Qimage2Label">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>310</y>
-       <width>341</width>
-       <height>201</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 1</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>290</y>
-       <width>81</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 2</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QFrame" name="frame_4">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>80</y>
-      <width>291</width>
+      <width>661</width>
       <height>541</height>
      </rect>
     </property>
@@ -941,8 +873,8 @@
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>271</width>
-       <height>211</height>
+       <width>641</width>
+       <height>461</height>
       </rect>
      </property>
      <property name="text">

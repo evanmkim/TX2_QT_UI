@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ArgusCamera2,&ArgusCamera::return_Resolution,this,&MainWindow::get_ResoluCAM2);
     connect(ArgusCamera2,&ArgusCamera::return_FrameRate,this,&MainWindow::get_FrameRateCAM2);
     connect(ArgusCamera2,&ArgusCamera::return_CurrFrameRate,this,&MainWindow::get_CurrFrameRateCAM2);
+    connect(ArgusCamera2,&ArgusCamera::return_DefectImage,this,&MainWindow::get_DefectImage2);
 
     connect(ui->ExposureTimeSlider_2,SIGNAL(valueChanged(int)),ArgusCamera2,SLOT(set_Exposure(int)));
     connect(ui->GainSlider_2, SIGNAL(valueChanged(int)),this, SLOT(notifyGainChangedCAM2(int)));
@@ -412,6 +413,14 @@ void MainWindow::get_DefectImage(QImage img_temp)
     QMatrix rm;
     rm.rotate(0);
     ui->QimageDefect->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->QimageDefect->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::get_DefectImage2(QImage img_temp)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    ui->QimageDefect2->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->QimageDefect2->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void MainWindow::get_ResoluCAM2(int sensorResolution)

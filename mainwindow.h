@@ -69,6 +69,7 @@ private slots:
     //Dislay Data
     void get_QImage(QImage);
     void get_DefectImage(QImage);
+    void get_DefectImage2(QImage);
     void get_FrameRate(double);
     void get_CurrFrameRate(double);
 

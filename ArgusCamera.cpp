@@ -582,7 +582,8 @@ bool ArgusCamera::initCAM(){
         cout <<"Image Processing time usage " << fixed<< ((IPduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
         cout <<"Display duration time usage " << fixed<< ((Displayduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
         cout <<"Unmap time usage " << fixed<< ((Unloadduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
-        cout <<"GPIO time usage " << fixed<< ((GPIOduration*1.0)/(oneloopduration/1.0))*100 << " %" << endl << endl;
+        cout <<"GPIO time usage " << fixed<< ((GPIOduration*1.0)/(oneloopduration/1.0))*100 << " %" << endl;
+        cout <<"Total Duration: "<< fixed << totalduration/1000000000.0 << endl << endl;
 
         emit return_FrameRate((frameCaptureLoop*1.0)/(totalduration/1000000000.0));
         emit return_CurrFrameRate(1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));

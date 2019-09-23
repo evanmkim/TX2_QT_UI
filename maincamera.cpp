@@ -224,6 +224,10 @@ bool MainCamera::initCAM(){
     for (int frameCaptureLoop = 1; frameCaptureLoop < CAPTURE_COUNT; frameCaptureLoop++)
     {
         cout << "Main Camera Frame: " << frameCaptureLoop << endl;
+
+        /// START SETTINGS
+        ///
+        ///
         auto startSettings = std::chrono::high_resolution_clock::now();
 
         //Pause Button vs StopButton
@@ -287,7 +291,11 @@ bool MainCamera::initCAM(){
 
         auto finishSettings = std::chrono::high_resolution_clock::now();
 
-        ////////IMAGE GENERATION STARTS HERE
+
+
+        /// START IMAGE GENERATION
+        ///
+        ///
         Argus::UniqueObj<EGLStream::Frame> frame(iFrameConsumer->acquireFrame());
         EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
         EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");
@@ -325,6 +333,11 @@ bool MainCamera::initCAM(){
         void *data_mem3;
         channels.clear();
 
+
+
+        /// START MAPPING
+        ///
+        ///
         auto startMapping = std::chrono::high_resolution_clock::now();
 
         NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
@@ -354,11 +367,17 @@ bool MainCamera::initCAM(){
         RESIZEDchannels.push_back(J);
         RESIZEDchannels.push_back(K);
         RESIZEDchannels.push_back(L);
+
         auto finishMapping = std::chrono::high_resolution_clock::now();
 
         cv::merge ( RESIZEDchannels, img );
         cv::cvtColor ( img,img,CV_YCrCb2RGB );
 
+
+
+        /// START IMAGE PROCESSING
+        ///
+        ///
         Mat imgTh;
         Mat imgProc1;
         Mat imgGray;
@@ -431,6 +450,11 @@ bool MainCamera::initCAM(){
 
         auto finishIP = std::chrono::high_resolution_clock::now();
 
+
+
+        /// START IMAGE DISPLAY
+        ///
+        ///
         if (captureButtonPressed){
             string savepath = "/home/nvidia/Desktop/capture" + std::to_string(frameCaptureLoop) + ".png";
             cv::imwrite(savepath, imgProc1);
@@ -454,6 +478,10 @@ bool MainCamera::initCAM(){
         auto finishDisplay = std::chrono::high_resolution_clock::now();
 
 
+
+        /// START UNMAPPING
+        ///
+        ///
         if (frameCaptureLoop%10==0){
 
             iSession->repeat(request.get());
@@ -469,6 +497,11 @@ bool MainCamera::initCAM(){
         SensorTimestamp = iMetadata->getSensorTimestamp();
         auto finishUnMap = std::chrono::high_resolution_clock::now();
 
+
+
+        /// START GPIO
+        ///
+        ///
         /*CHECK FOR GPIO INTERRUPT*/
         unsigned int Detectvalue=high;
         gpioGetValue(ButtonSigPin,&Detectvalue);
@@ -487,6 +520,10 @@ bool MainCamera::initCAM(){
 
         auto finishGPIO = std::chrono::high_resolution_clock::now();
 
+
+        /// DURATION CALCULATIONS
+        ///
+        ///
         finish = std::chrono::high_resolution_clock::now();
         float totalduration= std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
         float SettingDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishSettings-startSettings).count();
@@ -506,7 +543,8 @@ bool MainCamera::initCAM(){
         cout <<"Image Processing time usage " << fixed<< ((IPduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
         cout <<"Display duration time usage " << fixed<< ((Displayduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
         cout <<"Unmap time usage " << fixed<< ((Unloadduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
-        cout <<"GPIO time usage " << fixed<< ((GPIOduration*1.0)/(oneloopduration/1.0))*100 << " %" << endl << endl;
+        cout <<"GPIO time usage " << fixed<< ((GPIOduration*1.0)/(oneloopduration/1.0))*100 << " %" << endl;
+        cout <<"Total Duration: "<< fixed << totalduration/1000000000.0 << endl << endl;
 
         emit return_FrameRate((frameCaptureLoop*1.0)/(totalduration/1000000000.0));
         emit return_CurrFrameRate(1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));

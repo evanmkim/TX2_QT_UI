@@ -78,7 +78,7 @@ public:
 
 
 protected:
-    void run() override;
+    void run();
 
 private:
 

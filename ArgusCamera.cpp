@@ -503,8 +503,8 @@ bool ArgusCamera::initCAM(){
         auto finishIP = std::chrono::high_resolution_clock::now();
 
         if (captureButtonPressed){
-//            string savepath = "/home/nvidia/Desktop/capture" + std::to_string(frameCaptureLoop) + ".png";
-//            cv::imwrite(savepath, imgProc1);
+            string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureLoop) + ".png";
+            cv::imwrite(savepath, imgProc1);
             captureButtonPressed=false;
         }
 

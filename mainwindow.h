@@ -35,6 +35,7 @@ public:
     bool pauseButtonPressed = false;
     bool stopButtonPressed = false;
     bool colourButtonPressed = false;
+    bool triggerButtonPressed = false;
     bool captureButtonPressed = false;
     int FocusValue=300000;
 

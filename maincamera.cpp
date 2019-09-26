@@ -456,7 +456,7 @@ bool MainCamera::initCAM(){
         ///
         ///
         if (captureButtonPressed){
-            string savepath = "/home/nvidia/Desktop/capture" + std::to_string(frameCaptureLoop) + ".png";
+            string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureLoop) + ".png";
             cv::imwrite(savepath, imgProc1);
             captureButtonPressed=false;
         }
@@ -592,6 +592,12 @@ void MainCamera::captureJPEG(bool checked)
     captureButtonPressed = true;
     cout << captureButtonPressed <<endl;
 
+}
+
+void MainCamera::triggerRequest(bool checked)
+{
+    triggerButtonPressed = true;
+    cout << triggerButtonPressed << endl;
 }
 
 //////////////////////////////////////////////////////////

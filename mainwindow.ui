@@ -920,11 +920,6 @@
       <string>CAMERA 2</string>
      </property>
     </widget>
-    <zorder>QimageLabel</zorder>
-    <zorder>Qimage2Label</zorder>
-    <zorder>label_5</zorder>
-    <zorder>label_6</zorder>
-    <zorder>QimageDefect</zorder>
    </widget>
    <widget class="QFrame" name="frame_4">
     <property name="geometry">
@@ -999,11 +994,18 @@
      <rect>
       <x>190</x>
       <y>10</y>
-      <width>465</width>
+      <width>556</width>
       <height>29</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="triggerButton">
+       <property name="text">
+        <string>Trigger</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QPushButton" name="startButton">
        <property name="text">

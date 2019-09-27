@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->captureButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(captureJPEG(bool)));
     connect(ui->captureButton,SIGNAL(clicked(bool)), ArgusCamera2,SLOT(captureJPEG(bool)));
 
-    connect(ui->captureButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(captureJPEG(bool)));
+    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(triggerRequest(bool)));
 
     connect(ui->main_stopButtonCAM1, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(prepareStop(bool)));
 
@@ -150,7 +150,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_startButton_clicked()
 {
     ArgusCamera1->start();
-    ArgusCamera2->start();
+    //ArgusCamera2->start();
 }
 
 ///***INCOMPLETE***

@@ -65,7 +65,6 @@ SOURCES += main.cpp\
     jetsonGPIO.cpp \
     utils/qtpreviewconsumer.cpp \
     asmOpenCV.cpp \
-    triggermode.cpp \
     maincamera.cpp
 
 HEADERS  += mainwindow.h \
@@ -124,7 +123,6 @@ HEADERS  += mainwindow.h \
     mattoqimage.h \
     asmOpenCV.h \
     utils/gpiotriggermode.h \
-    triggermode.h \
     maincamera.h
 
 FORMS    += mainwindow.ui

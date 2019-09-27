@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1035</width>
-    <height>689</height>
+    <width>1820</width>
+    <height>1080</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,14 +17,14 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>690</x>
-      <y>10</y>
-      <width>331</width>
-      <height>611</height>
+      <x>1489</x>
+      <y>20</y>
+      <width>321</width>
+      <height>991</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
@@ -47,7 +47,7 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>120</y>
+        <y>530</y>
         <width>67</width>
         <height>17</height>
        </rect>
@@ -858,8 +858,8 @@
      <rect>
       <x>20</x>
       <y>80</y>
-      <width>361</width>
-      <height>541</height>
+      <width>761</width>
+      <height>931</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -871,10 +871,10 @@
     <widget class="QLabel" name="QimageLabel">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>341</width>
-       <height>201</height>
+       <x>80</x>
+       <y>70</y>
+       <width>640</width>
+       <height>360</height>
       </rect>
      </property>
      <property name="text">
@@ -884,10 +884,10 @@
     <widget class="QLabel" name="Qimage2Label">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>310</y>
-       <width>341</width>
-       <height>201</height>
+       <x>80</x>
+       <y>550</y>
+       <width>640</width>
+       <height>360</height>
       </rect>
      </property>
      <property name="text">
@@ -897,8 +897,8 @@
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>20</y>
+       <x>80</x>
+       <y>40</y>
        <width>91</width>
        <height>17</height>
       </rect>
@@ -910,8 +910,8 @@
     <widget class="QLabel" name="label_6">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>290</y>
+       <x>80</x>
+       <y>490</y>
        <width>81</width>
        <height>17</height>
       </rect>
@@ -924,10 +924,10 @@
    <widget class="QFrame" name="frame_4">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>790</x>
       <y>80</y>
-      <width>291</width>
-      <height>541</height>
+      <width>691</width>
+      <height>931</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -939,14 +939,53 @@
     <widget class="QLabel" name="QimageDefect">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>271</width>
-       <height>211</height>
+       <x>20</x>
+       <y>70</y>
+       <width>640</width>
+       <height>360</height>
       </rect>
      </property>
      <property name="text">
       <string>Live Label</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="QimageDefect2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>550</y>
+       <width>640</width>
+       <height>360</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Live Label</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>490</y>
+       <width>221</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CAMERA 2-DEFECT DETECTION</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>231</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CAMERA 1 - DEFECT DETECTION</string>
      </property>
     </widget>
    </widget>
@@ -955,11 +994,18 @@
      <rect>
       <x>190</x>
       <y>10</y>
-      <width>465</width>
+      <width>556</width>
       <height>29</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="triggerButton">
+       <property name="text">
+        <string>Trigger</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QPushButton" name="startButton">
        <property name="text">
@@ -1025,7 +1071,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1035</width>
+     <width>1820</width>
      <height>25</height>
     </rect>
    </property>

@@ -9,10 +9,12 @@
 #include "utils/Options.h"
 #include <nvbuf_utils.h>
 #include "EGLStream/NV/ImageNativeBuffer.h"
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d.hpp>
+
 #include "sys/types.h"
 #include "sys/sysinfo.h"
 #include <sys/time.h>
@@ -98,16 +100,16 @@ bool MainCamera::initCAM(){
     /////////////////////////////////////////////////////////////////
 
     //EVENT PROVIDER
-    IEventProvider *iEventProvider = interface_cast<IEventProvider>(captureSession);
-    EXIT_IF_NULL(iEventProvider, "iEventProvider is NULL");
+//    IEventProvider *iEventProvider = interface_cast<IEventProvider>(captureSession);
+//    EXIT_IF_NULL(iEventProvider, "iEventProvider is NULL");
 
-    ///////////////////////
+//    ///////////////////////
 
-    std::vector<EventType> eventTypes;
-    eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
-    UniqueObj<EventQueue> queue(iEventProvider->createEventQueue(eventTypes));
-    IEventQueue *iQueue = interface_cast<IEventQueue>(queue);
-    EXIT_IF_NULL(iQueue, "event queue interface is NULL");
+//    std::vector<EventType> eventTypes;
+//    eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
+//    UniqueObj<EventQueue> queue(iEventProvider->createEventQueue(eventTypes));
+//    IEventQueue *iQueue = interface_cast<IEventQueue>(queue);
+//    EXIT_IF_NULL(iQueue, "event queue interface is NULL");
 
     /////////////////////////////////////////////////////////////////
     ///Output Stream Settings
@@ -139,13 +141,15 @@ bool MainCamera::initCAM(){
     ///Request
     /////////////////////////////////////////////////////////////////
 
-    //REQUEST TO CAPTURE MANUAL
-    UniqueObj<Request> request(iSession->createRequest(Argus::CAPTURE_INTENT_STILL_CAPTURE));
-    IRequest *iRequest = interface_cast<IRequest>(request);
-    iRequest = interface_cast<IRequest>(request);
+    Argus::UniqueObj<Argus::Request> request(iSession->createRequest(Argus::CAPTURE_INTENT_STILL_CAPTURE));
+    Argus::IRequest *iRequest = Argus::interface_cast<Argus::IRequest>(request);
     EXIT_IF_NULL(iRequest, "Failed to get capture request interface");
 
     status = iRequest->enableOutputStream(stream.get());
+    EXIT_IF_NOT_OK(status, "Failed to enable stream in capture request");
+
+    uint32_t requestId = iSession->capture(request.get());
+    EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
     /// The above is the bare minumum to configure a capture
 
@@ -267,6 +271,8 @@ bool MainCamera::initCAM(){
 
         if (triggerButtonPressed) {
 
+            triggerButtonPressed = false;
+
             ///WAIT FOR EVENTS TO GET QUEUED
             // WAR Bug 200317271
             // update waitForEvents time from 1s to 2s to ensure events are queued up properly
@@ -317,7 +323,9 @@ bool MainCamera::initCAM(){
             /// START IMAGE GENERATION
             ///
             ///
-            Argus::UniqueObj<EGLStream::Frame> frame(iFrameConsumer->acquireFrame());
+            ///
+            const uint64_t FIVE_SECONDS_IN_NANOSECONDS = 5000000000;
+            Argus::UniqueObj<EGLStream::Frame> frame(iFrameConsumer->acquireFrame(FIVE_SECONDS_IN_NANOSECONDS, &status));
             EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
             EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");
 
@@ -337,139 +345,139 @@ bool MainCamera::initCAM(){
 //                firstTimeStamp = iMetadata->getSensorTimestamp();
 //            }
 
-//            auto finishGetImage = std::chrono::high_resolution_clock::now();
+            auto finishGetImage = std::chrono::high_resolution_clock::now();
 
-//            EGLStream::NV::IImageNativeBuffer *iImageNativeBuffer = interface_cast<EGLStream::NV::IImageNativeBuffer> (image);
-//            EXIT_IF_NULL(iImageNativeBuffer, "Failed to get iImageNativeBuffer");
-//            Argus::Size2D<uint32_t> size(1920, 1080); //1920, 1080//1280,720
+            EGLStream::NV::IImageNativeBuffer *iImageNativeBuffer = interface_cast<EGLStream::NV::IImageNativeBuffer> (image);
+            EXIT_IF_NULL(iImageNativeBuffer, "Failed to get iImageNativeBuffer");
+            Argus::Size2D<uint32_t> size(1920, 1080); //1920, 1080//1280,720
 
-//            int dmabuf_fd = iImageNativeBuffer->createNvBuffer(size, NvBufferColorFormat_YUV420,NvBufferLayout_Pitch);
+            int dmabuf_fd = iImageNativeBuffer->createNvBuffer(size, NvBufferColorFormat_YUV420,NvBufferLayout_Pitch);
 
-//            std::vector<cv::Mat> channels;
-//            std::vector<cv::Mat> RESIZEDchannels;
-//            cv::Mat img;
+            std::vector<cv::Mat> channels;
+            std::vector<cv::Mat> RESIZEDchannels;
+            cv::Mat img;
 
-//            void *data_mem1;
-//            void *data_mem2;
-//            void *data_mem3;
-//            channels.clear();
+            void *data_mem1;
+            void *data_mem2;
+            void *data_mem3;
+            channels.clear();
 
 
 
             /// START MAPPING
             ///
             ///
-//            auto startMapping = std::chrono::high_resolution_clock::now();
+            auto startMapping = std::chrono::high_resolution_clock::now();
 
-//            NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
-//            NvBufferMemSyncForCpu(dmabuf_fd, 0 , &data_mem1);
-//            //NvBufferMemSyncForDevice(dmabuf_fd, 0 , &data_mem1);
-//            channels.push_back(cv::Mat(1080, 1920, CV_8UC1, data_mem1, 2048));//540, 960 // 1080, 1920 // 720, 1280 //480 , 640 //360,480
+            NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
+            NvBufferMemSyncForCpu(dmabuf_fd, 0 , &data_mem1);
+            //NvBufferMemSyncForDevice(dmabuf_fd, 0 , &data_mem1);
+            channels.push_back(cv::Mat(1080, 1920, CV_8UC1, data_mem1, 2048));//540, 960 // 1080, 1920 // 720, 1280 //480 , 640 //360,480
 
-//            NvBufferMemMap(dmabuf_fd, 1, NvBufferMem_Read_Write, &data_mem2);
-//            NvBufferMemSyncForCpu(dmabuf_fd, 1 , &data_mem2);
-//            //NvBufferMemSyncForDevice(dmabuf_fd, 1 , &data_mem2);
-//            channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem2,1024)); //270, 480//540, 960 //360,640 //180,240
+            NvBufferMemMap(dmabuf_fd, 1, NvBufferMem_Read_Write, &data_mem2);
+            NvBufferMemSyncForCpu(dmabuf_fd, 1 , &data_mem2);
+            //NvBufferMemSyncForDevice(dmabuf_fd, 1 , &data_mem2);
+            channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem2,1024)); //270, 480//540, 960 //360,640 //180,240
 
-//            NvBufferMemMap(dmabuf_fd, 2, NvBufferMem_Read_Write, &data_mem3);
-//            NvBufferMemSyncForCpu(dmabuf_fd, 2 , &data_mem3);
-//            //NvBufferMemSyncForDevice(dmabuf_fd, 2 , &data_mem3);
-//            channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem3, 1024)); //23040
+            NvBufferMemMap(dmabuf_fd, 2, NvBufferMem_Read_Write, &data_mem3);
+            NvBufferMemSyncForCpu(dmabuf_fd, 2 , &data_mem3);
+            //NvBufferMemSyncForDevice(dmabuf_fd, 2 , &data_mem3);
+            channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem3, 1024)); //23040
 
-//            cv::Mat J,K,L;
+            cv::Mat J,K,L;
 
-//            resize(channels[0], J,cv::Size(960, 540), 0, 0, cv::INTER_AREA); //640, 480 //960, 540 //480, 270
-//            //resize(channels[1], K,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
-//            //resize(channels[2], L,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
+            resize(channels[0], J,cv::Size(960, 540), 0, 0, cv::INTER_AREA); //640, 480 //960, 540 //480, 270
+            //resize(channels[1], K,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
+            //resize(channels[2], L,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
 
-//            K=channels[1];
-//            L=channels[2];
+            K=channels[1];
+            L=channels[2];
 
-//            RESIZEDchannels.push_back(J);
-//            RESIZEDchannels.push_back(K);
-//            RESIZEDchannels.push_back(L);
+            RESIZEDchannels.push_back(J);
+            RESIZEDchannels.push_back(K);
+            RESIZEDchannels.push_back(L);
 
-//            auto finishMapping = std::chrono::high_resolution_clock::now();
+            auto finishMapping = std::chrono::high_resolution_clock::now();
 
-//            cv::merge ( RESIZEDchannels, img );
-//            cv::cvtColor ( img,img,CV_YCrCb2RGB );
+            cv::merge ( RESIZEDchannels, img );
+            cv::cvtColor ( img,img,CV_YCrCb2RGB );
 
 
 
             /// START IMAGE PROCESSING
             ///
             ///
-//            Mat imgTh;
-//            Mat imgProc1;
-//            Mat imgGray;
-//            Mat imgProc2;
-//            Mat saveimg2;
+            Mat imgTh;
+            Mat imgProc1;
+            Mat imgGray;
+            Mat imgProc2;
+            Mat saveimg2;
 
-//            cv::Rect ROI(0, 180, 639, 200);
+            cv::Rect ROI(0, 180, 639, 200);
 
-//            imgProc1=img.clone();
+            imgProc1=img.clone();
 
-//            ///Colour Testing Code
-//            /// Can Put into a different thread
-//            if(colourButtonPressed){
+            ///Colour Testing Code
+            /// Can Put into a different thread
+            if(colourButtonPressed){
 
-//                IplImage* ipl_img;
-//                ipl_img = cvCreateImage(cvSize(imgProc1.cols,imgProc1.rows),8,3);
-//                IplImage ipltemp=imgProc1;
-//                cvCopy(&ipltemp,ipl_img);
+                IplImage* ipl_img;
+                ipl_img = cvCreateImage(cvSize(imgProc1.cols,imgProc1.rows),8,3);
+                IplImage ipltemp=imgProc1;
+                cvCopy(&ipltemp,ipl_img);
 
-//                LAB.clear();
-//                LAB=AnalysisCV(ipl_img);
+                LAB.clear();
+                LAB=AnalysisCV(ipl_img);
 
-//                emit return_colourL(LAB[0]);
-//                emit return_colourA(LAB[1]);
-//                emit return_colourB(LAB[2]);
-
-
-//                emit return_colourBl(LAB[3]);
-//                emit return_colourG(LAB[4]);
-//                emit return_colourR(LAB[5]);
+                emit return_colourL(LAB[0]);
+                emit return_colourA(LAB[1]);
+                emit return_colourB(LAB[2]);
 
 
-
-//                cvReleaseImage(&ipl_img);
-//                cvResetImageROI(&ipltemp);
-
-//                delete ipl_img;
-//            }
+                emit return_colourBl(LAB[3]);
+                emit return_colourG(LAB[4]);
+                emit return_colourR(LAB[5]);
 
 
-//            cvtColor( imgProc1, imgGray, CV_BGR2GRAY );
-//            threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
-//            Mat imgFF=imgTh.clone();
-//            floodFill(imgFF,cv::Point(5,5),Scalar(0));
-//            //floodFill(imgFF,cv::Point(10,460),Scalar(0));
+                cvReleaseImage(&ipl_img);
+                cvResetImageROI(&ipltemp);
+
+                delete ipl_img;
+            }
 
 
-//            Rect ccomp;
+            cvtColor( imgProc1, imgGray, CV_BGR2GRAY );
+            threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
-//            for(int m=0;m<imgFF.rows;m++)
-//            {
-//                for(int n=0;n<imgFF.cols;n++)
-//                {
-//                    int iPixel=imgFF.at<uchar>(m,n);
-//                    if(iPixel==255)
-//                    {
-//                        int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
-//                        if(iArea<40)
-//                        {
-//                            floodFill(imgFF,Point(n,m),Scalar(0));
-//                        }
-//                        else
-//                        {
-//                            circle(imgProc1,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),30,Scalar(0,0,255),2,LINE_8);
-//                        }
-//                    }
-//                }
-//            }
+            Mat imgFF=imgTh.clone();
+            floodFill(imgFF,cv::Point(5,5),Scalar(0));
+            //floodFill(imgFF,cv::Point(10,460),Scalar(0));
 
-//            auto finishIP = std::chrono::high_resolution_clock::now();
+
+            Rect ccomp;
+
+            for(int m=0;m<imgFF.rows;m++)
+            {
+                for(int n=0;n<imgFF.cols;n++)
+                {
+                    int iPixel=imgFF.at<uchar>(m,n);
+                    if(iPixel==255)
+                    {
+                        int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
+                        if(iArea<40)
+                        {
+                            floodFill(imgFF,Point(n,m),Scalar(0));
+                        }
+                        else
+                        {
+                            circle(imgProc1,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),30,Scalar(0,0,255),2,LINE_8);
+                        }
+                    }
+                }
+            }
+
+            auto finishIP = std::chrono::high_resolution_clock::now();
 
 
 
@@ -477,46 +485,46 @@ bool MainCamera::initCAM(){
             ///
             ///
 //            if (captureButtonPressed){
-//                string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureLoop) + ".png";
-//                cv::imwrite(savepath, imgProc1);
+                string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureLoop) + ".png";
+                cv::imwrite(savepath, imgProc1);
 //                captureButtonPressed=false;
 //            }
 
-//            imShow[cameraDeviceIndex][1]=imgProc1.clone();
-//            imShow[cameraDeviceIndex][2]=imgTh.clone();
-//            imShow[cameraDeviceIndex][3]=imgFF.clone();
-//            imShow[cameraDeviceIndex][4]=imgGray.clone();
+            imShow[cameraDeviceIndex][1]=imgProc1.clone();
+            imShow[cameraDeviceIndex][2]=imgTh.clone();
+            imShow[cameraDeviceIndex][3]=imgFF.clone();
+            imShow[cameraDeviceIndex][4]=imgGray.clone();
 
-//            QImage  Qimg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
-//            Mat tej = imShow[cameraDeviceIndex][DisplayIndex]; //cvCopy
-//            QImage QimgDefect = ASM::cvMatToQImage(tej);
+            QImage  Qimg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
+            Mat tej = imShow[cameraDeviceIndex][DisplayIndex]; //cvCopy
+            QImage QimgDefect = ASM::cvMatToQImage(tej);
 
-//            //        emit return_QImageCAM2(Qimg.rgbSwapped());
-//            //        emit return_QImageCAM1(Qimg.rgbSwapped());
-//            emit return_QImage(Qimg.rgbSwapped());
-//            emit return_DefectImage(QimgDefect);
+            //        emit return_QImageCAM2(Qimg.rgbSwapped());
+            //        emit return_QImageCAM1(Qimg.rgbSwapped());
+            emit return_QImage(Qimg.rgbSwapped());
+            emit return_DefectImage(QimgDefect);
 
-//            auto finishDisplay = std::chrono::high_resolution_clock::now();
+            auto finishDisplay = std::chrono::high_resolution_clock::now();
 
 
 
-//            /// START UNMAPPING
-//            ///
-//            ///
-//            if (frameCaptureLoop%10==0){
+            /// START UNMAPPING
+            ///
+            ///
+            if (frameCaptureLoop%10==0){
 
-//                iSession->repeat(request.get());
-//            }
+                iSession->repeat(request.get());
+            }
 
-//            NvBufferMemUnMap (dmabuf_fd, 0, &data_mem1);
-//            NvBufferMemUnMap (dmabuf_fd, 1, &data_mem2);
-//            NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
-//            NvBufferDestroy (dmabuf_fd);
+            NvBufferMemUnMap (dmabuf_fd, 0, &data_mem1);
+            NvBufferMemUnMap (dmabuf_fd, 1, &data_mem2);
+            NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
+            NvBufferDestroy (dmabuf_fd);
 
-//            uint64_t FrameTime2 = iFrame->getTime();
+            //uint64_t FrameTime2 = iFrame->getTime();
 
-//            SensorTimestamp = iMetadata->getSensorTimestamp();
-//            auto finishUnMap = std::chrono::high_resolution_clock::now();
+            //SensorTimestamp = iMetadata->getSensorTimestamp();
+            //auto finishUnMap = std::chrono::high_resolution_clock::now();
 
 
 
@@ -570,22 +578,21 @@ bool MainCamera::initCAM(){
 //            emit return_FrameRate((frameCaptureLoop*1.0)/(totalduration/1000000000.0));
 //            emit return_CurrFrameRate(1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
-            EGLStream::IImageJPEG *iImageJPEG = Argus::interface_cast<EGLStream::IImageJPEG>(image);
-            EXIT_IF_NULL(iImageJPEG, "Failed to get ImageJPEG Interface");
+//            EGLStream::IImageJPEG *iImageJPEG = Argus::interface_cast<EGLStream::IImageJPEG>(image);
+//            EXIT_IF_NULL(iImageJPEG, "Failed to get ImageJPEG Interface");
 
 
-            status = iImageJPEG->writeJPEG("oneShot.jpg");
-            EXIT_IF_NOT_OK(status, "Failed to write JPEG");
+//            status = iImageJPEG->writeJPEG("oneShot.jpg");
+//            EXIT_IF_NOT_OK(status, "Failed to write JPEG");
 
             frameCaptureLoop++;
-            triggerButtonPressed = false;
         }
     }
 
     iSession->stopRepeat();
     iSession->waitForIdle();
 
-    queue.reset();
+    //queue.reset();
     stream.reset();
     cameraProvider.reset();
     gpioUnexport(ButtonSigPin);

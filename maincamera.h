@@ -135,6 +135,7 @@ public slots:
 
     void prepareSensorModeChange(bool);
     void captureJPEG(bool);
+    void triggerRequest(bool);
     void set_DisplayOriginal(bool);
     void set_DisplayFloodFill(bool);
     void set_DisplayThreshold(bool);
@@ -150,6 +151,7 @@ public slots:
     bool sensorModeApplyButtonPressed = false;
     bool colourButtonPressed = false;
     bool captureButtonPressed = false;
+    bool triggerButtonPressed = false;
 
     std::vector <double> LAB;
 

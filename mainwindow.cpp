@@ -23,20 +23,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ///CAM1 UI INITIALIZATION
 
     //SLIDER
-    ui->ExposureTimeSlider->setRange(30,40000); //do not hard code this
-    ui->ExposureTimeSlider->setValue(5000);
+    //ui->ExposureTimeSlider->setRange(30,40000); //do not hard code this
+    //ui->ExposureTimeSlider->setValue(5000);
     //ui->FocusSlider->setRange(2,1499999);
-    ui->GainSlider->setRange(10.0,2500.0); //do not hard code this
-    ui->GainSlider->setValue(10.0);
+    //ui->GainSlider->setRange(10.0,2500.0); //do not hard code this
+    //ui->GainSlider->setValue(10.0);
     //BUTTON
-    ui->pauseButton->setCheckable(true);
-    ui->colourInitButton->setCheckable(true);
-    ui->triggerModeButton->setCheckable(true);
+    //ui->pauseButton->setCheckable(true);
+    //ui->colourInitButton->setCheckable(true);
+    //ui->triggerModeButton->setCheckable(true);
     //RADIO
-    ui->radioOriginal->setChecked(true);
+    //ui->radioOriginal->setChecked(true);
     //SPINBOX
-    ui->sensorModespinBox->setMaximum(3);
-    ui->sensorModespinBox_2->setMaximum(3);
+    //ui->sensorModespinBox->setMaximum(3);
+    //ui->sensorModespinBox_2->setMaximum(3);
 
     ///THREAD INITIALIZATION
     ArgusCamera1 = new MainCamera(0);
@@ -47,22 +47,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ///MAIN CAMERA: CAM1
 
     //SLIDER
-    connect(ui->ExposureTimeSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Exposure(int)));
-    connect(ui->FocusSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Focus(int)));
-    connect(ui->GainSlider, SIGNAL(valueChanged(int)),this, SLOT(notifyGainChanged(int)));
-    connect(this, SIGNAL(floatValueChanged(float)),ArgusCamera1, SLOT(set_Gain(float)));
+    //connect(ui->ExposureTimeSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Exposure(int)));
+    //connect(ui->FocusSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Focus(int)));
+    //connect(ui->GainSlider, SIGNAL(valueChanged(int)),this, SLOT(notifyGainChanged(int)));
+    //connect(this, SIGNAL(floatValueChanged(float)),ArgusCamera1, SLOT(set_Gain(float)));
     //SPINBOX
-    connect(ui->sensorModespinBox, SIGNAL(valueChanged(int)),ArgusCamera1, SLOT(set_sensorMode(int)));
+    //connect(ui->sensorModespinBox, SIGNAL(valueChanged(int)),ArgusCamera1, SLOT(set_sensorMode(int)));
     //BUTTON
     connect(ui->pauseButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(preparePause(bool)));
     connect(ui->stopButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(prepareStop(bool)));
     connect(ui->stopButton, SIGNAL(clicked(bool)), ArgusCamera2, SLOT(prepareStop(bool)));
-    connect(ui->colourInitButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(set_colourAnalysis(bool)));
+    //connect(ui->colourInitButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(set_colourAnalysis(bool)));
     //RADIO
-    connect(ui->radioOriginal,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayOriginal(bool)));
-    connect(ui->radioFloodFill,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayFloodFill(bool)));
-    connect(ui->radioThreshold,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayThreshold(bool)));
-    connect(ui->radioGray,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayGray(bool)));
+    //connect(ui->radioOriginal,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayOriginal(bool)));
+    //connect(ui->radioFloodFill,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayFloodFill(bool)));
+    //connect(ui->radioThreshold,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayThreshold(bool)));
+    //connect(ui->radioGray,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayGray(bool)));
 
     //***INCOMPLETE*** SENSOR MODE APPLY BUTTON
     //connect(ui->sensorModeApplyButton,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_sensorMode(int)));
@@ -88,6 +88,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     connect(ui->captureButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(captureJPEG(bool)));
+    connect(ui->captureButton,SIGNAL(clicked(bool)), ArgusCamera2,SLOT(captureJPEG(bool)));
+
+    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(triggerRequest(bool)));
+    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera2,SLOT(triggerRequest(bool)));
+
     connect(ui->main_stopButtonCAM1, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(prepareStop(bool)));
 
 
@@ -190,6 +195,8 @@ void MainWindow::on_captureButton_clicked(bool checked)
 {
     cout<<"capture image" <<endl;
 }
+
+
 
 void MainWindow::on_stopButton_clicked()
 {

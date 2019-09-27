@@ -122,6 +122,9 @@ signals:
     void return_colourL(double);
     void return_colourA(double);
     void return_colourB(double);
+    void return_colourBl(double);
+    void return_colourG(double);
+    void return_colourR(double);
     void return_Resolution(int);
 
     void return_SessionEnding(bool);
@@ -136,6 +139,7 @@ public slots:
     void set_colourAnalysis(bool);
     void preparePause(bool);
     void prepareStop(bool);
+    void triggerRequest(bool);
 
     void prepareSensorModeChange(bool);
 
@@ -157,6 +161,7 @@ public slots:
     bool sensorModeApplyButtonPressed = false;
     bool colourButtonPressed = false;
     bool captureButtonPressed = false;
+    bool triggerButtonPressed = false;
 
     std::vector <double> LAB;
 

@@ -66,9 +66,7 @@ private slots:
 
     //Dislay Data
     void get_QImage(QImage);
-    void get_QImageCAM2(QImage);
     void get_DefectImage(QImage);
-    void get_DefectImage2(QImage);
 //    void get_FrameRate(double);
 //    void get_CurrFrameRate(double);
 
@@ -122,9 +120,10 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    std::vector<MainCamera *> TX2Cameras;
     //ARGUSCAMERA::ArgusCamera *ArgusCamera1;
-    MainCamera *ArgusCamera1;
-    ARGUSCAMERA::ArgusCamera *ArgusCamera2;
+//    MainCamera *ArgusCamera1;
+//    ARGUSCAMERA::ArgusCamera *ArgusCamera2;
     QImage image;
     QImage Defectimage;
     double dFrameRate;
@@ -134,6 +133,8 @@ private:
     QWaitCondition pauseCond;
     bool pause;
     jetsonTX1GPIONumber ButtonSigPin = gpio184;
+    int numTX2Cameras;
+
 
     double BGR[];
 

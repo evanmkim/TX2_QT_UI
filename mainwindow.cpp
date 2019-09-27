@@ -39,11 +39,25 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->sensorModespinBox_2->setMaximum(3);
 
     ///THREAD INITIALIZATION
-    ArgusCamera1 = new MainCamera(0);
-    ArgusCamera2 = new ArgusCamera(1);
+    //ArgusCamera1 = new MainCamera(0);
+    //ArgusCamera2 = new ArgusCamera(1);
+
+    this->numTX2Cameras = 2;
+
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        // init with device indices
+        this->TX2Cameras.push_back(new MainCamera(i));
+    }
 
 
     ///MAIN CAMERA: CAM1
+    ///
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        connect(ui->stopButton, SIGNAL(clicked(bool)), this->TX2Cameras[i], SLOT(prepareStop(bool)));
+        connect(this->TX2Cameras[i],&MainCamera::return_QImage,this,&MainWindow::get_QImage);
+        connect(this->TX2Cameras[i],&MainCamera::return_DefectImage,this,&MainWindow::get_DefectImage);
+        connect(ui->triggerButton,SIGNAL(clicked(bool)), this->TX2Cameras[i],SLOT(triggerRequest(bool)));
+    }
 
     //SLIDER
     //connect(ui->ExposureTimeSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Exposure(int)));
@@ -54,8 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ui->sensorModespinBox, SIGNAL(valueChanged(int)),ArgusCamera1, SLOT(set_sensorMode(int)));
     //BUTTON
     //connect(ui->pauseButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(preparePause(bool)));
-    connect(ui->stopButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(prepareStop(bool)));
-    connect(ui->stopButton, SIGNAL(clicked(bool)), ArgusCamera2, SLOT(prepareStop(bool)));
+    //    connect(ui->stopButton, SIGNAL(clicked(bool)), TX2Cameras[0], SLOT(prepareStop(bool)));
+    //    connect(ui->stopButton, SIGNAL(clicked(bool)), TX2Cameras[1], SLOT(prepareStop(bool)));
     //connect(ui->colourInitButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(set_colourAnalysis(bool)));
     //RADIO
     //connect(ui->radioOriginal,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_DisplayOriginal(bool)));
@@ -73,8 +87,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ArgusCamera1,&MainCamera::return_Resolution,this,&MainWindow::get_Resolu);
     //connect(ArgusCamera1,&MainCamera::return_FrameRate,this,&MainWindow::get_FrameRate);
     //connect(ArgusCamera1,&MainCamera::return_CurrFrameRate,this,&MainWindow::get_CurrFrameRate);
-    connect(ArgusCamera1,&MainCamera::return_QImage,this,&MainWindow::get_QImage);
-    connect(ArgusCamera1,&MainCamera::return_DefectImage,this,&MainWindow::get_DefectImage);
+    //    connect(ArgusCamera1,&MainCamera::return_QImage,this,&MainWindow::get_QImage);
+    //    connect(ArgusCamera1,&MainCamera::return_DefectImage,this,&MainWindow::get_DefectImage);
     //connect(ArgusCamera1,&MainCamera::return_colourL,this,&MainWindow::get_colourL);
     //connect(ArgusCamera1,&MainCamera::return_colourA,this,&MainWindow::get_colourA);
     //connect(ArgusCamera1,&MainCamera::return_colourB,this,&MainWindow::get_colourB);
@@ -85,14 +99,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ArgusCamera1,&MainCamera::return_colourG,this,&MainWindow::get_colourG);
     //connect(ArgusCamera1,&MainCamera::return_colourR,this,&MainWindow::get_colourR);
 
-    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(triggerRequest(bool)));
-    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera2,SLOT(triggerRequest(bool)));
+    //    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera1,SLOT(triggerRequest(bool)));
+    //    connect(ui->triggerButton,SIGNAL(clicked(bool)), ArgusCamera2,SLOT(triggerRequest(bool)));
 
     //connect(ui->main_stopButtonCAM1, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(prepareStop(bool)));
 
 
 
-///CAM2 PAGE
+    ///CAM2 PAGE
 
     //ui->ExposureTimeSlider_2->setRange(30,40000); //do not hard code this
     //ui->ExposureTimeSlider_2->setValue(5000);
@@ -100,11 +114,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->GainSlider_2->setRange(10.0,2500.0); //do not hard code this
     //ui->GainSlider_2->setValue(10.0);
 
-    connect(ArgusCamera2,&ArgusCamera::return_QImage,this,&MainWindow::get_QImageCAM2);
+    //    connect(ArgusCamera2,&ArgusCamera::return_QImage,this,&MainWindow::get_QImageCAM2);
     //connect(ArgusCamera2,&ArgusCamera::return_Resolution,this,&MainWindow::get_ResoluCAM2);
     //connect(ArgusCamera2,&ArgusCamera::return_FrameRate,this,&MainWindow::get_FrameRateCAM2);
     //connect(ArgusCamera2,&ArgusCamera::return_CurrFrameRate,this,&MainWindow::get_CurrFrameRateCAM2);
-    connect(ArgusCamera2,&ArgusCamera::return_DefectImage,this,&MainWindow::get_DefectImage2);
+    //    connect(ArgusCamera2,&ArgusCamera::return_DefectImage,this,&MainWindow::get_DefectImage2);
 
     //connect(ui->ExposureTimeSlider_2,SIGNAL(valueChanged(int)),ArgusCamera2,SLOT(set_Exposure(int)));
     //connect(ui->GainSlider_2, SIGNAL(valueChanged(int)),this, SLOT(notifyGainChangedCAM2(int)));
@@ -119,7 +133,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //    //connect(ui->FocusSlider_2,SIGNAL(valueChanged(int)),ArgusCamera2,SLOT(set_Focus(int)));
 
     //    connect(ui->stopButton, SIGNAL(clicked(bool)), ArgusCamera2, SLOT(prepareStop(bool)));
-        //NOT SURE YET
+    //NOT SURE YET
     //    //connect(ui->colourInitButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(set_colourAnalysis(bool)));
     //    //connect(ui->radioOriginal_2,SIGNAL(clicked(bool)),ArgusCamera2, SLOT(set_DisplayOriginal(bool)));
     //    //connect(ui->radioFloodFill_2,SIGNAL(clicked(bool)),ArgusCamera2, SLOT(set_DisplayFloodFill(bool)));
@@ -145,8 +159,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    ArgusCamera1->start();
-    ArgusCamera2->start();
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->start();
+    }
 }
 
 ///***INCOMPLETE***
@@ -159,7 +174,9 @@ void MainWindow::StartSession(bool)
 ///***INCORRECT USE***
 void MainWindow::on_exitButton_clicked()
 {
-    ArgusCamera2->quit();
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->quit();
+    }
 }
 
 
@@ -187,7 +204,7 @@ void MainWindow::on_exitButton_clicked()
 
 void MainWindow::on_stopButton_clicked()
 {
-        stopButtonPressed = true;
+    this->stopButtonPressed = true;
 }
 
 

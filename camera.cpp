@@ -1,4 +1,4 @@
-#include "maincamera.h"
+#include "camera.h"
 #include <QString>
 #include <iostream>
 #include <string>
@@ -27,13 +27,13 @@
 using namespace Argus;
 using namespace std;
 
-MainCamera::MainCamera(QObject *parent) : QThread(parent)
+Camera::Camera(QObject *parent) : QThread(parent)
 {
 
 }
 
 
-void MainCamera::run()
+void Camera::run()
 {
     gpioExport(ButtonSigPin);
     msleep(1000); //Need this
@@ -43,13 +43,13 @@ void MainCamera::run()
 }
 
 
-void MainCamera::putFrameInBuffer(Mat &f){
+void Camera::putFrameInBuffer(Mat &f){
     pos = idx % buffLen; // Cyclic Array
     frameBuffer[pos] = f.clone();
     idx++;
 }
 
-bool MainCamera::initCAM(){
+bool Camera::initCAM(){
 
     cout << "cameraDeviceIndex " << cameraDeviceIndex << endl;
 
@@ -605,18 +605,18 @@ bool MainCamera::initCAM(){
 ///Push Buttons
 //////////////////////////////////////////////////////////
 
-void MainCamera::preparePause(bool pauseButton)
+void Camera::preparePause(bool pauseButton)
 {
     pauseButtonPressed = pauseButton;
 }
 
-void MainCamera::prepareStop(bool stopButton)
+void Camera::prepareStop(bool stopButton)
 {
     stopButtonPressed = true;
     cout<< "Stop Button: " << stopButtonPressed << endl;
 }
 
-void MainCamera::prepareSensorModeChange(bool sensorModeApplyButton)
+void Camera::prepareSensorModeChange(bool sensorModeApplyButton)
 {
     sensorModeApplyButtonPressed = true;
     cout<< "sensorModeApplyButtonPressed: " << sensorModeApplyButtonPressed << endl;
@@ -624,14 +624,14 @@ void MainCamera::prepareSensorModeChange(bool sensorModeApplyButton)
 }
 
 
-void MainCamera::captureJPEG(bool checked)
+void Camera::captureJPEG(bool checked)
 {
     captureButtonPressed = true;
     cout << captureButtonPressed <<endl;
 
 }
 
-void MainCamera::triggerRequest(bool checked)
+void Camera::triggerRequest(bool checked)
 {
     triggerButtonPressed = true;
     cout << "Trigger Button Was Pressed" << endl;
@@ -641,54 +641,54 @@ void MainCamera::triggerRequest(bool checked)
 /// Set Values
 //////////////////////////////////////////////////////////
 
-void MainCamera::set_Exposure(int valueExposureSlider)
+void Camera::set_Exposure(int valueExposureSlider)
 {
     curExposure = valueExposureSlider*1000;
     cout<< "Current Set Exposure: " << curExposure <<endl;
 }
 
-void MainCamera::set_Focus(int valueFocusSlider)
+void Camera::set_Focus(int valueFocusSlider)
 {
     curFocus = valueFocusSlider;
     cout<< "Curerent Focus Position: " << curFocus <<endl;
 }
 
-void MainCamera::set_Gain(float valueGainSlider)
+void Camera::set_Gain(float valueGainSlider)
 {
     curGain = valueGainSlider;
     cout<< "set_GainCAM1: " << curGain <<endl;
 }
 
-void MainCamera::set_sensorMode(int value)
+void Camera::set_sensorMode(int value)
 {
     sensorModeIndex = value;
     cout<< "Sensor Mode: " << sensorModeIndex <<endl;
 }
 
-void MainCamera::set_colourAnalysis(bool colourButton)
+void Camera::set_colourAnalysis(bool colourButton)
 {
     colourButtonPressed = colourButton;
     cout<< "Colour Button is Submitted" << endl;
 }
 
-void MainCamera::set_DisplayOriginal(bool checked)
+void Camera::set_DisplayOriginal(bool checked)
 {
     if(checked)
         DisplayIndex =1;
 }
 
-void MainCamera::set_DisplayFloodFill(bool checked)
+void Camera::set_DisplayFloodFill(bool checked)
 {
     if(checked)
         DisplayIndex =3;
 }
 
-void MainCamera::set_DisplayThreshold(bool checked){
+void Camera::set_DisplayThreshold(bool checked){
     if(checked)
         DisplayIndex =2;
 }
 
-void MainCamera::set_DisplayGray(bool checked){
+void Camera::set_DisplayGray(bool checked){
     if(checked)
         DisplayIndex =4;
 }
@@ -697,7 +697,7 @@ void MainCamera::set_DisplayGray(bool checked){
 ///May not be in Use
 //////////////////////////////////////////////////////////
 
-void MainCamera::resume()
+void Camera::resume()
 {
     sync.lock();
     pause = false;
@@ -705,7 +705,7 @@ void MainCamera::resume()
     pauseCond.wakeAll();
 }
 
-void MainCamera::paused()
+void Camera::paused()
 {
     sync.lock();
     pause = true;

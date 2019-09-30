@@ -8,7 +8,7 @@
 //#include <QString>
 #include <string>
 #include <jetsonGPIO.h>
-#include <maincamera.h>
+#include <camera.h>
 #undef Bool
 //SIGNAL
 
@@ -112,10 +112,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::vector<MainCamera *> TX2Cameras;
-    //ARGUSCAMERA::ArgusCamera *ArgusCamera1;
-//    MainCamera *ArgusCamera1;
-//    ARGUSCAMERA::ArgusCamera *ArgusCamera2;
+    std::vector<Camera *> TX2Cameras;
     QImage image;
     QImage Defectimage;
     double dFrameRate;

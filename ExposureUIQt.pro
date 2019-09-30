@@ -65,7 +65,7 @@ SOURCES += main.cpp\
     jetsonGPIO.cpp \
     utils/qtpreviewconsumer.cpp \
     asmOpenCV.cpp \
-    maincamera.cpp
+    camera.cpp
 
 HEADERS  += mainwindow.h \
             Argus/Ext/BayerAverageMap.h \
@@ -123,6 +123,6 @@ HEADERS  += mainwindow.h \
     mattoqimage.h \
     asmOpenCV.h \
     utils/gpiotriggermode.h \
-    maincamera.h
+    camera.h
 
 FORMS    += mainwindow.ui

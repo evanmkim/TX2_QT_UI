@@ -1,5 +1,5 @@
-#ifndef MAINCAMERA_H
-#define MAINCAMERA_H
+#ifndef CAMERA_H
+#define CAMERA_H
 #define QT_THREAD_SUPPORT
 #include <qmutex.h>
 #include <QWaitCondition>
@@ -45,7 +45,7 @@ using namespace Argus;
 using namespace cv;
 using namespace std;
 
-class MainCamera : public QThread
+class Camera : public QThread
 {
     Q_OBJECT
 
@@ -55,9 +55,9 @@ private:
     bool pause;
 
 public:
-    explicit MainCamera(QObject *parent = 0);
+    explicit Camera(QObject *parent = 0);
 
-    MainCamera(int camDeviceIndex = 0, int set_count=0): pause(false){
+    Camera(int camDeviceIndex = 0, int set_count=0): pause(false){
         count=set_count;
         cameraDeviceIndex = camDeviceIndex;
     }
@@ -160,4 +160,4 @@ public slots:
 };
 
 
-#endif // MAINCAMERA_H
+#endif // Camera_H

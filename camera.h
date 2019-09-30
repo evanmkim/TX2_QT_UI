@@ -153,6 +153,7 @@ public slots:
     bool captureButtonPressed = false;
     bool triggerButtonPressed = false;
 
+
     std::vector <double> LAB;
 
 

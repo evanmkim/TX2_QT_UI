@@ -1,12 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "ArgusCamera.h"
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <QString>
 #include <algorithm>
-//<linux/delay.h>
 #include <QKeyEvent>
 
 
@@ -23,26 +21,30 @@ MainWindow::MainWindow(QWidget *parent) :
     ///CAM1 UI INITIALIZATION
 
     //SLIDER
+
     //ui->ExposureTimeSlider->setRange(30,40000); //do not hard code this
     //ui->ExposureTimeSlider->setValue(5000);
     //ui->FocusSlider->setRange(2,1499999);
     //ui->GainSlider->setRange(10.0,2500.0); //do not hard code this
     //ui->GainSlider->setValue(10.0);
+
     //BUTTON
+
     //ui->pauseButton->setCheckable(true);
     //ui->colourInitButton->setCheckable(true);
     //ui->triggerModeButton->setCheckable(true);
+
     //RADIO
+
     //ui->radioOriginal->setChecked(true);
+
     //SPINBOX
+
     //ui->sensorModespinBox->setMaximum(3);
     //ui->sensorModespinBox_2->setMaximum(3);
 
     ///THREAD INITIALIZATION
-    //ArgusCamera1 = new Camera(0);
-    //ArgusCamera2 = new ArgusCamera(1);
-
-    this->numTX2Cameras = 2;
+    ///
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
         // init with device indices
@@ -54,16 +56,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ///
     for (int i = 0; i < this->numTX2Cameras; i++) {
         connect(ui->stopButton, SIGNAL(clicked(bool)), this->TX2Cameras[i], SLOT(prepareStop(bool)));
-        connect(this->TX2Cameras[i],&Camera::return_QImage,this,&MainWindow::get_QImage);
-        connect(this->TX2Cameras[i],&Camera::return_DefectImage,this,&MainWindow::get_DefectImage);
+        connect(this->TX2Cameras[i],&Camera::return_QImage,this,&MainWindow::display_QImage);
+        connect(this->TX2Cameras[i],&Camera::return_DefectImage,this,&MainWindow::display_DefectImage);
         connect(ui->triggerButton,SIGNAL(clicked(bool)), this->TX2Cameras[i],SLOT(triggerRequest(bool)));
     }
 
-    images[0] = ui->QimageLabel;
-    images[1] = ui->Qimage2Label;
-
-    defectImages[0] = ui->QimageDefect;
-    defectImages[1] = ui->QimageDefect2;
+    images[0] = ui->QImageLabel1;
+    images[1] = ui->QImageLabel2;
+    images[2] = ui->QImageLabel3;
+    defectImages[0] = ui->QDefectLabel1;
+    defectImages[1] = ui->QDefectLabel2;
+    defectImages[2] = ui->QDefectLabel3;
 
     //SLIDER
 
@@ -95,7 +98,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(ui->sensorModeApplyButton,SIGNAL(clicked(bool)),ArgusCamera1, SLOT(set_sensorMode(int)));
     //connect(ui->sensorModeApplyButton, SIGNAL(clicked(bool)), ArgusCamera1, SLOT(prepareSensorModeChange(bool)));
     //connect(ui->sensorModeApplyButton, SIGNAL(clicked(bool)), ArgusCamera2, SLOT(prepareSensorModeChange(bool)));
-    //connect(ArgusCamera1,&ArgusCamera::return_SessionEnding,this,&MainWindow::StartSession);
 
     //UI DISPLAY VALUES
 
@@ -166,12 +168,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-////////////////////////////////////////////////////////////////////
-///PUSH BUTTONS
-////////////////////////////////////////////////////////////////////
-
-
 void MainWindow::on_startButton_clicked()
 {
     for (int i = 0; i < this->numTX2Cameras; i++) {
@@ -179,19 +175,26 @@ void MainWindow::on_startButton_clicked()
     }
 }
 
-///***INCOMPLETE***
-
-void MainWindow::StartSession(bool)
-{
-
-}
-
-///***INCORRECT USE***
 void MainWindow::on_exitButton_clicked()
 {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->quit();
-    }
+    cout << "exiting" << endl;
+    this->close();
+}
+
+void MainWindow::display_QImage(QImage img_temp, int imageIndex)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->images[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::display_DefectImage(QImage img_temp, int imageIndex)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->defectImages[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -405,22 +408,6 @@ void MainWindow::on_stopButton_clicked()
 
 
 //Display
-
-void MainWindow::get_QImage(QImage img_temp, int imageIndex)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->images[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-void MainWindow::get_DefectImage(QImage img_temp, int imageIndex)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->defectImages[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
 
 //void MainWindow::get_ResoluCAM2(int sensorResolution)
 //{

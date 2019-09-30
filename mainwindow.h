@@ -4,8 +4,6 @@
 #include <QtMultimediaWidgets>
 #include <QMainWindow>
 #include <QImage>
-#include "ArgusCamera.h"
-//#include <QString>
 #include <string>
 #include <jetsonGPIO.h>
 #include <camera.h>
@@ -65,8 +63,8 @@ private slots:
 //    int get_minExposure(int ExposureValue);
 
     //Dislay Data
-    void get_QImage(QImage, int);
-    void get_DefectImage(QImage, int);
+    void display_QImage(QImage, int);
+    void display_DefectImage(QImage, int);
 //    void get_FrameRate(double);
 //    void get_CurrFrameRate(double);
 
@@ -87,7 +85,6 @@ private slots:
 //    void get_CurrFrameRateCAM2(double);
 
 //    void notifyGainChangedCAM2(int value);
-    void StartSession(bool);
 //    void on_resetButton_clicked();
 
 //    void on_radioThreshold_clicked();
@@ -122,9 +119,9 @@ private:
     QWaitCondition pauseCond;
     bool pause;
     jetsonTX1GPIONumber ButtonSigPin = gpio184;
-    int numTX2Cameras;
-    QLabel *images[2];
-    QLabel *defectImages[2];
+    int numTX2Cameras = 3;
+    QLabel *images[3];
+    QLabel *defectImages[3];
     double BGR[];
 
 };

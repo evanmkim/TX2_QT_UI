@@ -110,8 +110,8 @@ signals:
     void return_maxExposure(int);
     void return_FrameRate(double);
     void return_CurrFrameRate(double);
-    void return_QImage(QImage);
-    void return_DefectImage(QImage);
+    void return_QImage(QImage, int);
+    void return_DefectImage(QImage, int);
     void return_colourL(double);
     void return_colourA(double);
     void return_colourB(double);

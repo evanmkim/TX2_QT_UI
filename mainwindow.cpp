@@ -59,6 +59,12 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(ui->triggerButton,SIGNAL(clicked(bool)), this->TX2Cameras[i],SLOT(triggerRequest(bool)));
     }
 
+    images[0] = ui->QimageLabel;
+    images[1] = ui->Qimage2Label;
+
+    defectImages[0] = ui->QimageDefect;
+    defectImages[1] = ui->QimageDefect2;
+
     //SLIDER
     //connect(ui->ExposureTimeSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Exposure(int)));
     //connect(ui->FocusSlider,SIGNAL(valueChanged(int)),ArgusCamera1,SLOT(set_Focus(int)));
@@ -391,36 +397,20 @@ void MainWindow::on_stopButton_clicked()
 
 //Display
 
-void MainWindow::get_QImage(QImage img_temp)
+void MainWindow::get_QImage(QImage img_temp, int imageIndex)
 {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    ui->QimageLabel->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->QimageLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    this->images[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void MainWindow::get_QImageCAM2(QImage img_temp)
+void MainWindow::get_DefectImage(QImage img_temp, int imageIndex)
 {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    ui->Qimage2Label->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->Qimage2Label->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-void MainWindow::get_DefectImage(QImage img_temp)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    ui->QimageDefect->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->QimageDefect->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-void MainWindow::get_DefectImage2(QImage img_temp)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    ui->QimageDefect2->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(ui->QimageDefect2->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    this->defectImages[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 //void MainWindow::get_ResoluCAM2(int sensorResolution)

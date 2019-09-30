@@ -501,8 +501,8 @@ bool MainCamera::initCAM(){
 
             //        emit return_QImageCAM2(Qimg.rgbSwapped());
             //        emit return_QImageCAM1(Qimg.rgbSwapped());
-            emit return_QImage(Qimg.rgbSwapped());
-            emit return_DefectImage(QimgDefect);
+            emit return_QImage(Qimg.rgbSwapped(),this->cameraDeviceIndex);
+            emit return_DefectImage(QimgDefect,this->cameraDeviceIndex);
 
             auto finishDisplay = std::chrono::high_resolution_clock::now();
 

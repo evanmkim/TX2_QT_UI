@@ -65,8 +65,8 @@ private slots:
 //    int get_minExposure(int ExposureValue);
 
     //Dislay Data
-    void get_QImage(QImage);
-    void get_DefectImage(QImage);
+    void get_QImage(QImage, int);
+    void get_DefectImage(QImage, int);
 //    void get_FrameRate(double);
 //    void get_CurrFrameRate(double);
 
@@ -101,21 +101,13 @@ private slots:
     void on_exitButton_clicked();
 
 //    void on_sensorModeApplyButton_clicked();
-
 //    void on_sensorModeApplyButton_pressed();
-
 //    void on_sensorModeApplyButton_released();
-
 //    void on_sensorModeApplyButton_2_pressed();
-
 //    void on_sensorModeApplyButton_2_released();
-
 //    void on_main_startButtonCAM1_clicked();
-
 //    void on_main_startButtonCAM2_clicked();
-
 //    void on_main_stopButtonCAM1_clicked();
-
 //    void on_main_stopButtonCAM2_clicked();
 
 private:
@@ -134,8 +126,8 @@ private:
     bool pause;
     jetsonTX1GPIONumber ButtonSigPin = gpio184;
     int numTX2Cameras;
-
-
+    QLabel *images[2];
+    QLabel *defectImages[2];
     double BGR[];
 
 };

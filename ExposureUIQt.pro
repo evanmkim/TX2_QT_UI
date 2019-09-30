@@ -60,7 +60,6 @@ SOURCES += main.cpp\
         utils/PreviewConsumer.cpp \
         utils/Thread.cpp \
         utils/WindowBase.cpp \
-    ArgusCamera.cpp \
     SimpleCV.cpp \
     jetsonGPIO.cpp \
     utils/qtpreviewconsumer.cpp \
@@ -114,7 +113,6 @@ HEADERS  += mainwindow.h \
             utils/Value.h \
             utils/Window.h \
             utils/WindowBase.h \
-    ArgusCamera.h \
     nvbuf_utils.h \
     SimpleCV.h \
     cvmatconsumerthread.h \

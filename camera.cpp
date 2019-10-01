@@ -35,10 +35,10 @@ Camera::Camera(QObject *parent) : QThread(parent)
 
 void Camera::run()
 {
-    gpioExport(ButtonSigPin);
-    msleep(1000); //Need this
-    gpioSetDirection(ButtonSigPin,inputPin);
-
+    //gpioExport(ButtonSigPin);
+    cout << "Starting Camera" << this->cameraDeviceIndex << endl;
+    msleep(3000); //Need this
+    //gpioSetDirection(ButtonSigPin,inputPin);
     initCAM();
 }
 
@@ -49,6 +49,7 @@ void Camera::putFrameInBuffer(Mat &f){
     idx++;
 }
 
+// When init returns success or failure, the thread exits through Camera::run()
 bool Camera::initCAM(){
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
@@ -150,8 +151,6 @@ bool Camera::initCAM(){
 
     uint32_t requestId = iSession->capture(request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
-
-    /// The above is the bare minumum to configure a capture
 
 
 
@@ -419,32 +418,32 @@ bool Camera::initCAM(){
 
             ///Colour Testing Code
             /// Can Put into a different thread
-            if(colourButtonPressed){
+//            if(colourButtonPressed){
 
-                IplImage* ipl_img;
-                ipl_img = cvCreateImage(cvSize(imgProc1.cols,imgProc1.rows),8,3);
-                IplImage ipltemp=imgProc1;
-                cvCopy(&ipltemp,ipl_img);
+//                IplImage* ipl_img;
+//                ipl_img = cvCreateImage(cvSize(imgProc1.cols,imgProc1.rows),8,3);
+//                IplImage ipltemp=imgProc1;
+//                cvCopy(&ipltemp,ipl_img);
 
-                LAB.clear();
-                LAB=AnalysisCV(ipl_img);
+//                LAB.clear();
+//                LAB=AnalysisCV(ipl_img);
 
-                emit return_colourL(LAB[0]);
-                emit return_colourA(LAB[1]);
-                emit return_colourB(LAB[2]);
-
-
-                emit return_colourBl(LAB[3]);
-                emit return_colourG(LAB[4]);
-                emit return_colourR(LAB[5]);
+//                emit return_colourL(LAB[0]);
+//                emit return_colourA(LAB[1]);
+//                emit return_colourB(LAB[2]);
 
 
+//                emit return_colourBl(LAB[3]);
+//                emit return_colourG(LAB[4]);
+//                emit return_colourR(LAB[5]);
 
-                cvReleaseImage(&ipl_img);
-                cvResetImageROI(&ipltemp);
 
-                delete ipl_img;
-            }
+
+//                cvReleaseImage(&ipl_img);
+//                cvResetImageROI(&ipltemp);
+
+//                delete ipl_img;
+//            }
 
 
             cvtColor( imgProc1, imgGray, CV_BGR2GRAY );
@@ -499,10 +498,18 @@ bool Camera::initCAM(){
             Mat tej = imShow[cameraDeviceIndex][DisplayIndex]; //cvCopy
             QImage QimgDefect = ASM::cvMatToQImage(tej);
 
-            //        emit return_QImageCAM2(Qimg.rgbSwapped());
-            //        emit return_QImageCAM1(Qimg.rgbSwapped());
-            emit return_QImage(Qimg.rgbSwapped(),this->cameraDeviceIndex);
-            emit return_DefectImage(QimgDefect,this->cameraDeviceIndex);
+            if (this->cameraDeviceIndex == 0) {
+                emit return_QImage1(Qimg.rgbSwapped());
+                emit return_DefectImage1(QimgDefect);
+            } else if (this->cameraDeviceIndex == 1) {
+                emit return_QImage2(Qimg.rgbSwapped());
+                emit return_DefectImage2(QimgDefect);
+            } else if (this->cameraDeviceIndex == 2) {
+                emit return_QImage3(Qimg.rgbSwapped());
+                emit return_DefectImage3(QimgDefect);
+            } else {
+                EXIT_IF_NULL(this->cameraDeviceIndex, "Invalid Camera Device Index");
+            }
 
             auto finishDisplay = std::chrono::high_resolution_clock::now();
 
@@ -580,7 +587,6 @@ bool Camera::initCAM(){
 
             //            EGLStream::IImageJPEG *iImageJPEG = Argus::interface_cast<EGLStream::IImageJPEG>(image);
             //            EXIT_IF_NULL(iImageJPEG, "Failed to get ImageJPEG Interface");
-
 
             //            status = iImageJPEG->writeJPEG("oneShot.jpg");
             //            EXIT_IF_NOT_OK(status, "Failed to write JPEG");

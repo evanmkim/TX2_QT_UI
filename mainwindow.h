@@ -63,8 +63,14 @@ private slots:
 //    int get_minExposure(int ExposureValue);
 
     //Dislay Data
-    void display_QImage(QImage, int);
-    void display_DefectImage(QImage, int);
+
+    void display_QImage1(QImage);
+    void display_DefectImage1(QImage);
+    void display_QImage2(QImage);
+    void display_DefectImage2(QImage);
+    void display_QImage3(QImage);
+    void display_DefectImage3(QImage);
+
 //    void get_FrameRate(double);
 //    void get_CurrFrameRate(double);
 

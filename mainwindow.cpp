@@ -56,10 +56,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ///
     for (int i = 0; i < this->numTX2Cameras; i++) {
         connect(ui->stopButton, SIGNAL(clicked(bool)), this->TX2Cameras[i], SLOT(prepareStop(bool)));
-        connect(this->TX2Cameras[i],&Camera::return_QImage,this,&MainWindow::display_QImage);
-        connect(this->TX2Cameras[i],&Camera::return_DefectImage,this,&MainWindow::display_DefectImage);
         connect(ui->triggerButton,SIGNAL(clicked(bool)), this->TX2Cameras[i],SLOT(triggerRequest(bool)));
     }
+
+    connect(this->TX2Cameras[0],&Camera::return_QImage1,this,&MainWindow::display_QImage1);
+    connect(this->TX2Cameras[0],&Camera::return_DefectImage1,this,&MainWindow::display_DefectImage1);
+    connect(this->TX2Cameras[1],&Camera::return_QImage2,this,&MainWindow::display_QImage2);
+    connect(this->TX2Cameras[1],&Camera::return_DefectImage2,this,&MainWindow::display_DefectImage2);
+    connect(this->TX2Cameras[2],&Camera::return_QImage3,this,&MainWindow::display_QImage3);
+    connect(this->TX2Cameras[2],&Camera::return_DefectImage3,this,&MainWindow::display_DefectImage3);
 
     images[0] = ui->QImageLabel1;
     images[1] = ui->QImageLabel2;
@@ -181,21 +186,55 @@ void MainWindow::on_exitButton_clicked()
     this->close();
 }
 
-void MainWindow::display_QImage(QImage img_temp, int imageIndex)
+void MainWindow::display_QImage1(QImage img_temp)
 {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    this->images[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    this->images[0]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[0]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void MainWindow::display_DefectImage(QImage img_temp, int imageIndex)
+void MainWindow::display_DefectImage1(QImage img_temp)
 {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    this->defectImages[imageIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[imageIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    this->defectImages[0]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[0]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
+
+void MainWindow::display_QImage2(QImage img_temp)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->images[1]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[1]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::display_DefectImage2(QImage img_temp)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->defectImages[1]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[1]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::display_QImage3(QImage img_temp)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->images[2]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[2]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::display_DefectImage3(QImage img_temp)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->defectImages[2]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[2]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+
 
 
 //void MainWindow::on_colourInitButton_clicked(bool checked)

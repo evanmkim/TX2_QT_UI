@@ -35,11 +35,9 @@ Camera::Camera(QObject *parent) : QThread(parent)
 
 void Camera::run()
 {
-    //gpioExport(ButtonSigPin);
     cout << "Starting Camera" << this->cameraDeviceIndex << endl;
     msleep(3000); //Need this
-    //gpioSetDirection(ButtonSigPin,inputPin);
-    initCAM();
+    initCam();
 }
 
 
@@ -50,7 +48,7 @@ void Camera::putFrameInBuffer(Mat &f){
 }
 
 // When init returns success or failure, the thread exits through Camera::run()
-bool Camera::initCAM(){
+bool Camera::initCam(){
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
@@ -87,7 +85,7 @@ bool Camera::initCAM(){
 
 
     ///////////////////////////////////////////////////////////////
-    ///Set up session
+    ///Capture Sessioin
     ///////////////////////////////////////////////////////////////
 
     //CAPTURE SESSION
@@ -95,22 +93,6 @@ bool Camera::initCAM(){
     ICaptureSession *iSession = interface_cast<ICaptureSession>(captureSession);
     EXIT_IF_NULL(iSession, "Cannot get Capture Session Interface");
 
-
-    /////////////////////////////////////////////////////////////////
-    ///Events
-    /////////////////////////////////////////////////////////////////
-
-    //EVENT PROVIDER
-    //    IEventProvider *iEventProvider = interface_cast<IEventProvider>(captureSession);
-    //    EXIT_IF_NULL(iEventProvider, "iEventProvider is NULL");
-
-    //    ///////////////////////
-
-    //    std::vector<EventType> eventTypes;
-    //    eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
-    //    UniqueObj<EventQueue> queue(iEventProvider->createEventQueue(eventTypes));
-    //    IEventQueue *iQueue = interface_cast<IEventQueue>(queue);
-    //    EXIT_IF_NULL(iQueue, "event queue interface is NULL");
 
     /////////////////////////////////////////////////////////////////
     ///Output Stream Settings
@@ -153,192 +135,27 @@ bool Camera::initCAM(){
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
 
-
-    /*
-    /////////////////////////////////////////////////////////////////
-    ///Source Settings
-    /////////////////////////////////////////////////////////////////
-
-    //INITIALIZE SOURCE SETTING INTERFACE TO GET SENSOR MODE
-    Argus::ISourceSettings *iSourceSettings = Argus::interface_cast<Argus::ISourceSettings>(iRequest->getSourceSettings());
-    EXIT_IF_NULL(iSourceSettings, "Failed to get source settings interface");
-
-
-
-    ///////////////////////////////////////////////////////////////
-    ///Camera Properties (For Storing Image)
-    ///////////////////////////////////////////////////////////////
-
-    //Declare iCameraProperties-> Store properties for storage session //1
-    ICameraProperties *iCameraProperties = interface_cast<ICameraProperties>(cameraDevices[cameraDeviceIndex]);
-    EXIT_IF_NULL(iCameraProperties, "Failed to get ICameraProperties interface");
-    std::vector<SensorMode*> sensorModes; //1
-    iCameraProperties->getBasicSensorModes(&sensorModes);
-    std::vector<SensorMode*> modes;
-    iCameraProperties->getAllSensorModes(&modes);
-    if (sensorModes.size() == 0)
-        cout <<"Failed to get sensor modes"<<endl; //exit
-
-
-    ///////////////////////////////////////////////////////////////
-    ///Sensor Mode
-    ///////////////////////////////////////////////////////////////
-
-    cout<<"Sensor Mode Index: "<< sensorModeIndex <<endl;
-    SensorMode *sensorMode = sensorModes[sensorModeIndex]; //2 is 60fps, 0 is 30 fps
-    ISensorMode *iSensorMode = interface_cast<ISensorMode>(sensorModes[sensorModeIndex]);
-    EXIT_IF_NULL(iSensorMode, "Failed to get sensor mode interface");
-
-    emit return_Resolution(iSensorMode->getResolution().height());
-
-
-    ///////////////////////////////////////////////////////////////
-    ///Exposure Time
-    ///////////////////////////////////////////////////////////////
-
-    ///GET EXPOSURE TIME RANGE AND RESOLUTION
-    ArgusSamples::Range<uint64_t> limitExposureTimeRange = iSensorMode->getExposureTimeRange();
-    printf("-Sensor Exposure Range min %ju, max %ju\n", limitExposureTimeRange.min(), limitExposureTimeRange.max());
-    Size2D<uint32_t> sensorResolution = iSensorMode->getResolution();
-
-    cout<<"-Sensor Resolution: "<< iSensorMode->getResolution().height() << " x " << iSensorMode->getResolution().width() <<endl;
-    EXIT_IF_NOT_OK(iSourceSettings->setSensorMode(sensorMode),"Unable to set Sensor Mode");
-
-    //INTIALIZES THE CAMERA PARAMETERS OF THE CAMERA STARTING
-    EXIT_IF_NOT_OK(iRequest->enableOutputStream(stream.get()),"Failed to enable stream in capture request");
-
-    const uint64_t THIRD_OF_A_SECOND = 500000;
-    EXIT_IF_NOT_OK(iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(curExposure)),"Unable to set the Source Settings Exposure Time Range");
-
-    /// 3. GET THE GAIN RANGE FROM THE CHANGED EXPOSURE
-    ArgusSamples::Range<float> sensorModeAnalogGainRange = iSensorMode->getAnalogGainRange();
-    printf("-Sensor Analog Gain range min %f, max %f\n", sensorModeAnalogGainRange.min(), sensorModeAnalogGainRange.max());
-    EXIT_IF_NOT_OK(iSourceSettings->setGainRange(ArgusSamples::Range<float>(sensorModeAnalogGainRange.min())), "Unable to set the Source Settings Gain Range");
-
-    /// 4. SET THE GAIN RANGE TO MINIMUM
-    ArgusSamples::Range<long unsigned int> sensorFrameDurationRange = iSensorMode->getFrameDurationRange();
-    printf("-Frame Duration Range min %f, max %f\n", sensorFrameDurationRange.min(), sensorFrameDurationRange.max());
-    EXIT_IF_NOT_OK(iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
-    EXIT_IF_NOT_OK(iSession->repeat(request.get()), "Unable to submit repeat() request");
-
-    float PreviousTimeStamp=0.0;
-    float SensorTimestamp=0.0;
-    uint64_t firstFrameTime = 0.0;
-    float firstTimeStamp=0.0;
-
-    auto start = std::chrono::high_resolution_clock::now();
-    auto finish = std::chrono::high_resolution_clock::now();
-
-    uint64_t PreviousFrameNum=0;
-    */
-
     ///////////////////////////////////////////////////////////////
     ///CAPTURING LOOP
     ///////////////////////////////////////////////////////////////
-    ///
+
     uint32_t frameCaptureLoop = 0;
 
     while(!stopButtonPressed) {
 
-        //    for (int frameCaptureLoop = 1; frameCaptureLoop < CAPTURE_COUNT; frameCaptureLoop++)
-        //    {
-
-        /// START SETTINGS
-        ///
-        ///
-        auto startSettings = std::chrono::high_resolution_clock::now();
-
-        //        sync.lock();
-        //        while(pauseButtonPressed){
-        //            sync.unlock();
-        //            sleep(1);
-        //            sync.lock();
-        //        }
-
-        //        pauseCond.wakeAll(); // in this place, your thread will stop to execute until someone calls resume
-        //        sync.unlock();
-
-
-        const uint64_t ONE_SECOND = 1000000000;
-
         if (triggerButtonPressed) {
 
             triggerButtonPressed = false;
-            cout << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureLoop << endl;
-
-            ///WAIT FOR EVENTS TO GET QUEUED
-            // WAR Bug 200317271
-            // update waitForEvents time from 1s to 2s to ensure events are queued up properly
-            //iEventProvider->waitForEvents(queue.get(), 2*ONE_SECOND);
-            //EXIT_IF_TRUE(iQueue->getSize() == 0, "No events in queue");
-
-            //            ///GET EVENT CAPTURE
-            //            const Event* event = iQueue->getEvent(iQueue->getSize() - 1);
-            //            const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
-            //            EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
-
-            //            ///GET METADATA
-            //            const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
-            //            const ICaptureMetadata* iMetadata = interface_cast<const ICaptureMetadata>(metaData);
-            //            EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
-
-            //            ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
-            //            uint64_t frameExposureTime = iMetadata->getSensorExposureTime();
-            //            float frameGain = iMetadata->getSensorAnalogGain();
-            //            printf("Frame metadata ExposureTime %ju, Analog Gain %f\n", frameExposureTime, frameGain); ///CHANGE THIS
-
-            //            ///SUPPORTED FRAME RATE
-            //            float FrameReadoutTime = iMetadata->getFrameReadoutTime();
-            //            printf("FrameReadoutTime %f\n", FrameReadoutTime);
-
-            //            float FrameDuration = iMetadata->getFrameDuration();
-            //            printf("FrameDuration %f\n", (FrameDuration));
-
-            //            PreviousTimeStamp=SensorTimestamp;
-            //            SensorTimestamp = iMetadata->getSensorTimestamp();
-            //            printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
-
-            //            /// SET EXPOSURE TIME WITH UI
-            //            const uint64_t THIRD_OF_A_SECOND = curExposure;
-            //            EXIT_IF_NOT_OK(iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(THIRD_OF_A_SECOND)),"Unable to set the Source Settings Exposure Time Range");
-
-            //            ///SET GAIN WITH UI
-            //            float newGainValue = curGain;
-            //            EXIT_IF_NOT_OK(iSourceSettings->setGainRange(ArgusSamples::Range<float>(newGainValue)), "Unable to set the Source Settings Gain Range");
-
-            //            const uint64_t newFocusPos = curFocus;
-            //            EXIT_IF_NOT_OK(iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(curFocus)), "Unable to set the Frame Duration Range");
-
-            //            auto finishSettings = std::chrono::high_resolution_clock::now();
-
-
+            cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureLoop << endl;
 
             /// START IMAGE GENERATION
-            ///
-            ///
-            ///
-            const uint64_t FIVE_SECONDS_IN_NANOSECONDS = 5000000000;
+
             Argus::UniqueObj<EGLStream::Frame> frame(iFrameConsumer->acquireFrame());
             EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
             EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");
 
-            if (!iFrame)
-                break;
-
             EGLStream::Image *image = iFrame->getImage();
             EXIT_IF_NULL(image, "Failed to get Image from iFrame->getImage()");
-
-            //            uint64_t FrameNum = iFrame->getNumber();
-            //            uint64_t FrameTime = iFrame->getTime();
-
-            //            PreviousFrameNum = FrameNum;
-
-            //            if (frameCaptureLoop == 1){
-            //                firstFrameTime = FrameTime;
-            //                firstTimeStamp = iMetadata->getSensorTimestamp();
-            //            }
-
-            auto finishGetImage = std::chrono::high_resolution_clock::now();
 
             EGLStream::NV::IImageNativeBuffer *iImageNativeBuffer = interface_cast<EGLStream::NV::IImageNativeBuffer> (image);
             EXIT_IF_NULL(iImageNativeBuffer, "Failed to get iImageNativeBuffer");
@@ -356,10 +173,8 @@ bool Camera::initCAM(){
             channels.clear();
 
 
-
             /// START MAPPING
-            ///
-            ///
+
             auto startMapping = std::chrono::high_resolution_clock::now();
 
             NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
@@ -396,10 +211,8 @@ bool Camera::initCAM(){
             cv::cvtColor ( img,img,CV_YCrCb2RGB );
 
 
-
             /// START IMAGE PROCESSING
-            ///
-            ///
+
             Mat imgTh;
             Mat imgProc1;
             Mat imgGray;
@@ -410,42 +223,12 @@ bool Camera::initCAM(){
 
             imgProc1=img.clone();
 
-            ///Colour Testing Code
-            /// Can Put into a different thread
-//            if(colourButtonPressed){
-
-//                IplImage* ipl_img;
-//                ipl_img = cvCreateImage(cvSize(imgProc1.cols,imgProc1.rows),8,3);
-//                IplImage ipltemp=imgProc1;
-//                cvCopy(&ipltemp,ipl_img);
-
-//                LAB.clear();
-//                LAB=AnalysisCV(ipl_img);
-
-//                emit return_colourL(LAB[0]);
-//                emit return_colourA(LAB[1]);
-//                emit return_colourB(LAB[2]);
-
-
-//                emit return_colourBl(LAB[3]);
-//                emit return_colourG(LAB[4]);
-//                emit return_colourR(LAB[5]);
-
-
-
-//                cvReleaseImage(&ipl_img);
-//                cvResetImageROI(&ipltemp);
-
-//                delete ipl_img;
-//            }
-
 
             cvtColor( imgProc1, imgGray, CV_BGR2GRAY );
             threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
             Mat imgFF=imgTh.clone();
             floodFill(imgFF,cv::Point(5,5),Scalar(0));
-            //floodFill(imgFF,cv::Point(10,460),Scalar(0));
 
 
             Rect ccomp;
@@ -472,16 +255,8 @@ bool Camera::initCAM(){
 
             auto finishIP = std::chrono::high_resolution_clock::now();
 
-
-
-            /// START IMAGE DISPLAY
-            ///
-            ///
-            //            if (captureButtonPressed){
             //string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureLoop) + ".png";
             //cv::imwrite(savepath, imgProc1);
-            //                captureButtonPressed=false;
-            //            }
 
             imShow[this->cameraDeviceIndex][1]=imgProc1.clone();
             imShow[this->cameraDeviceIndex][2]=imgTh.clone();
@@ -503,13 +278,9 @@ bool Camera::initCAM(){
                 emit return_DefectImage3(QimgDefect);
             }
 
-            auto finishDisplay = std::chrono::high_resolution_clock::now();
-
-
 
             /// START UNMAPPING
-            ///
-            ///
+
             if (frameCaptureLoop%10==0){
 
                 iSession->repeat(request.get());
@@ -519,69 +290,6 @@ bool Camera::initCAM(){
             NvBufferMemUnMap (dmabuf_fd, 1, &data_mem2);
             NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
             NvBufferDestroy (dmabuf_fd);
-
-            //uint64_t FrameTime2 = iFrame->getTime();
-
-            //SensorTimestamp = iMetadata->getSensorTimestamp();
-            //auto finishUnMap = std::chrono::high_resolution_clock::now();
-
-
-
-            /// START GPIO
-            ///
-            ///
-            //            /*CHECK FOR GPIO INTERRUPT*/
-            //            unsigned int Detectvalue=high;
-            //            gpioGetValue(ButtonSigPin,&Detectvalue);
-
-
-            //            if (Detectvalue==high) {//***Add condition on if picture not taken
-            //                cout<< "Detectvalue==high    :" << Detectvalue <<endl;
-            //                //            string savepath = "/home/nvidia/Desktop/capture" + std::to_string(frameCaptureLoop) + ".png";
-            //                //            cv::imwrite(savepath, tej);
-
-            //            }
-            //            else {
-            //                cout<< "Detectvalue==low    :" << Detectvalue <<endl; //Take Picture
-            //            }
-
-
-            //            auto finishGPIO = std::chrono::high_resolution_clock::now();
-
-
-            /// DURATION CALCULATIONS
-            ///
-            ///
-            //            finish = std::chrono::high_resolution_clock::now();
-            //            float totalduration= std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
-            //            float SettingDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishSettings-startSettings).count();
-            //            float GetImageDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishGetImage-finishSettings).count();
-            //            float Mappingduration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishMapping-finishGetImage).count();
-            //            float IPduration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishIP-finishMapping).count();
-            //            float Displayduration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishDisplay-finishIP).count();
-            //            float Unloadduration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishUnMap-finishDisplay).count();
-            //            float GPIOduration = std::chrono::duration_cast<std::chrono::nanoseconds>(finishGPIO-finishUnMap).count();
-            //            float oneloopduration= std::chrono::duration_cast<std::chrono::nanoseconds>(finish-startSettings).count();
-
-            //            cout <<"Setting Time Duration: " << fixed<< SettingDuration/1000000000.0 <<endl;
-            //            cout <<"Frame Rate using Chrono Clock: " << fixed<< (frameCaptureLoop*1.0)/(totalduration/1000000000.0) <<endl;
-            //            cout <<"Settings time usage: " << fixed<< ((SettingDuration*1.0)/(oneloopduration/1.0)) *100 << " %" <<endl;
-            //            cout <<"Get Image time usage: " << fixed<< ((GetImageDuration*1.0)/(oneloopduration/1.0)) *100 << " %" <<endl;
-            //            cout <<"Mapping time usage: " << fixed<< ((Mappingduration*1.0)/(oneloopduration/1.0)) *100 << " %" <<endl;
-            //            cout <<"Image Processing time usage " << fixed<< ((IPduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
-            //            cout <<"Display duration time usage " << fixed<< ((Displayduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
-            //            cout <<"Unmap time usage " << fixed<< ((Unloadduration*1.0)/(oneloopduration/1.0))*100 << " %" <<endl;
-            //            cout <<"GPIO time usage " << fixed<< ((GPIOduration*1.0)/(oneloopduration/1.0))*100 << " %" << endl;
-            //            cout <<"Total Duration: "<< fixed << totalduration/1000000000.0 << endl << endl;
-
-            //            emit return_FrameRate((frameCaptureLoop*1.0)/(totalduration/1000000000.0));
-            //            emit return_CurrFrameRate(1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
-
-            //            EGLStream::IImageJPEG *iImageJPEG = Argus::interface_cast<EGLStream::IImageJPEG>(image);
-            //            EXIT_IF_NULL(iImageJPEG, "Failed to get ImageJPEG Interface");
-
-            //            status = iImageJPEG->writeJPEG("oneShot.jpg");
-            //            EXIT_IF_NOT_OK(status, "Failed to write JPEG");
 
             frameCaptureLoop++;
         }
@@ -597,121 +305,19 @@ bool Camera::initCAM(){
     cameraProvider.reset();
     cameraProvider.release();
 
+    // Exit this thread
     this->exit();
-
-    //gpioUnexport(ButtonSigPin);
 }
 
 
-
-
-//////////////////////////////////////////////////////////
-///Push Buttons
-//////////////////////////////////////////////////////////
-
-void Camera::preparePause(bool pauseButton)
-{
-    pauseButtonPressed = pauseButton;
-}
-
-void Camera::prepareStop(bool stopButton)
+void Camera::stopRequest(bool stopButton)
 {
     stopButtonPressed = true;
     cout<< "Stop Button: " << stopButtonPressed << endl;
 }
 
-void Camera::prepareSensorModeChange(bool sensorModeApplyButton)
-{
-    sensorModeApplyButtonPressed = true;
-    cout<< "sensorModeApplyButtonPressed: " << sensorModeApplyButtonPressed << endl;
-
-}
-
-
-void Camera::captureJPEG(bool checked)
-{
-    captureButtonPressed = true;
-    cout << captureButtonPressed <<endl;
-
-}
-
 void Camera::triggerRequest(bool checked)
 {
     triggerButtonPressed = true;
-    cout << "Trigger Button Was Pressed" << endl;
 }
 
-//////////////////////////////////////////////////////////
-/// Set Values
-//////////////////////////////////////////////////////////
-
-void Camera::set_Exposure(int valueExposureSlider)
-{
-    curExposure = valueExposureSlider*1000;
-    cout<< "Current Set Exposure: " << curExposure <<endl;
-}
-
-void Camera::set_Focus(int valueFocusSlider)
-{
-    curFocus = valueFocusSlider;
-    cout<< "Curerent Focus Position: " << curFocus <<endl;
-}
-
-void Camera::set_Gain(float valueGainSlider)
-{
-    curGain = valueGainSlider;
-    cout<< "set_GainCAM1: " << curGain <<endl;
-}
-
-void Camera::set_sensorMode(int value)
-{
-    sensorModeIndex = value;
-    cout<< "Sensor Mode: " << sensorModeIndex <<endl;
-}
-
-void Camera::set_colourAnalysis(bool colourButton)
-{
-    colourButtonPressed = colourButton;
-    cout<< "Colour Button is Submitted" << endl;
-}
-
-void Camera::set_DisplayOriginal(bool checked)
-{
-    if(checked)
-        DisplayIndex =1;
-}
-
-void Camera::set_DisplayFloodFill(bool checked)
-{
-    if(checked)
-        DisplayIndex =3;
-}
-
-void Camera::set_DisplayThreshold(bool checked){
-    if(checked)
-        DisplayIndex =2;
-}
-
-void Camera::set_DisplayGray(bool checked){
-    if(checked)
-        DisplayIndex =4;
-}
-
-//////////////////////////////////////////////////////////
-///May not be in Use
-//////////////////////////////////////////////////////////
-
-void Camera::resume()
-{
-    sync.lock();
-    pause = false;
-    sync.unlock();
-    pauseCond.wakeAll();
-}
-
-void Camera::paused()
-{
-    sync.lock();
-    pause = true;
-    sync.unlock();
-}

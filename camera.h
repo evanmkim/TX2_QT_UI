@@ -33,14 +33,12 @@
 using namespace std;
 using namespace Argus;
 
-
 #define EXIT_IF_TRUE(val,msg)   \
-        {if ((val)) {printf("%s\n",msg); return EXIT_FAILURE;}}
+{if ((val)) {printf("%s\n",msg); return EXIT_FAILURE;}}
 #define EXIT_IF_NULL(val,msg)   \
-        {if (!val) {printf("%s\n",msg); return EXIT_FAILURE;}}
+{if (!val) {printf("%s\n",msg); return EXIT_FAILURE;}}
 #define EXIT_IF_NOT_OK(val,msg) \
-        {if (val!=Argus::STATUS_OK) {printf("%s\n",msg); return EXIT_FAILURE;}}
-
+{if (val!=Argus::STATUS_OK) {printf("%s\n",msg); return EXIT_FAILURE;}}
 
 using namespace cv;
 using namespace std;
@@ -52,28 +50,17 @@ class Camera : public QThread
 private:
     QMutex sync;
     QWaitCondition pauseCond;
-    bool pause;
 
 public:
     explicit Camera(QObject *parent = 0);
 
-    Camera(int camDeviceIndex = 0, int set_count=0): pause(false){
+    Camera(int camDeviceIndex = 0, int set_count=0) {
         count=set_count;
         cameraDeviceIndex = camDeviceIndex;
     }
-    bool EncoderGPIO(bool);
-
-
-    struct ExecuteOptions
-    {
-        uint32_t cameraIndex;
-        uint32_t useAverageMap;
-    };
 
     void show_cam();//all general functions
-    bool initCAM();
-    void resume();
-    void paused();
+    bool initCam();
     void putFrameInBuffer(Mat &f);
 
 
@@ -82,85 +69,34 @@ protected:
 
 private:
 
-
-//Unused Variables
     int count;
-    int minExposure;
-    int maxExposure;
     QTimer *timer;
     ArgusSamples::EGLDisplayHolder g_display;
-
-
-//Default Values
-    const int DEFAULT_EXPOSURE_TIME = 5000000;//camera default exposure
-    const int CAPTURE_COUNT = 700000;
     int cameraDeviceIndex;
     int DisplayIndex=1;
-    jetsonTX1GPIONumber ButtonSigPin = gpio184;
 
-//Threading
+    //Threading
     int idx;
     int pos;
     int buffLen=50;
     Mat frameBuffer[50];
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
 
+    bool stopButtonPressed = false;
+    bool triggerButtonPressed = false;
+    std::vector <double> LAB;
+
 signals:
-    void return_minExposure(int); //Not used
-    void return_maxExposure(int);
-    void return_FrameRate(double);
-    void return_CurrFrameRate(double);
     void return_QImage1(QImage);
     void return_DefectImage1(QImage);
     void return_QImage2(QImage);
     void return_DefectImage2(QImage);
     void return_QImage3(QImage);
     void return_DefectImage3(QImage);
-    void return_colourL(double);
-    void return_colourA(double);
-    void return_colourB(double);
-
-    void return_colourBl(double);
-    void return_colourG(double);
-    void return_colourR(double);
-
-    void return_Resolution(int);
-    void return_SessionEnding(bool);
-    //void return_sensorMode(int);
 
 public slots:
-    void set_sensorMode(int);
-    void set_Focus(int);
-    void set_Exposure(int);
-    void set_Gain(float);
-    void set_colourAnalysis(bool);
-    void preparePause(bool);
-    void prepareStop(bool);
-
-    void prepareSensorModeChange(bool);
-    void captureJPEG(bool);
+    void stopRequest(bool);
     void triggerRequest(bool);
-    void set_DisplayOriginal(bool);
-    void set_DisplayFloodFill(bool);
-    void set_DisplayThreshold(bool);
-    void set_DisplayGray(bool);
-
- private:
-    int curExposure=DEFAULT_EXPOSURE_TIME;
-    int curFocus=2;
-    float curGain=1;
-    int sensorModeIndex=0;
-    bool pauseButtonPressed = false;
-    bool stopButtonPressed = false;
-    bool sensorModeApplyButtonPressed = false;
-    bool colourButtonPressed = false;
-    bool captureButtonPressed = false;
-    bool triggerButtonPressed = false;
-
-
-    std::vector <double> LAB;
-
-
 
 };
 

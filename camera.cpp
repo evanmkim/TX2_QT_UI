@@ -142,7 +142,7 @@ bool Camera::initCAM(){
     ///Request
     /////////////////////////////////////////////////////////////////
 
-    Argus::UniqueObj<Argus::Request> request(iSession->createRequest(Argus::CAPTURE_INTENT_STILL_CAPTURE));
+    Argus::UniqueObj<Argus::Request> request(iSession->createRequest(CAPTURE_INTENT_MANUAL));
     Argus::IRequest *iRequest = Argus::interface_cast<Argus::IRequest>(request);
     EXIT_IF_NULL(iRequest, "Failed to get capture request interface");
 
@@ -242,18 +242,11 @@ bool Camera::initCAM(){
 
         //    for (int frameCaptureLoop = 1; frameCaptureLoop < CAPTURE_COUNT; frameCaptureLoop++)
         //    {
-        cout << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureLoop << endl;
 
         /// START SETTINGS
         ///
         ///
         auto startSettings = std::chrono::high_resolution_clock::now();
-
-
-        if (this->stopButtonPressed){
-            cout << "Stop Button Pressed. Session Ended." << endl;
-            break;
-        }
 
         //        sync.lock();
         //        while(pauseButtonPressed){
@@ -271,6 +264,7 @@ bool Camera::initCAM(){
         if (triggerButtonPressed) {
 
             triggerButtonPressed = false;
+            cout << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureLoop << endl;
 
             ///WAIT FOR EVENTS TO GET QUEUED
             // WAR Bug 200317271
@@ -324,7 +318,7 @@ bool Camera::initCAM(){
             ///
             ///
             const uint64_t FIVE_SECONDS_IN_NANOSECONDS = 5000000000;
-            Argus::UniqueObj<EGLStream::Frame> frame(iFrameConsumer->acquireFrame(FIVE_SECONDS_IN_NANOSECONDS, &status));
+            Argus::UniqueObj<EGLStream::Frame> frame(iFrameConsumer->acquireFrame());
             EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
             EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");
 
@@ -507,8 +501,6 @@ bool Camera::initCAM(){
             } else if (this->cameraDeviceIndex == 2) {
                 emit return_QImage3(Qimg.rgbSwapped());
                 emit return_DefectImage3(QimgDefect);
-            } else {
-                EXIT_IF_NULL(this->cameraDeviceIndex, "Invalid Camera Device Index");
             }
 
             auto finishDisplay = std::chrono::high_resolution_clock::now();

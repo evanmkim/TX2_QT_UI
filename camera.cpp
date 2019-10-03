@@ -139,14 +139,20 @@ bool Camera::initCam(){
     ///CAPTURING LOOP
     ///////////////////////////////////////////////////////////////
 
-    uint32_t frameCaptureLoop = 0;
+    uint32_t frameCaptureCount = 0;
+
+    msleep(3000);
 
     while(!stopButtonPressed) {
+
+        msleep(100);
+
+        triggerButtonPressed = true;
 
         if (triggerButtonPressed) {
 
             triggerButtonPressed = false;
-            cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureLoop << endl;
+            cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureCount << endl;
 
             /// START IMAGE GENERATION
 
@@ -157,29 +163,33 @@ bool Camera::initCam(){
             EGLStream::Image *image = iFrame->getImage();
             EXIT_IF_NULL(image, "Failed to get Image from iFrame->getImage()");
 
+            /// SETUP NV BUFFER
+
+            // Cast image to an IImageNativeBuffer
             EGLStream::NV::IImageNativeBuffer *iImageNativeBuffer = interface_cast<EGLStream::NV::IImageNativeBuffer> (image);
             EXIT_IF_NULL(iImageNativeBuffer, "Failed to get iImageNativeBuffer");
             Argus::Size2D<uint32_t> size(1920, 1080); //1920, 1080//1280,720
 
+            // (Direct Memory Access Buffer File Directory) (YUV420 is similar to Y'CbCr. YUV is analog and Y'CbCr is digital)
             int dmabuf_fd = iImageNativeBuffer->createNvBuffer(size, NvBufferColorFormat_YUV420,NvBufferLayout_Pitch);
 
             std::vector<cv::Mat> channels;
-            std::vector<cv::Mat> RESIZEDchannels;
+            std::vector<cv::Mat> resizedChannels;
             cv::Mat img;
 
+            // Pointers to three dma address planes
             void *data_mem1;
             void *data_mem2;
             void *data_mem3;
+
             channels.clear();
 
-
-            /// START MAPPING
-
-            auto startMapping = std::chrono::high_resolution_clock::now();
+            /// START MAPPING (essentially optimizing memory access for the CPU)
 
             NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
             NvBufferMemSyncForCpu(dmabuf_fd, 0 , &data_mem1);
             //NvBufferMemSyncForDevice(dmabuf_fd, 0 , &data_mem1);
+            // CV_8UC1 means a 8-bit single-channel array
             channels.push_back(cv::Mat(1080, 1920, CV_8UC1, data_mem1, 2048));//540, 960 // 1080, 1920 // 720, 1280 //480 , 640 //360,480
 
             NvBufferMemMap(dmabuf_fd, 1, NvBufferMem_Read_Write, &data_mem2);
@@ -201,34 +211,31 @@ bool Camera::initCam(){
             K=channels[1];
             L=channels[2];
 
-            RESIZEDchannels.push_back(J);
-            RESIZEDchannels.push_back(K);
-            RESIZEDchannels.push_back(L);
+            resizedChannels.push_back(J);
+            resizedChannels.push_back(K);
+            resizedChannels.push_back(L);
 
-            auto finishMapping = std::chrono::high_resolution_clock::now();
-
-            cv::merge ( RESIZEDchannels, img );
+            // merge() merges several arrays to make a single, multi-channel array (img)
+            // Think a 2-D array where each element in the array has multiple valies (RGB, YUV etc). This is a multi-channel array
+            // A single channel array would just have one value per element
+            cv::merge ( resizedChannels, img );
+            // cvtColor() converts from the YCrCb space to RGB color space
             cv::cvtColor ( img,img,CV_YCrCb2RGB );
-
 
             /// START IMAGE PROCESSING
 
             Mat imgTh;
-            Mat imgProc1;
+            Mat imgProc;
             Mat imgGray;
-            Mat imgProc2;
-            Mat saveimg2;
 
-            cv::Rect ROI(0, 180, 639, 200);
+            imgProc=img.clone();
 
-            imgProc1=img.clone();
-
-
-            cvtColor( imgProc1, imgGray, CV_BGR2GRAY );
-            threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
+            // cvtColor() converts from the RGB (or BGR) space to grayscale-channeled image
+            cv::cvtColor( imgProc, imgGray, CV_BGR2GRAY );
+            cv::threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
             Mat imgFF=imgTh.clone();
-            floodFill(imgFF,cv::Point(5,5),Scalar(0));
+            cv::floodFill(imgFF,cv::Point(5,5),Scalar(0));
 
 
             Rect ccomp;
@@ -247,24 +254,23 @@ bool Camera::initCam(){
                         }
                         else
                         {
-                            circle(imgProc1,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),30,Scalar(0,0,255),2,LINE_8);
+                            circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),30,Scalar(0,0,255),2,LINE_8);
                         }
                     }
                 }
             }
 
-            auto finishIP = std::chrono::high_resolution_clock::now();
+            //string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureCount) + ".png";
+            //cv::imwrite(savepath, imgProc);
 
-            //string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureLoop) + ".png";
-            //cv::imwrite(savepath, imgProc1);
-
-            imShow[this->cameraDeviceIndex][1]=imgProc1.clone();
+            // Display different processed images by setting DisplayIndex (default to 1)
+            imShow[this->cameraDeviceIndex][1]=imgProc.clone();
             imShow[this->cameraDeviceIndex][2]=imgTh.clone();
             imShow[this->cameraDeviceIndex][3]=imgFF.clone();
             imShow[this->cameraDeviceIndex][4]=imgGray.clone();
 
             QImage  Qimg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
-            Mat tej = imShow[cameraDeviceIndex][DisplayIndex]; //cvCopy
+            Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex]; //cvCopy
             QImage QimgDefect = ASM::cvMatToQImage(tej);
 
             if (this->cameraDeviceIndex == 0) {
@@ -281,7 +287,7 @@ bool Camera::initCam(){
 
             /// START UNMAPPING
 
-            if (frameCaptureLoop%10==0){
+            if (frameCaptureCount%10==0){
 
                 iSession->repeat(request.get());
             }
@@ -291,7 +297,7 @@ bool Camera::initCam(){
             NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
             NvBufferDestroy (dmabuf_fd);
 
-            frameCaptureLoop++;
+            frameCaptureCount++;
         }
     }
 

@@ -23,55 +23,37 @@
 #include <sys/mman.h> //for mmap
 #include "asmOpenCV.h"
 
-
 using namespace Argus;
 using namespace std;
 
-Camera::Camera(QObject *parent) : QThread(parent)
-{
 
-}
-
+Camera::Camera(QObject *parent) : QThread(parent) {}
 
 void Camera::run()
 {
     cout << "Starting Camera" << this->cameraDeviceIndex << endl;
     msleep(3000); //Need this
-    initCam();
+    this->initialized = initCam();
+    if (!initialized) {
+        cout << "Failed to initialize camera " << this->cameraDeviceIndex << endl;
+        this->exit();
+    }
 }
 
-
-void Camera::putFrameInBuffer(Mat &f){
-    pos = idx % buffLen; // Cyclic Array
-    frameBuffer[pos] = f.clone();
-    idx++;
-}
 
 // When init returns success or failure, the thread exits through Camera::run()
 bool Camera::initCam(){
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
-    idx = 0;
-    stopButtonPressed = false;
-
-    ///////////////////////////////////////////////////////////////
-    ///Camera Provider
-    ///////////////////////////////////////////////////////////////
-
-    //CAMERA PROVIDER //1
+    //CAMERA PROVIDER
     CameraProvider::create();
     UniqueObj<CameraProvider> cameraProvider(CameraProvider::create()); //global?
     ICameraProvider *iCameraProvider = interface_cast<ICameraProvider>(cameraProvider);
     EXIT_IF_NULL(iCameraProvider, "Cannot get core camera provider interface");
     printf("Argus Version: %s\n", iCameraProvider->getVersion().c_str());
 
-
-    ///////////////////////////////////////////////////////////////
-    ///Camera Device
-    ///////////////////////////////////////////////////////////////
-
-    //CAMERA DEVICE //1
+    //CAMERA DEVICE
     std::vector<CameraDevice*> cameraDevices;
     Argus::Status status = iCameraProvider->getCameraDevices(&cameraDevices);
     EXIT_IF_NOT_OK(status, "Failed to get camera devices");
@@ -83,21 +65,12 @@ bool Camera::initCam(){
         return EXIT_FAILURE;
     }
 
-
-    ///////////////////////////////////////////////////////////////
-    ///Capture Sessioin
-    ///////////////////////////////////////////////////////////////
-
     //CAPTURE SESSION
     UniqueObj<CaptureSession> captureSession(iCameraProvider->createCaptureSession(cameraDevices[cameraDeviceIndex]));
     ICaptureSession *iSession = interface_cast<ICaptureSession>(captureSession);
     EXIT_IF_NULL(iSession, "Cannot get Capture Session Interface");
 
-
-    /////////////////////////////////////////////////////////////////
-    ///Output Stream Settings
-    /////////////////////////////////////////////////////////////////
-
+    //OUTPUT STREAM SETTINGS
     UniqueObj<OutputStreamSettings> streamSettings(iSession->createOutputStreamSettings());
     IOutputStreamSettings *iStreamSettings =interface_cast<IOutputStreamSettings>(streamSettings);
     EXIT_IF_NULL(iStreamSettings, "Cannot get OutputStreamSettings Interface");
@@ -105,25 +78,16 @@ bool Camera::initCam(){
     iStreamSettings->setResolution(Size2D<uint32_t>(1920, 1080)); //1920, 1080 //640,480
     iStreamSettings->setEGLDisplay(g_display.get());
 
-
-    /////////////////////////////////////////////////////////////////
-    ///Output Stream
-    /////////////////////////////////////////////////////////////////
-
     //CREATE OUTPUT STREAM
     UniqueObj<OutputStream> stream(iSession->createOutputStream(streamSettings.get()));
     IStream *iStream = interface_cast<IStream>(stream);
     EXIT_IF_NULL(iStream, "Cannot get OutputStream Interface");
 
-    ///METHOD 1: Using Frame Consumer to acquire each frame
     Argus::UniqueObj<EGLStream::FrameConsumer> consumer(EGLStream::FrameConsumer::create(stream.get()));
     EGLStream::IFrameConsumer *iFrameConsumer = Argus::interface_cast<EGLStream::IFrameConsumer>(consumer);
     EXIT_IF_NULL(iFrameConsumer, "Failed to initialize Consumer");
 
-    /////////////////////////////////////////////////////////////////
-    ///Request
-    /////////////////////////////////////////////////////////////////
-
+    //REQUEST
     Argus::UniqueObj<Argus::Request> request(iSession->createRequest(CAPTURE_INTENT_MANUAL));
     Argus::IRequest *iRequest = Argus::interface_cast<Argus::IRequest>(request);
     EXIT_IF_NULL(iRequest, "Failed to get capture request interface");
@@ -134,24 +98,17 @@ bool Camera::initCam(){
     uint32_t requestId = iSession->capture(request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
-
-    ///////////////////////////////////////////////////////////////
-    ///CAPTURING LOOP
-    ///////////////////////////////////////////////////////////////
-
+    //CAPTURE LOOP
     uint32_t frameCaptureCount = 0;
 
-    msleep(3000);
-
     while(!stopButtonPressed) {
-
-        msleep(100);
 
         triggerButtonPressed = true;
 
         if (triggerButtonPressed) {
 
             triggerButtonPressed = false;
+
             cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << frameCaptureCount << endl;
 
             /// START IMAGE GENERATION
@@ -223,21 +180,24 @@ bool Camera::initCam(){
             cv::cvtColor ( img,img,CV_YCrCb2RGB );
 
             /// START IMAGE PROCESSING
+            /// The goal of this processing pipeline is to have the image in a floodfill binary space so that defects can be identified
 
-            Mat imgTh;
-            Mat imgProc;
-            Mat imgGray;
+            Mat imgProc, imgTh, imgGray, imgFF;
 
             imgProc=img.clone();
 
-            // cvtColor() converts from the RGB (or BGR) space to grayscale-channeled image
+            // cvtColor() converts from the RGB (or BGR) space to grayscale-channeled image (multichannel to singe channel so we can apply thresholding)
             cv::cvtColor( imgProc, imgGray, CV_BGR2GRAY );
+            // threshold() is used here to get a bi-level (binary) image out of a grayscale one with a max value of 255
+            // 255 will indicate an abnormality; a defect
             cv::threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
-            Mat imgFF=imgTh.clone();
+            imgFF=imgTh.clone();
+
+            // floodfill() starts at a seed point and fills the component with the specified color
             cv::floodFill(imgFF,cv::Point(5,5),Scalar(0));
 
-
+            // ccomp is used to compose the bouding are for the "red circle" around the defect
             Rect ccomp;
 
             for(int m=0;m<imgFF.rows;m++)
@@ -245,6 +205,7 @@ bool Camera::initCam(){
                 for(int n=0;n<imgFF.cols;n++)
                 {
                     int iPixel=imgFF.at<uchar>(m,n);
+                    // Defect in the area
                     if(iPixel==255)
                     {
                         int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
@@ -270,7 +231,7 @@ bool Camera::initCam(){
             imShow[this->cameraDeviceIndex][4]=imgGray.clone();
 
             QImage  Qimg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
-            Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex]; //cvCopy
+            Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex];
             QImage QimgDefect = ASM::cvMatToQImage(tej);
 
             if (this->cameraDeviceIndex == 0) {
@@ -284,10 +245,8 @@ bool Camera::initCam(){
                 emit return_DefectImage3(QimgDefect);
             }
 
-
-            /// START UNMAPPING
-
-            if (frameCaptureCount%10==0){
+            //START UNMAPPING
+            if (this->frameCaptureCount%10==0){
 
                 iSession->repeat(request.get());
             }
@@ -297,7 +256,7 @@ bool Camera::initCam(){
             NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
             NvBufferDestroy (dmabuf_fd);
 
-            frameCaptureCount++;
+            this->frameCaptureCount++;
         }
     }
 

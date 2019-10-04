@@ -41,7 +41,6 @@ private:
     std::vector<Camera *> TX2Cameras;
     QImage image;
     QImage defectImage;
-    std::vector<double> LAB[];
     int numTX2Cameras = 3;
     QLabel *images[3];
     QLabel *defectImages[3];

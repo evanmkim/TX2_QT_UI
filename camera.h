@@ -47,44 +47,33 @@ class Camera : public QThread
 {
     Q_OBJECT
 
-private:
-    QMutex sync;
-    QWaitCondition pauseCond;
-
 public:
     explicit Camera(QObject *parent = 0);
 
-    Camera(int camDeviceIndex = 0, int set_count=0) {
-        count=set_count;
-        cameraDeviceIndex = camDeviceIndex;
-    }
+    Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){}
 
-    void show_cam();//all general functions
     bool initCam();
-    void putFrameInBuffer(Mat &f);
-
+    bool initialized;
 
 protected:
+
     void run();
 
 private:
 
-    int count;
-    QTimer *timer;
-    ArgusSamples::EGLDisplayHolder g_display;
+
+
+
+    int frameCaptureCount;
     int cameraDeviceIndex;
     int DisplayIndex=1;
 
-    //Threading
-    int idx;
-    int pos;
-    int buffLen=50;
-    Mat frameBuffer[50];
-    Mat imShow[4][10]; //2D Array that saves frames in an array to display
-
+    bool exitButtonPressed = false;
     bool stopButtonPressed = false;
     bool triggerButtonPressed = false;
-    std::vector <double> LAB;
+
+    Mat imShow[4][10]; //2D Array that saves frames in an array to display
+    ArgusSamples::EGLDisplayHolder g_display;
 
 signals:
     void return_QImage1(QImage);

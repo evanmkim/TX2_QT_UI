@@ -44,8 +44,8 @@ bool Camera::initCam(){
 
     //CAMERA PROVIDER
     CameraProvider::create();
-    UniqueObj<CameraProvider> cameraProvider(CameraProvider::create());
-    this->iCameraProvider = interface_cast<ICameraProvider>(cameraProvider);
+    this->cameraProvider = UniqueObj<CameraProvider>(CameraProvider::create());
+    this->iCameraProvider = interface_cast<ICameraProvider>(this->cameraProvider);
     EXIT_IF_NULL(this->iCameraProvider, "Cannot get core camera provider interface");
 
     //CAMERA DEVICE
@@ -60,37 +60,36 @@ bool Camera::initCam(){
     }
 
     //CAPTURE SESSION
-    UniqueObj<CaptureSession> captureSession(this->iCameraProvider->createCaptureSession(this->cameraDevices[this->cameraDeviceIndex]));
-    this->iSession = interface_cast<ICaptureSession>(captureSession);
+    this->captureSession = UniqueObj<CaptureSession>(this->iCameraProvider->createCaptureSession(this->cameraDevices[this->cameraDeviceIndex]));
+    this->iSession = interface_cast<ICaptureSession>(this->captureSession);
     EXIT_IF_NULL(this->iSession, "Cannot get Capture Session Interface");
 
     //OUTPUT STREAM SETTINGS
-    UniqueObj<OutputStreamSettings> streamSettings(this->iSession->createOutputStreamSettings());
-    this->iStreamSettings =interface_cast<IOutputStreamSettings>(streamSettings);
+    this->streamSettings = UniqueObj<OutputStreamSettings>(this->iSession->createOutputStreamSettings());
+    this->iStreamSettings =interface_cast<IOutputStreamSettings>(this->streamSettings);
     EXIT_IF_NULL(this->iStreamSettings, "Cannot get OutputStreamSettings Interface");
     this->iStreamSettings->setPixelFormat(PIXEL_FMT_YCbCr_420_888);
     this->iStreamSettings->setResolution(Size2D<uint32_t>(1920, 1080));
     this->iStreamSettings->setEGLDisplay(this->g_display.get());
 
     //CREATE OUTPUT STREAM
-    UniqueObj<OutputStream> stream(this->iSession->createOutputStream(streamSettings.get()));
-    this->iStream = interface_cast<IStream>(stream);
+    this->stream = UniqueObj<OutputStream>(this->iSession->createOutputStream(this->streamSettings.get()));
+    this->iStream = interface_cast<IStream>(this->stream);
     EXIT_IF_NULL(this->iStream, "Cannot get OutputStream Interface");
 
-    Argus::UniqueObj<EGLStream::FrameConsumer> consumer(EGLStream::FrameConsumer::create(stream.get()));
+    Argus::UniqueObj<EGLStream::FrameConsumer> consumer(EGLStream::FrameConsumer::create(this->stream.get()));
     this->iFrameConsumer = Argus::interface_cast<EGLStream::IFrameConsumer>(consumer);
     EXIT_IF_NULL(this->iFrameConsumer, "Failed to initialize Consumer");
 
     //REQUEST
-    //Argus::UniqueObj<Argus::Request> request(this->iSession->createRequest(CAPTURE_INTENT_MANUAL));
     this->request = Argus::UniqueObj<Argus::Request>(this->iSession->createRequest(CAPTURE_INTENT_MANUAL));
-    this->iRequest = Argus::interface_cast<Argus::IRequest>(request);
+    this->iRequest = Argus::interface_cast<Argus::IRequest>(this->request);
     EXIT_IF_NULL(this->iRequest, "Failed to get capture request interface");
 
-    this->status = this->iRequest->enableOutputStream(stream.get());
+    this->status = this->iRequest->enableOutputStream(this->stream.get());
     EXIT_IF_NOT_OK(this->status, "Failed to enable stream in capture request");
 
-    uint32_t requestId = this->iSession->capture(request.get());
+    uint32_t requestId = this->iSession->capture(this->request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
     while (!this->stopButtonPressed) {}
@@ -99,12 +98,13 @@ bool Camera::initCam(){
     this->iSession->waitForIdle();
     this->iStream->disconnect();
 
-    stream.reset();
+    this->stream.reset();
 
-    cameraProvider.reset();
-    cameraProvider.release();
+    this->cameraProvider.reset();
+    this->cameraProvider.release();
 
     this->g_display.cleanup();
+    cout << "Cleaning Up" << endl;
 
     // Exit this thread
     this->exit();
@@ -112,21 +112,16 @@ bool Camera::initCam(){
 
 bool Camera::triggerRequest(bool checked)
 {
-    cout << endl << "Trigger Button Pressed" << endl;
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
     /// START IMAGE GENERATION
 
     EXIT_IF_NULL(this->iFrameConsumer, "Frame Consumer Invalid")
-    // It's like its set to invalid at some point after the first iteration
     Argus::UniqueObj<EGLStream::Frame> frame(this->iFrameConsumer->acquireFrame());
-    cout << endl << "Acquired Frame" << endl;
     EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
-    cout << endl << "Casted Frame to IFrame" << endl;
     EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");
 
     EGLStream::Image *image = iFrame->getImage();
-    cout << endl << "Got Da Image" << endl;
     EXIT_IF_NULL(image, "Failed to get Image from iFrame->getImage()");
 
     // Cast image to an IImageNativeBuffer

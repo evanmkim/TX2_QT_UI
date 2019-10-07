@@ -58,20 +58,29 @@ public:
     bool stopButtonPressed = false;
 
 protected:
-
     void run();
 
 private:
-
     Argus::Status status;
-    std::vector<CameraDevice *> cameraDevices;
-    Argus::UniqueObj<Argus::Request> request;
 
+    std::vector<CameraDevice *> cameraDevices;
+
+    Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
     ICameraProvider *iCameraProvider = nullptr;
+
+    Argus::UniqueObj<Argus::CaptureSession> captureSession;
     ICaptureSession *iSession = nullptr;
+
+    Argus::UniqueObj<Argus::OutputStreamSettings> streamSettings;
     IOutputStreamSettings *iStreamSettings = nullptr;
+
+    Argus::UniqueObj<Argus::OutputStream> stream;
     IStream *iStream = nullptr;
+
+    Argus::UniqueObj<EGLStream::FrameConsumer> consumer;
     EGLStream::IFrameConsumer *iFrameConsumer = nullptr;
+
+    Argus::UniqueObj<Argus::Request> request;
     Argus::IRequest *iRequest = nullptr;
 
     int frameCaptureCount=0;

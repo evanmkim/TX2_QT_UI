@@ -50,10 +50,12 @@ class Camera : public QThread
 public:
     explicit Camera(QObject *parent = 0);
 
-    Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){}
+    Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){
+
+    }
 
     bool initCam();
-    bool initialized;
+    bool stopButtonPressed = false;
 
 protected:
 
@@ -61,16 +63,20 @@ protected:
 
 private:
 
+    Argus::Status status;
+    std::vector<CameraDevice *> cameraDevices;
+    Argus::UniqueObj<Argus::Request> request;
 
+    ICameraProvider *iCameraProvider = nullptr;
+    ICaptureSession *iSession = nullptr;
+    IOutputStreamSettings *iStreamSettings = nullptr;
+    IStream *iStream = nullptr;
+    EGLStream::IFrameConsumer *iFrameConsumer = nullptr;
+    Argus::IRequest *iRequest = nullptr;
 
-
-    int frameCaptureCount;
-    int cameraDeviceIndex;
+    int frameCaptureCount=0;
+    int cameraDeviceIndex=0;
     int DisplayIndex=1;
-
-    bool exitButtonPressed = false;
-    bool stopButtonPressed = false;
-    bool triggerButtonPressed = false;
 
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
@@ -85,8 +91,7 @@ signals:
 
 public slots:
     void stopRequest(bool);
-    void triggerRequest(bool);
-
+    bool triggerRequest(bool);
 };
 
 

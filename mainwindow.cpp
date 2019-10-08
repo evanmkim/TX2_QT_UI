@@ -20,23 +20,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ///THREAD INITIALIZATION
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras.push_back(new Camera(i));
+        this->TX2Cameras.push_back(std::unique_ptr<Camera>(new Camera(i)));
     }
+    this->trigger = std::unique_ptr<Trigger>(new Trigger);
 
 
     ///MAIN CAMERA: CAM1
     ///
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        connect(ui->stopButton, SIGNAL(clicked(bool)), this->TX2Cameras[i], SLOT(stopRequest(bool)));
-        connect(ui->triggerButton,SIGNAL(clicked(bool)), this->TX2Cameras[i],SLOT(triggerRequest(bool)));
+        connect(ui->stopButton, SIGNAL(clicked(bool)), this->TX2Cameras[i].get(), SLOT(stopRequest(bool)));
+        connect(ui->triggerButton,SIGNAL(clicked(bool)), this->TX2Cameras[i].get(),SLOT(triggerRequest(bool)));
     }
 
-    connect(this->TX2Cameras[0],&Camera::return_QImage1,this,&MainWindow::display_QImage1);
-    connect(this->TX2Cameras[0],&Camera::return_DefectImage1,this,&MainWindow::display_DefectImage1);
-    connect(this->TX2Cameras[1],&Camera::return_QImage2,this,&MainWindow::display_QImage2);
-    connect(this->TX2Cameras[1],&Camera::return_DefectImage2,this,&MainWindow::display_DefectImage2);
-    connect(this->TX2Cameras[2],&Camera::return_QImage3,this,&MainWindow::display_QImage3);
-    connect(this->TX2Cameras[2],&Camera::return_DefectImage3,this,&MainWindow::display_DefectImage3);
+    connect(this->TX2Cameras[0].get(),&Camera::return_QImage1,this,&MainWindow::display_QImage1);
+    connect(this->TX2Cameras[0].get(),&Camera::return_DefectImage1,this,&MainWindow::display_DefectImage1);
+    connect(this->TX2Cameras[1].get(),&Camera::return_QImage2,this,&MainWindow::display_QImage2);
+    connect(this->TX2Cameras[1].get(),&Camera::return_DefectImage2,this,&MainWindow::display_DefectImage2);
+    connect(this->TX2Cameras[2].get(),&Camera::return_QImage3,this,&MainWindow::display_QImage3);
+    connect(this->TX2Cameras[2].get(),&Camera::return_DefectImage3,this,&MainWindow::display_DefectImage3);
 
     images[0] = ui->QImageLabel1;
     images[1] = ui->QImageLabel2;
@@ -54,6 +55,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
+    this->trigger->start();
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->start();
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.5.1, 2019-10-07T17:15:58. -->
+<!-- Written by QtCreator 3.5.1, 2019-10-08T15:17:10. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -60,7 +60,7 @@
   <valuemap type="QVariantMap">
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">JetsonTX2</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">JetsonTX2</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{963c3257-1179-4923-9e54-f0cec7aaca1a}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{6d9ca6b6-6a84-47a0-933c-1c5fd8a60347}</value>
    <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>

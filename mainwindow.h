@@ -4,9 +4,11 @@
 #include <QtMultimediaWidgets>
 #include <QMainWindow>
 #include <QImage>
+#include <memory>
 #include <string>
 #include <jetsonGPIO.h>
-#include <camera.h>
+#include "camera.h"
+#include "trigger.h"
 #undef Bool
 //SIGNAL
 
@@ -38,7 +40,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::vector<Camera *> TX2Cameras;
+    std::vector<std::unique_ptr<Camera>> TX2Cameras;
+    std::unique_ptr<Trigger> trigger;
     QImage image;
     QImage defectImage;
     int numTX2Cameras = 3;

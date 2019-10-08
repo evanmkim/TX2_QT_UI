@@ -43,7 +43,6 @@ bool Camera::initCam(){
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
     //CAMERA PROVIDER
-    CameraProvider::create();
     this->cameraProvider = UniqueObj<CameraProvider>(CameraProvider::create());
     this->iCameraProvider = interface_cast<ICameraProvider>(this->cameraProvider);
     EXIT_IF_NULL(this->iCameraProvider, "Cannot get core camera provider interface");
@@ -92,13 +91,16 @@ bool Camera::initCam(){
     uint32_t requestId = this->iSession->capture(this->request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
-    while (!this->stopButtonPressed) {}
+    while (!(this->stopButtonPressed && this->frameFinished)) {}
+
+    this->stopButtonPressed = false;
 
     this->iSession->stopRepeat();
     this->iSession->waitForIdle();
-    this->iStream->disconnect();
+    //this->iStream->disconnect();
 
     this->stream.reset();
+    this->stream.release();
 
     this->cameraProvider.reset();
     this->cameraProvider.release();
@@ -113,6 +115,7 @@ bool Camera::initCam(){
 bool Camera::triggerRequest(bool checked)
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
+    this->frameFinished = false;
 
     /// START IMAGE GENERATION
 
@@ -258,7 +261,9 @@ bool Camera::triggerRequest(bool checked)
     NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
     NvBufferDestroy (dmabuf_fd);
 
+    this->frameFinished = true;
     this->frameCaptureCount++;
+
     return true;
 }
 

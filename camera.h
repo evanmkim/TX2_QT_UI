@@ -50,20 +50,20 @@ class Camera : public QThread
 public:
     explicit Camera(QObject *parent = 0);
 
-    Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){
-
-    }
+    Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){}
 
     bool initCam();
     bool stopButtonPressed = false;
+    bool frameFinished = false;
 
 protected:
     void run();
 
 private:
     Argus::Status status;
-
     std::vector<CameraDevice *> cameraDevices;
+    int frameCaptureCount=0;
+    int cameraDeviceIndex=0;
 
     Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
     ICameraProvider *iCameraProvider = nullptr;
@@ -83,12 +83,10 @@ private:
     Argus::UniqueObj<Argus::Request> request;
     Argus::IRequest *iRequest = nullptr;
 
-    int frameCaptureCount=0;
-    int cameraDeviceIndex=0;
     int DisplayIndex=1;
-
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
+
 
 signals:
     void return_QImage1(QImage);

@@ -18,20 +18,33 @@
 #include <sys/time.h>
 #include <unistd.h> //for sleep
 #include <chrono> //for time
+#include <termios.h>
 
 class Trigger: public QThread
 {
     Q_OBJECT
 
+private:
+    bool stopButtonPressed = false;
+    // Initialized to true before the first capture
+    bool frameFinished = true;
+
 public:
     explicit Trigger(QObject *parent = 0);
 
-    //Trigger() {}
-
     bool initGPIO();
+
+    int getKey();
 
 protected:
     void run();
+
+signals:
+    void captureRequest(bool);
+
+public slots:
+    void stopRequest(bool);
+    void captureComplete(bool);
 };
 
 #endif // TRIGGER

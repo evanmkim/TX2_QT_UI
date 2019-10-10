@@ -54,7 +54,6 @@ public:
 
     bool initCam();
     bool stopButtonPressed = false;
-    bool frameFinished = false;
 
 protected:
     void run();
@@ -87,14 +86,18 @@ private:
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
 
+    // Provides exclusive write access to frameFinished
+    QMutex mutex;
+    static int frameFinished;
 
 signals:
-    void return_QImage1(QImage);
-    void return_DefectImage1(QImage);
-    void return_QImage2(QImage);
-    void return_DefectImage2(QImage);
-    void return_QImage3(QImage);
-    void return_DefectImage3(QImage);
+    void returnQImage1(QImage);
+    void returnDefectImage1(QImage);
+    void returnQImage2(QImage);
+    void returnDefectImage2(QImage);
+    void returnQImage3(QImage);
+    void returnDefectImage3(QImage);
+    void returnFrameFinished(bool);
 
 public slots:
     void stopRequest(bool);

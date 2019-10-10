@@ -23,20 +23,18 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    bool stopButtonPressed = false;
 
 private slots:
 
     void on_startButton_clicked();
-    void on_stopButton_clicked();
     void on_exitButton_clicked();
 
-    void display_QImage1(QImage);
-    void display_DefectImage1(QImage);
-    void display_QImage2(QImage);
-    void display_DefectImage2(QImage);
-    void display_QImage3(QImage);
-    void display_DefectImage3(QImage);
+    void displayQImage1(QImage);
+    void displayDefectImage1(QImage);
+    void displayQImage2(QImage);
+    void displayDefectImage2(QImage);
+    void displayQImage3(QImage);
+    void displayDefectImage3(QImage);
 
 private:
     Ui::MainWindow *ui;

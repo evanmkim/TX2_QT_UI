@@ -28,6 +28,7 @@ using namespace std;
 
 
 Camera::Camera(QObject *parent) : QThread(parent) {}
+int Camera::frameFinished = 0;
 
 void Camera::run()
 {
@@ -91,7 +92,7 @@ bool Camera::initCam(){
     uint32_t requestId = this->iSession->capture(this->request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
-    while (!(this->stopButtonPressed && this->frameFinished)) {}
+    while (!stopButtonPressed) {}
 
     this->stopButtonPressed = false;
 
@@ -115,7 +116,6 @@ bool Camera::initCam(){
 bool Camera::triggerRequest(bool checked)
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
-    this->frameFinished = false;
 
     /// START IMAGE GENERATION
 
@@ -240,14 +240,14 @@ bool Camera::triggerRequest(bool checked)
     QImage QimgDefect = ASM::cvMatToQImage(tej);
 
     if (this->cameraDeviceIndex == 0) {
-        emit return_QImage1(Qimg.rgbSwapped());
-        emit return_DefectImage1(QimgDefect);
+        emit returnQImage1(Qimg.rgbSwapped());
+        emit returnDefectImage1(QimgDefect);
     } else if (this->cameraDeviceIndex == 1) {
-        emit return_QImage2(Qimg.rgbSwapped());
-        emit return_DefectImage2(QimgDefect);
+        emit returnQImage2(Qimg.rgbSwapped());
+        emit returnDefectImage2(QimgDefect);
     } else if (this->cameraDeviceIndex == 2) {
-        emit return_QImage3(Qimg.rgbSwapped());
-        emit return_DefectImage3(QimgDefect);
+        emit returnQImage3(Qimg.rgbSwapped());
+        emit returnDefectImage3(QimgDefect);
     }
 
     //START UNMAPPING
@@ -261,9 +261,17 @@ bool Camera::triggerRequest(bool checked)
     NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
     NvBufferDestroy (dmabuf_fd);
 
-    this->frameFinished = true;
+    this->mutex.lock();
+    Camera::frameFinished++;
     this->frameCaptureCount++;
 
+    if(Camera::frameFinished == 3)
+    {
+        cout << "Frame Finished" << endl;
+        Camera::frameFinished = 0;
+        emit returnFrameFinished(true);
+    }
+    this->mutex.unlock();
     return true;
 }
 

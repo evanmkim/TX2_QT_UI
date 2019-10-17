@@ -17,10 +17,10 @@
    <widget class="QFrame" name="frame_1">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>80</y>
-      <width>581</width>
-      <height>931</height>
+      <x>790</x>
+      <y>0</y>
+      <width>1021</width>
+      <height>1001</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -29,24 +29,11 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QLabel" name="QImageLabel1">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>120</y>
-       <width>480</width>
-       <height>270</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>40</x>
-       <y>50</y>
+       <x>90</x>
+       <y>160</y>
        <width>91</width>
        <height>17</height>
       </rect>
@@ -55,26 +42,65 @@
       <string>CAMERA 1</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_6">
+    <widget class="QLabel" name="QImageLabel1">
      <property name="geometry">
       <rect>
-       <x>40</x>
-       <y>510</y>
-       <width>221</width>
+       <x>350</x>
+       <y>10</y>
+       <width>549</width>
+       <height>309</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Live Label</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>490</y>
+       <width>91</width>
        <height>17</height>
       </rect>
      </property>
      <property name="text">
-      <string>CAMERA 1 - DEFECT DETECTION</string>
+      <string>CAMERA 2</string>
      </property>
     </widget>
-    <widget class="QLabel" name="QDefectLabel1">
+    <widget class="QLabel" name="QImageLabel2">
      <property name="geometry">
       <rect>
-       <x>40</x>
-       <y>580</y>
-       <width>480</width>
-       <height>270</height>
+       <x>350</x>
+       <y>340</y>
+       <width>549</width>
+       <height>309</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Live Label</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>820</y>
+       <width>91</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CAMERA 3</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="QImageLabel3">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>670</y>
+       <width>549</width>
+       <height>309</height>
       </rect>
      </property>
      <property name="text">
@@ -85,24 +111,50 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>556</width>
+      <x>180</x>
+      <y>0</y>
+      <width>381</width>
       <height>29</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="triggerButton">
+      <widget class="QPushButton" name="tgrModeStartButton">
        <property name="text">
-        <string>Trigger</string>
+        <string>Trigger Mode Start</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="startButton">
+      <widget class="QPushButton" name="ctsModeStartButton">
        <property name="text">
-        <string>Start</string>
+        <string>Continuous Mode Start</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>30</y>
+      <width>381</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="cptrButton">
+       <property name="text">
+        <string>Capture</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Pause</string>
        </property>
       </widget>
      </item>
@@ -121,142 +173,6 @@
       </widget>
      </item>
     </layout>
-   </widget>
-   <widget class="QFrame" name="frame_2">
-    <property name="geometry">
-     <rect>
-      <x>620</x>
-      <y>80</y>
-      <width>581</width>
-      <height>931</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="QImageLabel2">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>120</y>
-       <width>480</width>
-       <height>270</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_7">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>50</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 2</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_8">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>510</y>
-       <width>221</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 2 - DEFECT DETECTION</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="QDefectLabel2">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>580</y>
-       <width>480</width>
-       <height>270</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QFrame" name="frame_3">
-    <property name="geometry">
-     <rect>
-      <x>1220</x>
-      <y>80</y>
-      <width>581</width>
-      <height>931</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="QImageLabel3">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>120</y>
-       <width>480</width>
-       <height>270</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>50</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 3</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_10">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>510</y>
-       <width>221</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 3 - DEFECT DETECTION</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="QDefectLabel3">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>580</y>
-       <width>480</width>
-       <height>270</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
    </widget>
   </widget>
   <widget class="QToolBar" name="mainToolBar">

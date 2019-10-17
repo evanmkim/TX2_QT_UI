@@ -98,7 +98,8 @@ bool Camera::initCam(){
 
     this->iSession->stopRepeat();
     this->iSession->waitForIdle();
-    //this->iStream->disconnect();
+
+    this->iStream->disconnect();
 
     this->stream.reset();
     this->stream.release();
@@ -267,7 +268,6 @@ bool Camera::triggerRequest(bool checked)
 
     if(Camera::frameFinished == 3)
     {
-        cout << "Frame Finished" << endl;
         Camera::frameFinished = 0;
         emit returnFrameFinished(true);
     }

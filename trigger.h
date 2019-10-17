@@ -31,10 +31,7 @@ private:
 
 public:
     explicit Trigger(QObject *parent = 0);
-
-    bool initGPIO();
-
-    int getKey();
+    void initGPIO();
 
 protected:
     void run();

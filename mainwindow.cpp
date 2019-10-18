@@ -92,8 +92,9 @@ void MainWindow::on_pauseButton_clicked()
 
 void MainWindow::on_captureButton_clicked()
 {
-    // Write the current frame to a jpg file
-    // Functionality exists already in the camera event loop
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->captureButtonPressed = true;
+    }
 }
 
 void MainWindow::displayQImage1(QImage img_temp)

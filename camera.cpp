@@ -121,7 +121,7 @@ bool Camera::triggerRequest(bool checked)
     /// START IMAGE GENERATION
 
     EXIT_IF_NULL(this->iFrameConsumer, "Frame Consumer Invalid")
-    Argus::UniqueObj<EGLStream::Frame> frame(this->iFrameConsumer->acquireFrame());
+            Argus::UniqueObj<EGLStream::Frame> frame(this->iFrameConsumer->acquireFrame());
     EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
     EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");
 
@@ -227,8 +227,11 @@ bool Camera::triggerRequest(bool checked)
         }
     }
 
-    //string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureCount) + ".png";
-    //cv::imwrite(savepath, imgProc);
+    if (this->captureButtonPressed) {
+        string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureCount) + ".png";
+        cv::imwrite(savepath, imgProc);
+        this->captureButtonPressed = false;
+    }
 
     // Display different processed images by setting DisplayIndex (default to 1)
     imShow[this->cameraDeviceIndex][1]=imgProc.clone();

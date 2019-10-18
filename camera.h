@@ -53,7 +53,10 @@ public:
     Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){}
 
     bool initCam();
+
+    // boolean flags set by MainWindow on_clicked methods
     bool stopButtonPressed = false;
+    bool captureButtonPressed = false;
 
 protected:
     void run();

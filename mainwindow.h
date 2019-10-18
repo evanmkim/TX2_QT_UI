@@ -26,8 +26,11 @@ public:
 
 private slots:
 
-    void on_startButton_clicked();
+    void on_ctsModeStartButton_clicked();
+    void on_tgrModeStartButton_clicked();
     void on_exitButton_clicked();
+    void on_captureButton_clicked();
+    void on_pauseButton_clicked();
 
     void displayQImage1(QImage);
     void displayDefectImage1(QImage);

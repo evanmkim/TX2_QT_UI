@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QFrame" name="frame_1">
+   <widget class="QFrame" name="imageDisplay">
     <property name="geometry">
      <rect>
       <x>790</x>
@@ -112,7 +112,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>250</y>
+      <y>120</y>
       <width>381</width>
       <height>29</height>
      </rect>
@@ -138,7 +138,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>290</y>
+      <y>180</y>
       <width>381</width>
       <height>31</height>
      </rect>
@@ -174,17 +174,17 @@
      </item>
     </layout>
    </widget>
-   <widget class="QTabWidget" name="camPage3">
+   <widget class="QTabWidget" name="camPages">
     <property name="geometry">
      <rect>
       <x>170</x>
-      <y>370</y>
+      <y>290</y>
       <width>451</width>
       <height>541</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="camPage1">
      <attribute name="title">
@@ -444,7 +444,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="camPage2">
      <attribute name="title">
       <string>CAM2</string>
      </attribute>
@@ -702,7 +702,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="camPage3">
      <attribute name="title">
       <string>CAM3</string>
      </attribute>

@@ -241,13 +241,13 @@ bool Camera::triggerRequest(bool checked)
     QImage QimgDefect = ASM::cvMatToQImage(tej);
 
     if (this->cameraDeviceIndex == 0) {
-        emit returnQImage1(Qimg.rgbSwapped());
+        //emit returnQImage1(Qimg.rgbSwapped());
         emit returnDefectImage1(QimgDefect);
     } else if (this->cameraDeviceIndex == 1) {
-        emit returnQImage2(Qimg.rgbSwapped());
+        //emit returnQImage2(Qimg.rgbSwapped());
         emit returnDefectImage2(QimgDefect);
     } else if (this->cameraDeviceIndex == 2) {
-        emit returnQImage3(Qimg.rgbSwapped());
+        //emit returnQImage3(Qimg.rgbSwapped());
         emit returnDefectImage3(QimgDefect);
     }
 

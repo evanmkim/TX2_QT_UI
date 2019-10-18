@@ -29,8 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ///
     for (int i = 0; i < this->numTX2Cameras; i++) {
         connect(ui->stopButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::stopRequest);
+
         // UI Trigger
         //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::triggerRequest);
+
         // Hardware Trigger
         connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), &Camera::triggerRequest);
         connect(this->TX2Cameras[i].get(), &Camera::returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
@@ -44,12 +46,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->TX2Cameras[2].get(),&Camera::returnQImage3,this,&MainWindow::displayQImage3);
     connect(this->TX2Cameras[2].get(),&Camera::returnDefectImage3,this,&MainWindow::displayDefectImage3);
 
-    images[0] = ui->QImageLabel1;
-    images[1] = ui->QImageLabel2;
-    images[2] = ui->QImageLabel3;
-    defectImages[0] = ui->QDefectLabel1;
-    defectImages[1] = ui->QDefectLabel2;
-    defectImages[2] = ui->QDefectLabel3;
+//    images[0] = ui->QImageLabel1;
+//    images[1] = ui->QImageLabel2;
+//    images[2] = ui->QImageLabel3;
+    defectImages[0] = ui->QImageLabel1;
+    defectImages[1] = ui->QImageLabel2;
+    defectImages[2] = ui->QImageLabel3;
 }
 
 
@@ -58,7 +60,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_startButton_clicked()
+// Start into continuous capture at 30 fps (for live view)
+void MainWindow::on_ctsModeStartButton_clicked()
 {
     this->trigger->start();
     for (int i = 0; i < this->numTX2Cameras; i++) {
@@ -66,9 +69,31 @@ void MainWindow::on_startButton_clicked()
     }
 }
 
+// Start into triggered capture, hardware synchronized (for sync view)
+void MainWindow::on_tgrModeStartButton_clicked()
+{
+    this->trigger->start();
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->start();
+    }
+}
+
+
 void MainWindow::on_exitButton_clicked()
 {
     this->close();
+}
+
+void MainWindow::on_pauseButton_clicked()
+{
+    // Set a boolean flag to handle pausing each of the cameras
+    // Update the text on the pause button to "resume" and flip the boolean again on resuming capture
+}
+
+void MainWindow::on_captureButton_clicked()
+{
+    // Write the current frame to a jpg file
+    // Functionality exists already in the camera event loop
 }
 
 void MainWindow::displayQImage1(QImage img_temp)

@@ -26,7 +26,7 @@ void Trigger::initGPIO()
     int ledValue = low ;
     unsigned int prevValue = low;
     // Turn off the LED
-    gpioSetValue(gLed,low) ;
+    gpioSetValue(gLed,low);
 
     while((!this->stopButtonPressed))
     {

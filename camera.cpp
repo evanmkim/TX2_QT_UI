@@ -114,7 +114,7 @@ bool Camera::initCam(){
     this->exit();
 }
 
-bool Camera::triggerRequest(bool checked)
+bool Camera::triggerRequest()
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
@@ -278,8 +278,20 @@ bool Camera::triggerRequest(bool checked)
     return true;
 }
 
-void Camera::stopRequest(bool checked)
+void Camera::stopRequest()
 {
     this->stopButtonPressed = true;
     cout<< "Stop Button Pressed" << endl;
+}
+
+void Camera::pauseRequest(bool checked)
+{
+    this->pauseButtonPressed = checked;
+    cout << "Pause Button Pressed" << endl;
+}
+
+void Camera::saveRequest()
+{
+    this->captureButtonPressed = true;
+    cout << "Capture Button Pressed" << endl;
 }

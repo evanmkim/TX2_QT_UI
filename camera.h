@@ -57,6 +57,7 @@ public:
     // boolean flags set by MainWindow on_clicked methods
     bool stopButtonPressed = false;
     bool captureButtonPressed = false;
+    bool pauseButtonPressed = false;
 
 protected:
     void run();
@@ -103,8 +104,10 @@ signals:
     void returnFrameFinished(bool);
 
 public slots:
-    void stopRequest(bool);
-    bool triggerRequest(bool);
+    void stopRequest();
+    void pauseRequest(bool);
+    bool triggerRequest();
+    void saveRequest();
 };
 
 

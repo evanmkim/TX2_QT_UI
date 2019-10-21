@@ -26,6 +26,7 @@ class Trigger: public QThread
 
 private:
     bool stopButtonPressed = false;
+    bool pauseButtonPressed = false;
     // Initialized to true before the first capture
     bool frameFinished = true;
 
@@ -41,6 +42,7 @@ signals:
 
 public slots:
     void stopRequest(bool);
+    void pauseRequest(bool);
     void captureComplete(bool);
 };
 

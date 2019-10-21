@@ -30,7 +30,8 @@ void Trigger::initGPIO()
 
     while((!this->stopButtonPressed))
     {
-        if (frameFinished)
+        // Don't send a trigger signal unless the previous frame has finished and the pause button is not pressed.
+        if (frameFinished && !pauseButtonPressed)
         {
             //gpioGetValue(pushButton, &value);
             if(prevValue == low) {
@@ -61,7 +62,13 @@ void Trigger::initGPIO()
 void Trigger::stopRequest(bool checked)
 {
     this->stopButtonPressed = true;
-    cout<< "Stop Button Pressed" << endl;
+    cout << "Stop Button Pressed" << endl;
+}
+
+void Trigger::pauseRequest(bool checked)
+{
+    this->pauseButtonPressed = checked;
+    cout << "Pause Button Pressed" << endl;
 }
 
 void Trigger::captureComplete(bool checked)

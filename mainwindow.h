@@ -31,12 +31,10 @@ private slots:
     void on_exitButton_clicked();
     void on_pauseButton_clicked(bool checked);
 
-    void displayQImage1(QImage);
-    void displayDefectImage1(QImage);
-    void displayQImage2(QImage);
-    void displayDefectImage2(QImage);
-    void displayQImage3(QImage);
-    void displayDefectImage3(QImage);
+    void displayQImage(QImage, int);
+    void displayQDefectImage(QImage, int);
+
+    void displayRes(int, int);
 
 private:
     Ui::MainWindow *ui;
@@ -45,9 +43,11 @@ private:
     QImage image;
     QImage defectImage;
     int numTX2Cameras = 3;
+    double BGR[];
+
     QLabel *images[3];
     QLabel *defectImages[3];
-    double BGR[];
+    QLabel *resolutions[3];
 };
 
 #endif // MAINWINDOW_H

@@ -82,8 +82,8 @@ bool Camera::initCam(){
     EXIT_IF_NULL(this->iFrameConsumer, "Failed to initialize Consumer");
 
     //REQUEST
-    this->request = Argus::UniqueObj<Argus::Request>(this->iSession->createRequest(CAPTURE_INTENT_MANUAL));
-    this->iRequest = Argus::interface_cast<Argus::IRequest>(this->request);
+    this->request = UniqueObj<Request>(this->iSession->createRequest(CAPTURE_INTENT_MANUAL));
+    this->iRequest = interface_cast<IRequest>(this->request);
     EXIT_IF_NULL(this->iRequest, "Failed to get capture request interface");
 
     this->status = this->iRequest->enableOutputStream(this->stream.get());
@@ -91,6 +91,50 @@ bool Camera::initCam(){
 
     uint32_t requestId = this->iSession->capture(this->request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
+
+    // Continuous Capture Settings
+    if (this->captureMode == 0) {
+
+        //EVENT PROVIDER
+        this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
+        EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");
+
+        std::vector<EventType> eventTypes;
+        eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
+
+        this->queue = UniqueObj<EventQueue>(this->iEventProvider->createEventQueue(eventTypes));
+        this->iQueue = interface_cast<IEventQueue>(this->queue);
+        EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
+
+        //SETTINGS INTERFACE
+        this->iSourceSettings = interface_cast<ISourceSettings>(this->iRequest->getSourceSettings());
+        EXIT_IF_NULL(this->iSourceSettings, "Failed to get source settings interface");
+
+        //CAMERA PROPERTIES
+        this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
+        EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
+
+        std::vector<SensorMode*> sensorModes;
+        this->iCameraProperties->getBasicSensorModes(&sensorModes);
+        std::vector<SensorMode*> modes;
+        this->iCameraProperties->getAllSensorModes(&modes);
+        if (sensorModes.size() == 0)
+            cout <<"Failed to get sensor modes"<<endl;
+
+        //SENSOR MODE
+        // Index as 2 is 60fps, 0 is 30 fps (fix at 0 for now)
+        this->iSensorMode = interface_cast<ISensorMode>(sensorModes[0]);
+        EXIT_IF_NULL(this->iSensorMode, "Failed to get sensor mode interface");
+
+        emit returnRes(this->iSensorMode->getResolution().height(), this->cameraDeviceIndex);
+
+        //runCts();
+
+    // Triggered Capture Settings
+    } else if (this->captureMode ==1 ) {
+
+        // Not sure if needed yet
+    }
 
     while (!stopButtonPressed) {}
 
@@ -114,10 +158,10 @@ bool Camera::initCam(){
     this->exit();
 }
 
-bool Camera::runCts()
-{
-    // Call this method at the end of the cts capture initialization
-}
+//bool Camera::runCts()
+//{
+//    // Call this method at the end of the cts capture initialization
+//}
 
 bool Camera::triggerRequest()
 {
@@ -248,16 +292,9 @@ bool Camera::triggerRequest()
     Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex];
     QImage QimgDefect = ASM::cvMatToQImage(tej);
 
-    if (this->cameraDeviceIndex == 0) {
-        //emit returnQImage1(Qimg.rgbSwapped());
-        emit returnDefectImage1(QimgDefect);
-    } else if (this->cameraDeviceIndex == 1) {
-        //emit returnQImage2(Qimg.rgbSwapped());
-        emit returnDefectImage2(QimgDefect);
-    } else if (this->cameraDeviceIndex == 2) {
-        //emit returnQImage3(Qimg.rgbSwapped());
-        emit returnDefectImage3(QimgDefect);
-    }
+    //emit returnQImage(Qimg.rgbSwapped(), this->cameraDeviceIndex);
+    emit returnQDefectImage(QimgDefect, this->cameraDeviceIndex);
+
 
     //START UNMAPPING
     if ((this->frameCaptureCount)%10 == 0)

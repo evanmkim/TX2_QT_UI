@@ -721,7 +721,7 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QSlider" name="FocusSlider_4">
+      <widget class="QSlider" name="FocusSlider_3">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -734,7 +734,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
          <x>122</x>
@@ -747,7 +747,7 @@
         <string>µs</string>
        </property>
       </widget>
-      <widget class="QSlider" name="ExposureTimeSlider_4">
+      <widget class="QSlider" name="ExposureTimeSlider_3">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -760,7 +760,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
-      <widget class="QLabel" name="labelTitleExposureTime_4">
+      <widget class="QLabel" name="labelTitleExposureTime_3">
        <property name="geometry">
         <rect>
          <x>11</x>
@@ -773,7 +773,7 @@
         <string>Exposure Time:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelGain_4">
+      <widget class="QLabel" name="labelGain_3">
        <property name="geometry">
         <rect>
          <x>109</x>
@@ -786,7 +786,7 @@
         <string>ns</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelFrameDuration_4">
+      <widget class="QLabel" name="labelFrameDuration_3">
        <property name="geometry">
         <rect>
          <x>140</x>
@@ -799,7 +799,7 @@
         <string>ns</string>
        </property>
       </widget>
-      <widget class="QLabel" name="titleFocus_4">
+      <widget class="QLabel" name="titleFocus_3">
        <property name="geometry">
         <rect>
          <x>11</x>
@@ -812,7 +812,7 @@
         <string>Frame Duration:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="titleGain_4">
+      <widget class="QLabel" name="titleGain_3">
        <property name="geometry">
         <rect>
          <x>11</x>
@@ -825,7 +825,7 @@
         <string>Gain:</string>
        </property>
       </widget>
-      <widget class="QSlider" name="GainSlider_4">
+      <widget class="QSlider" name="GainSlider_3">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -867,7 +867,7 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QLabel" name="labelCurrFrameRate_4">
+      <widget class="QLabel" name="labelCurrFrameRate_3">
        <property name="geometry">
         <rect>
          <x>100</x>
@@ -880,7 +880,7 @@
         <string>TextLabel</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelResolution_4">
+      <widget class="QLabel" name="labelResolution_3">
        <property name="geometry">
         <rect>
          <x>110</x>
@@ -893,7 +893,7 @@
         <string>TextLabel</string>
        </property>
       </widget>
-      <widget class="QLabel" name="titleResolution_4">
+      <widget class="QLabel" name="titleResolution_3">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -906,7 +906,7 @@
         <string>Resolution: </string>
        </property>
       </widget>
-      <widget class="QLabel" name="titleFrameRate_4">
+      <widget class="QLabel" name="titleFrameRate_3">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -919,7 +919,7 @@
         <string>Avg Frame Rate:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelFrameRate_4">
+      <widget class="QLabel" name="labelFrameRate_3">
        <property name="geometry">
         <rect>
          <x>130</x>
@@ -932,7 +932,7 @@
         <string>TextLabel</string>
        </property>
       </widget>
-      <widget class="QLabel" name="titleCurrFrameRate_4">
+      <widget class="QLabel" name="titleCurrFrameRate_3">
        <property name="geometry">
         <rect>
          <x>10</x>

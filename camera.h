@@ -72,6 +72,7 @@ private:
     int frameCaptureCount=0;
     int cameraDeviceIndex=0;
 
+    // Session Interfaces
     Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
     ICameraProvider *iCameraProvider = nullptr;
 
@@ -90,6 +91,18 @@ private:
     Argus::UniqueObj<Argus::Request> request;
     Argus::IRequest *iRequest = nullptr;
 
+    // Cts Session Interfaces
+    IEventProvider *iEventProvider = nullptr;
+
+    Argus::UniqueObj<Argus::EventQueue> queue;
+    IEventQueue *iQueue = nullptr;
+
+    ISourceSettings *iSourceSettings = nullptr;
+    ICameraProperties *iCameraProperties = nullptr;
+    ISensorMode *iSensorMode = nullptr;
+
+
+
     int DisplayIndex=1;
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
@@ -100,15 +113,12 @@ private:
 
     bool runCts();
 
-
-
 signals:
-    void returnQImage1(QImage);
-    void returnDefectImage1(QImage);
-    void returnQImage2(QImage);
-    void returnDefectImage2(QImage);
-    void returnQImage3(QImage);
-    void returnDefectImage3(QImage);
+    void returnQImage(QImage, int);
+    void returnQDefectImage(QImage, int);
+
+    void returnRes(int, int);
+
     void returnFrameFinished(bool);
 
 public slots:

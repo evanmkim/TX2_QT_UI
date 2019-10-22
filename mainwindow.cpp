@@ -26,10 +26,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
         connect(ui->stopButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::stopRequest);
-        //connect(ui->pauseButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::pauseRequest);
-        connect(ui->pauseButton, SIGNAL(clicked(bool)), this->TX2Cameras[i].get(), SLOT(pauseRequest(bool)));
+        connect(ui->pauseButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::pauseRequest);
         connect(ui->captureButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::saveRequest);
 
+        connect(this->TX2Cameras[i].get(),&Camera::returnQImage,this,&MainWindow::displayQImage);
+        connect(this->TX2Cameras[i].get(),&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
+
+        connect(this->TX2Cameras[i].get(),&Camera::returnRes,this,&MainWindow::displayRes);
 
         // UI Trigger
         //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::triggerRequest);
@@ -38,22 +41,19 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), &Camera::triggerRequest);
         connect(this->TX2Cameras[i].get(), &Camera::returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
     }
-    connect(ui->stopButton, SIGNAL(clicked(bool)), this->trigger.get(), SLOT(stopRequest(bool)));
-    connect(ui->pauseButton, SIGNAL(clicked(bool)), this->trigger.get(), SLOT(pauseRequest(bool)));
+    connect(ui->stopButton, &QPushButton::clicked, this->trigger.get(), &Trigger::stopRequest);
+    connect(ui->pauseButton, &QPushButton::clicked, this->trigger.get(), &Trigger::pauseRequest);
 
-    connect(this->TX2Cameras[0].get(),&Camera::returnQImage1,this,&MainWindow::displayQImage1);
-    connect(this->TX2Cameras[0].get(),&Camera::returnDefectImage1,this,&MainWindow::displayDefectImage1);
-    connect(this->TX2Cameras[1].get(),&Camera::returnQImage2,this,&MainWindow::displayQImage2);
-    connect(this->TX2Cameras[1].get(),&Camera::returnDefectImage2,this,&MainWindow::displayDefectImage2);
-    connect(this->TX2Cameras[2].get(),&Camera::returnQImage3,this,&MainWindow::displayQImage3);
-    connect(this->TX2Cameras[2].get(),&Camera::returnDefectImage3,this,&MainWindow::displayDefectImage3);
-
-    //    images[0] = ui->QImageLabel1;
-    //    images[1] = ui->QImageLabel2;
-    //    images[2] = ui->QImageLabel3;
+    images[0] = ui->QImageLabel1;
+    images[1] = ui->QImageLabel2;
+    images[2] = ui->QImageLabel3;
     defectImages[0] = ui->QImageLabel1;
     defectImages[1] = ui->QImageLabel2;
     defectImages[2] = ui->QImageLabel3;
+
+    resolutions[0] = ui->labelResolution;
+    resolutions[1] = ui->labelResolution_2;
+    resolutions[2] = ui->labelResolution_3;
 
     ui->pauseButton->setCheckable(true);
 }
@@ -89,7 +89,6 @@ void MainWindow::on_exitButton_clicked()
     this->close();
 }
 
-// SHOULD BE ABLE TO CAPTURE CURRENT FRAME WHILE PAUSED
 void MainWindow::on_pauseButton_clicked(bool checked)
 {
     if (checked) {
@@ -101,51 +100,25 @@ void MainWindow::on_pauseButton_clicked(bool checked)
     }
 }
 
-void MainWindow::displayQImage1(QImage img_temp)
+void MainWindow::displayQImage(QImage img_temp, int camIndex)
 {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    this->images[0]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[0]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    this->images[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void MainWindow::displayDefectImage1(QImage img_temp)
+void MainWindow::displayQDefectImage(QImage img_temp, int camIndex)
 {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
-    this->defectImages[0]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[0]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    this->defectImages[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void MainWindow::displayQImage2(QImage img_temp)
+void MainWindow::displayRes(int sensorRes, int camIndex)
 {
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->images[1]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[1]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-void MainWindow::displayDefectImage2(QImage img_temp)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->defectImages[1]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[1]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-void MainWindow::displayQImage3(QImage img_temp)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->images[2]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[2]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-void MainWindow::displayDefectImage3(QImage img_temp)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->defectImages[2]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[2]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    QString strExpTime=QString::number(sensorRes)+" p";
+    this->resolutions[camIndex]->setText(strExpTime);
 }
 

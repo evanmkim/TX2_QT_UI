@@ -67,9 +67,9 @@ MainWindow::~MainWindow()
 // Start into continuous capture at 30 fps (for live view)
 void MainWindow::on_ctsModeStartButton_clicked()
 {
-    this->trigger->start();
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->start();
+        this->TX2Cameras[i]->captureMode = 0;
     }
 }
 
@@ -79,6 +79,7 @@ void MainWindow::on_tgrModeStartButton_clicked()
     this->trigger->start();
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->start();
+        this->TX2Cameras[i]->captureMode = 1;
     }
 }
 

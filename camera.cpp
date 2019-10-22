@@ -114,6 +114,11 @@ bool Camera::initCam(){
     this->exit();
 }
 
+bool Camera::runCts()
+{
+    // Call this method at the end of the cts capture initialization
+}
+
 bool Camera::triggerRequest()
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;

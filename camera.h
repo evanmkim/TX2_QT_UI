@@ -59,6 +59,10 @@ public:
     bool captureButtonPressed = false;
     bool pauseButtonPressed = false;
 
+    // Continuous Mode: 0
+    // Triggered Mode: 1
+    int captureMode = 0;
+
 protected:
     void run();
 
@@ -93,6 +97,10 @@ private:
     // Provides exclusive write access to frameFinished
     QMutex mutex;
     static int frameFinished;
+
+    bool runCts();
+
+
 
 signals:
     void returnQImage1(QImage);

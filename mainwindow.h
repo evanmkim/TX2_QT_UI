@@ -36,6 +36,9 @@ private slots:
 
     void displayRes(int, int);
 
+    void displayFrameRate(double, int);
+    void displayCurrFrameRate(double, int);
+
 private:
     Ui::MainWindow *ui;
     std::vector<std::unique_ptr<Camera>> TX2Cameras;
@@ -45,9 +48,11 @@ private:
     int numTX2Cameras = 3;
     double BGR[];
 
-    QLabel *images[3];
-    QLabel *defectImages[3];
-    QLabel *resolutions[3];
+    std::vector<QLabel *> images;
+    std::vector<QLabel *> defectImages;
+    std::vector<QLabel *> resolutions;
+    std::vector<QLabel *> frameRates;
+    std::vector<QLabel *> currFrameRates;
 };
 
 #endif // MAINWINDOW_H

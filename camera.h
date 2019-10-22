@@ -24,6 +24,7 @@
 #include "utils/Options.h"
 #include <algorithm>
 #include <math.h>
+#include <chrono>
 #include "utils/PreviewConsumer.h"
 #include "utils/Error.h"
 #include "SimpleCV.h"
@@ -67,10 +68,32 @@ protected:
     void run();
 
 private:
+
+    // Exposure Settings
+    const int DEFAULT_EXPOSURE_TIME = 5000000;
+    const int CAPTURE_COUNT = 700000;
+
+    int curExposure=DEFAULT_EXPOSURE_TIME;
+    int curFocus=2;
+    float curGain=1;
+
+    // Session Info
     Argus::Status status;
     std::vector<CameraDevice *> cameraDevices;
     int frameCaptureCount=0;
     int cameraDeviceIndex=0;
+
+    // Session Frame Rate
+    float previousTimeStamp=0.0;
+    float sensorTimeStamp=0.0;
+
+    int frameCaptureLoop;
+
+    chrono::high_resolution_clock::time_point startTime;
+    chrono::high_resolution_clock::time_point finishTime;
+
+    uint64_t previousFrameNum=0;
+
 
     // Session Interfaces
     Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
@@ -101,8 +124,9 @@ private:
     ICameraProperties *iCameraProperties = nullptr;
     ISensorMode *iSensorMode = nullptr;
 
+    const ICaptureMetadata *iMetadata = nullptr;
 
-
+    // CV Processing
     int DisplayIndex=1;
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
@@ -112,6 +136,7 @@ private:
     static int frameFinished;
 
     bool runCts();
+    void endCapture();
 
 signals:
     void returnQImage(QImage, int);
@@ -121,10 +146,13 @@ signals:
 
     void returnFrameFinished(bool);
 
+    void returnFrameRate(double, int);
+    void returnCurrFrameRate(double, int);
+
 public slots:
     void stopRequest();
     void pauseRequest(bool);
-    bool triggerRequest();
+    bool frameRequest();
     void saveRequest();
 };
 

@@ -33,27 +33,39 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(this->TX2Cameras[i].get(),&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
 
         connect(this->TX2Cameras[i].get(),&Camera::returnRes,this,&MainWindow::displayRes);
+        connect(this->TX2Cameras[i].get(),&Camera::returnFrameRate,this,&MainWindow::displayFrameRate);
+        connect(this->TX2Cameras[i].get(),&Camera::returnCurrFrameRate,this,&MainWindow::displayCurrFrameRate);
 
         // UI Trigger
-        //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::triggerRequest);
+        //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::frameRequest);
 
         // Hardware Trigger
-        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), &Camera::triggerRequest);
+        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), &Camera::frameRequest);
         connect(this->TX2Cameras[i].get(), &Camera::returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
+
+        // UI Label Vector Assignment
+        images.push_back(ui->QImageLabel1);
+        images.push_back(ui->QImageLabel2);
+        images.push_back(ui->QImageLabel3);
+
+        defectImages.push_back(ui->QImageLabel1);
+        defectImages.push_back(ui->QImageLabel2);
+        defectImages.push_back(ui->QImageLabel3);
+
+        resolutions.push_back(ui->labelResolution);
+        resolutions.push_back(ui->labelResolution_2);
+        resolutions.push_back(ui->labelResolution_3);
+
+        frameRates.push_back(ui->labelFrameRate);
+        frameRates.push_back(ui->labelFrameRate_2);
+        frameRates.push_back(ui->labelFrameRate_3);
+
+        currFrameRates.push_back(ui->labelCurrFrameRate);
+        currFrameRates.push_back(ui->labelCurrFrameRate_2);
+        currFrameRates.push_back(ui->labelCurrFrameRate_3);
     }
     connect(ui->stopButton, &QPushButton::clicked, this->trigger.get(), &Trigger::stopRequest);
     connect(ui->pauseButton, &QPushButton::clicked, this->trigger.get(), &Trigger::pauseRequest);
-
-    images[0] = ui->QImageLabel1;
-    images[1] = ui->QImageLabel2;
-    images[2] = ui->QImageLabel3;
-    defectImages[0] = ui->QImageLabel1;
-    defectImages[1] = ui->QImageLabel2;
-    defectImages[2] = ui->QImageLabel3;
-
-    resolutions[0] = ui->labelResolution;
-    resolutions[1] = ui->labelResolution_2;
-    resolutions[2] = ui->labelResolution_3;
 
     ui->pauseButton->setCheckable(true);
 }
@@ -120,5 +132,15 @@ void MainWindow::displayRes(int sensorRes, int camIndex)
 {
     QString strExpTime=QString::number(sensorRes)+" p";
     this->resolutions[camIndex]->setText(strExpTime);
+}
+
+void MainWindow::displayFrameRate(double frameRate, int camIndex) {
+    QString strFrameRate=QString::number(frameRate)+"  fps";
+    this->frameRates[camIndex]->setText(strFrameRate);
+}
+
+void MainWindow::displayCurrFrameRate(double currFrameRate, int camIndex) {
+    QString strFrameRate=QString::number(currFrameRate)+"  fps";
+    this->currFrameRates[camIndex]->setText(strFrameRate);
 }
 

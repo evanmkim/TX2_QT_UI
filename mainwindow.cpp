@@ -17,6 +17,43 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    // UI Label Vector Assignment
+    this->images.push_back(ui->QImageLabel1);
+    this->images.push_back(ui->QImageLabel2);
+    this->images.push_back(ui->QImageLabel3);
+
+    this->defectImages.push_back(ui->QImageLabel1);
+    this->defectImages.push_back(ui->QImageLabel2);
+    this->defectImages.push_back(ui->QImageLabel3);
+
+    this->resolutions.push_back(ui->labelResolution);
+    this->resolutions.push_back(ui->labelResolution_2);
+    this->resolutions.push_back(ui->labelResolution_3);
+
+    this->frameRates.push_back(ui->labelFrameRate);
+    this->frameRates.push_back(ui->labelFrameRate_2);
+    this->frameRates.push_back(ui->labelFrameRate_3);
+
+    this->currFrameRates.push_back(ui->labelCurrFrameRate);
+    this->currFrameRates.push_back(ui->labelCurrFrameRate_2);
+    this->currFrameRates.push_back(ui->labelCurrFrameRate_3);
+
+    this->exposureSliders.push_back(ui->ExposureTimeSlider);
+    this->exposureSliders.push_back(ui->ExposureTimeSlider_2);
+    this->exposureSliders.push_back(ui->ExposureTimeSlider_3);
+
+    this->gainSliders.push_back(ui->GainSlider);
+    this->gainSliders.push_back(ui->GainSlider_2);
+    this->gainSliders.push_back(ui->GainSlider_3);
+
+    this->exposureValues.push_back(ui->ExposureLabel);
+    this->exposureValues.push_back(ui->ExposureLabel_2);
+    this->exposureValues.push_back(ui->ExposureLabel_3);
+
+    this->gainValues.push_back(ui->GainLabel);
+    this->gainValues.push_back(ui->GainLabel_2);
+    this->gainValues.push_back(ui->GainLabel_3);
+
     ///THREAD INITIALIZATION
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
@@ -25,16 +62,23 @@ MainWindow::MainWindow(QWidget *parent) :
     this->trigger = std::unique_ptr<Trigger>(new Trigger);
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
+        // Buttons
         connect(ui->stopButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::stopRequest);
         connect(ui->pauseButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::pauseRequest);
         connect(ui->captureButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::saveRequest);
 
+        //Sliders
+        connect(this->exposureSliders[i], &QSlider::valueChanged, this->TX2Cameras[i].get(), &Camera::setExposure);
+        connect(this->gainSliders[i], &QSlider::valueChanged, this->TX2Cameras[i].get(), &Camera::setGain);
+
+        // Display Data
         connect(this->TX2Cameras[i].get(),&Camera::returnQImage,this,&MainWindow::displayQImage);
         connect(this->TX2Cameras[i].get(),&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
-
         connect(this->TX2Cameras[i].get(),&Camera::returnRes,this,&MainWindow::displayRes);
         connect(this->TX2Cameras[i].get(),&Camera::returnFrameRate,this,&MainWindow::displayFrameRate);
         connect(this->TX2Cameras[i].get(),&Camera::returnCurrFrameRate,this,&MainWindow::displayCurrFrameRate);
+        connect(this->TX2Cameras[i].get(),&Camera::returnExposureVal,this,&MainWindow::displayExposureVal);
+        connect(this->TX2Cameras[i].get(),&Camera::returnGainVal,this,&MainWindow::displayGainVal);
 
         // UI Trigger
         //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::frameRequest);
@@ -43,26 +87,11 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), &Camera::frameRequest);
         connect(this->TX2Cameras[i].get(), &Camera::returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
 
-        // UI Label Vector Assignment
-        images.push_back(ui->QImageLabel1);
-        images.push_back(ui->QImageLabel2);
-        images.push_back(ui->QImageLabel3);
-
-        defectImages.push_back(ui->QImageLabel1);
-        defectImages.push_back(ui->QImageLabel2);
-        defectImages.push_back(ui->QImageLabel3);
-
-        resolutions.push_back(ui->labelResolution);
-        resolutions.push_back(ui->labelResolution_2);
-        resolutions.push_back(ui->labelResolution_3);
-
-        frameRates.push_back(ui->labelFrameRate);
-        frameRates.push_back(ui->labelFrameRate_2);
-        frameRates.push_back(ui->labelFrameRate_3);
-
-        currFrameRates.push_back(ui->labelCurrFrameRate);
-        currFrameRates.push_back(ui->labelCurrFrameRate_2);
-        currFrameRates.push_back(ui->labelCurrFrameRate_3);
+        // Slider Elements
+        this->exposureSliders[i]->setRange(30,40000);
+        this->exposureSliders[i]->setValue(5000);
+        this->gainSliders[i]->setRange(10.0,2500.0);
+        this->gainSliders[i]->setValue(10.0);
     }
     connect(ui->stopButton, &QPushButton::clicked, this->trigger.get(), &Trigger::stopRequest);
     connect(ui->pauseButton, &QPushButton::clicked, this->trigger.get(), &Trigger::pauseRequest);
@@ -80,19 +109,19 @@ MainWindow::~MainWindow()
 void MainWindow::on_ctsModeStartButton_clicked()
 {
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->start();
         this->TX2Cameras[i]->captureMode = 0;
+        this->TX2Cameras[i]->start();
     }
 }
 
 // Start into triggered capture, hardware synchronized (for sync view)
 void MainWindow::on_tgrModeStartButton_clicked()
 {
-    this->trigger->start();
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->start();
         this->TX2Cameras[i]->captureMode = 1;
+        this->TX2Cameras[i]->start();
     }
+    this->trigger->start();
 }
 
 
@@ -143,4 +172,20 @@ void MainWindow::displayCurrFrameRate(double currFrameRate, int camIndex) {
     QString strFrameRate=QString::number(currFrameRate)+"  fps";
     this->currFrameRates[camIndex]->setText(strFrameRate);
 }
+
+void MainWindow::displayExposureVal(int newValue, int camIndex)
+{
+    QString strExpTime=QString::number(newValue);
+    this->exposureValues[camIndex]->setText(strExpTime+" µs");
+}
+
+void MainWindow::displayGainVal(int newValue, int camIndex)
+{
+    int value = newValue/10;
+
+    QString strGainTime=QString::number(value);
+    this->gainValues[camIndex]->setText(strGainTime);
+}
+
+
 

@@ -24,20 +24,25 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    int ExposureValue=300000;
+    float GainInitialValue=1.0;
+
 private slots:
 
+    // Push Buttons
     void on_ctsModeStartButton_clicked();
     void on_tgrModeStartButton_clicked();
     void on_exitButton_clicked();
     void on_pauseButton_clicked(bool checked);
 
+    // Display Data
     void displayQImage(QImage, int);
     void displayQDefectImage(QImage, int);
-
     void displayRes(int, int);
-
     void displayFrameRate(double, int);
     void displayCurrFrameRate(double, int);
+    void displayExposureVal(int, int);
+    void displayGainVal(int, int);
 
 private:
     Ui::MainWindow *ui;
@@ -53,6 +58,11 @@ private:
     std::vector<QLabel *> resolutions;
     std::vector<QLabel *> frameRates;
     std::vector<QLabel *> currFrameRates;
+    std::vector<QLabel *> exposureValues;
+    std::vector<QLabel *> gainValues;
+
+    std::vector<QSlider *> exposureSliders;
+    std::vector<QSlider *> gainSliders;
 };
 
 #endif // MAINWINDOW_H

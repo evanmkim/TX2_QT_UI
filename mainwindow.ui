@@ -180,11 +180,11 @@
       <x>170</x>
       <y>290</y>
       <width>451</width>
-      <height>541</height>
+      <height>441</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="camPage1">
      <attribute name="title">
@@ -196,7 +196,7 @@
         <x>40</x>
         <y>230</y>
         <width>371</width>
-        <height>231</height>
+        <height>151</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -205,23 +205,10 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QSlider" name="FocusSlider">
+      <widget class="QLabel" name="ExposureLabel">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>170</y>
-         <width>331</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>122</x>
+         <x>160</x>
          <y>11</y>
          <width>78</width>
          <height>17</height>
@@ -257,10 +244,10 @@
         <string>Exposure Time:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelGain">
+      <widget class="QLabel" name="GainLabel">
        <property name="geometry">
         <rect>
-         <x>109</x>
+         <x>160</x>
          <y>80</y>
          <width>91</width>
          <height>17</height>
@@ -268,32 +255,6 @@
        </property>
        <property name="text">
         <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="labelFrameDuration">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>150</y>
-         <width>82</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="titleFocus">
-       <property name="geometry">
-        <rect>
-         <x>11</x>
-         <y>150</y>
-         <width>131</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Frame Duration:</string>
        </property>
       </widget>
       <widget class="QLabel" name="titleGain">
@@ -454,7 +415,7 @@
         <x>40</x>
         <y>230</y>
         <width>371</width>
-        <height>231</height>
+        <height>151</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -463,23 +424,10 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QSlider" name="FocusSlider_2">
+      <widget class="QLabel" name="ExposureLabel_2">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>170</y>
-         <width>331</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>122</x>
+         <x>160</x>
          <y>11</y>
          <width>78</width>
          <height>17</height>
@@ -515,10 +463,10 @@
         <string>Exposure Time:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelGain_2">
+      <widget class="QLabel" name="GainLabel_2">
        <property name="geometry">
         <rect>
-         <x>109</x>
+         <x>160</x>
          <y>80</y>
          <width>91</width>
          <height>17</height>
@@ -526,32 +474,6 @@
        </property>
        <property name="text">
         <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="labelFrameDuration_2">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>150</y>
-         <width>82</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="titleFocus_2">
-       <property name="geometry">
-        <rect>
-         <x>11</x>
-         <y>150</y>
-         <width>131</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Frame Duration:</string>
        </property>
       </widget>
       <widget class="QLabel" name="titleGain_2">
@@ -712,7 +634,7 @@
         <x>40</x>
         <y>230</y>
         <width>371</width>
-        <height>231</height>
+        <height>141</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -721,23 +643,10 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QSlider" name="FocusSlider_3">
+      <widget class="QLabel" name="ExposureLabel_3">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>170</y>
-         <width>331</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_3">
-       <property name="geometry">
-        <rect>
-         <x>122</x>
+         <x>160</x>
          <y>11</y>
          <width>78</width>
          <height>17</height>
@@ -773,10 +682,10 @@
         <string>Exposure Time:</string>
        </property>
       </widget>
-      <widget class="QLabel" name="labelGain_3">
+      <widget class="QLabel" name="GainLabel_3">
        <property name="geometry">
         <rect>
-         <x>109</x>
+         <x>160</x>
          <y>80</y>
          <width>91</width>
          <height>17</height>
@@ -784,32 +693,6 @@
        </property>
        <property name="text">
         <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="labelFrameDuration_3">
-       <property name="geometry">
-        <rect>
-         <x>140</x>
-         <y>150</y>
-         <width>82</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>ns</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="titleFocus_3">
-       <property name="geometry">
-        <rect>
-         <x>11</x>
-         <y>150</y>
-         <width>131</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Frame Duration:</string>
        </property>
       </widget>
       <widget class="QLabel" name="titleGain_3">

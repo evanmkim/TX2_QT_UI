@@ -28,6 +28,7 @@ using namespace std;
 
 
 Camera::Camera(QObject *parent) : QThread(parent) {}
+
 int Camera::frameFinished = 0;
 
 void Camera::run()
@@ -161,8 +162,8 @@ bool Camera::initCam(){
 
 void Camera::endCapture() {
 
-    cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
     while (!stopButtonPressed) {}
+    cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
 
     this->stopButtonPressed = false;
 
@@ -215,25 +216,25 @@ bool Camera::runCts()
         EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
         ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
-        uint64_t frameExposureTime = iMetadata->getSensorExposureTime();
-        float frameGain = iMetadata->getSensorAnalogGain();
+        uint64_t frameExposureTime = this->iMetadata->getSensorExposureTime();
+        float frameGain = this->iMetadata->getSensorAnalogGain();
         //printf("Frame metadata ExposureTime %ju, Analog Gain %f\n", frameExposureTime, frameGain); ///CHANGE THIS
 
         ///SUPPORTED FRAME RATE
-        previousTimeStamp=sensorTimeStamp;
-        sensorTimeStamp = iMetadata->getSensorTimestamp();
+        this->previousTimeStamp=this->sensorTimeStamp;
+        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
         //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
         /// SET EXPOSURE TIME WITH UI
-        const uint64_t THIRD_OF_A_SECOND = curExposure;
-        EXIT_IF_NOT_OK(iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(THIRD_OF_A_SECOND)),"Unable to set the Source Settings Exposure Time Range");
+        const uint64_t THIRD_OF_A_SECOND = this->curExposure;
+        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(THIRD_OF_A_SECOND)),"Unable to set the Source Settings Exposure Time Range");
 
         ///SET GAIN WITH UI
-        float newGainValue = curGain;
-        EXIT_IF_NOT_OK(iSourceSettings->setGainRange(ArgusSamples::Range<float>(newGainValue)), "Unable to set the Source Settings Gain Range");
+        float newGainValue = this->curGain;
+        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(newGainValue)), "Unable to set the Source Settings Gain Range");
 
         const uint64_t newFocusPos = curFocus;
-        EXIT_IF_NOT_OK(iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(curFocus)), "Unable to set the Frame Duration Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(curFocus)), "Unable to set the Frame Duration Range");
 
         frameRequest();
     }
@@ -353,7 +354,7 @@ bool Camera::frameRequest()
     }
 
     if (this->captureButtonPressed) {
-        string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(frameCaptureCount) + ".png";
+        string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(this->frameCaptureCount) + ".png";
         cv::imwrite(savepath, imgProc);
         this->captureButtonPressed = false;
     }
@@ -383,19 +384,9 @@ bool Camera::frameRequest()
     NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
     NvBufferDestroy (dmabuf_fd);
 
-    sensorTimeStamp = this->iMetadata->getSensorTimestamp();
-
     this->mutex.lock();
     Camera::frameFinished++;
     this->frameCaptureCount++;
-
-    // Frame Rate Information
-    finishTime = std::chrono::high_resolution_clock::now();
-    // In nanosecond ticks
-    float totalDuration= std::chrono::duration_cast<std::chrono::nanoseconds>(finishTime-startTime).count();
-
-    emit returnFrameRate((frameCaptureLoop*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
-    emit returnCurrFrameRate(1.0/(sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
 
     // Requests a new frame when all three frames have been displayed
     if(Camera::frameFinished == 3)
@@ -404,6 +395,18 @@ bool Camera::frameRequest()
         emit returnFrameFinished(true);
     }
     this->mutex.unlock();
+
+    if(this->captureMode == 0) {
+        sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+
+        // Frame Rate Information
+        finishTime = std::chrono::high_resolution_clock::now();
+        // In nanosecond ticks
+        float totalDuration= std::chrono::duration_cast<std::chrono::nanoseconds>(finishTime-startTime).count();
+
+        emit returnFrameRate((frameCaptureLoop*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
+        emit returnCurrFrameRate(1.0/(sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
+    }
     return true;
 }
 
@@ -423,4 +426,16 @@ void Camera::saveRequest()
 {
     this->captureButtonPressed = true;
     cout << "Capture Button Pressed" << endl;
+}
+
+void Camera::setExposure(int valueExposureSlider)
+{
+    this->curExposure = valueExposureSlider*1000;
+    emit returnExposureVal(valueExposureSlider, this->cameraDeviceIndex);
+}
+
+void Camera::setGain(int valueGainSlider)
+{
+    this->curGain = valueGainSlider;
+    emit returnGainVal(valueGainSlider, this->cameraDeviceIndex);
 }

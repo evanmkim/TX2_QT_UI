@@ -75,7 +75,7 @@ private:
 
     int curExposure=DEFAULT_EXPOSURE_TIME;
     int curFocus=2;
-    float curGain=1;
+    int curGain=1;
 
     // Session Info
     Argus::Status status;
@@ -141,19 +141,20 @@ private:
 signals:
     void returnQImage(QImage, int);
     void returnQDefectImage(QImage, int);
-
     void returnRes(int, int);
-
     void returnFrameFinished(bool);
-
     void returnFrameRate(double, int);
     void returnCurrFrameRate(double, int);
+    void returnExposureVal(int, int);
+    void returnGainVal(int, int);
 
 public slots:
     void stopRequest();
     void pauseRequest(bool);
     bool frameRequest();
     void saveRequest();
+    void setExposure(int);
+    void setGain(int);
 };
 
 

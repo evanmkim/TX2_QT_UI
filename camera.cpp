@@ -178,7 +178,7 @@ void Camera::endCapture() {
     this->cameraProvider.release();
 
     this->g_display.cleanup();
-    cout << "Cleaning Up" << endl;
+    cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
 
     // Exit this thread
     this->exit();
@@ -192,7 +192,6 @@ bool Camera::runCts()
     for (this->frameCaptureLoop = 1; this->frameCaptureLoop < CAPTURE_COUNT; this->frameCaptureLoop++)
     {
         if (stopButtonPressed){
-            cout << "Stop Button Pressed. Session Ended." << this->cameraDeviceIndex << endl;
             break;
         }
 
@@ -238,7 +237,6 @@ bool Camera::runCts()
 
         frameRequest();
     }
-    endCapture();
 }
 
 bool Camera::frameRequest()
@@ -399,7 +397,6 @@ bool Camera::frameRequest()
     emit returnFrameRate((frameCaptureLoop*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
     emit returnCurrFrameRate(1.0/(sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
 
-
     // Requests a new frame when all three frames have been displayed
     if(Camera::frameFinished == 3)
     {
@@ -408,8 +405,6 @@ bool Camera::frameRequest()
     }
     this->mutex.unlock();
     return true;
-
-
 }
 
 void Camera::stopRequest()

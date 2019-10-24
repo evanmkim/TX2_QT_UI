@@ -93,6 +93,54 @@ bool Camera::initCam(){
     uint32_t requestId = this->iSession->capture(this->request.get());
     EXIT_IF_NULL(requestId, "Failed to submit capture request");
 
+    //SETTINGS INTERFACE
+    this->iSourceSettings = interface_cast<ISourceSettings>(this->iRequest->getSourceSettings());
+    EXIT_IF_NULL(this->iSourceSettings, "Failed to get source settings interface");
+
+    //CAMERA PROPERTIES
+    this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
+    EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
+
+    std::vector<SensorMode*> sensorModes;
+    this->iCameraProperties->getBasicSensorModes(&sensorModes);
+    std::vector<SensorMode*> modes;
+    this->iCameraProperties->getAllSensorModes(&modes);
+    if (sensorModes.size() == 0)
+        cout <<"Failed to get sensor modes"<<endl;
+
+    //SENSOR MODE
+    // Index as 2 is 60fps, 0 is 30 fps (fix at 0 for now)
+    SensorMode *sensorMode = sensorModes[0];
+    this->iSensorMode = interface_cast<ISensorMode>(sensorModes[0]);
+    EXIT_IF_NULL(this->iSensorMode, "Failed to get sensor mode interface");
+
+    emit returnRes(this->iSensorMode->getResolution().height(), this->cameraDeviceIndex);
+
+    //GET EXPOSURE TIME RANGE AND RESOLUTION
+    ArgusSamples::Range<uint64_t> limitExposureTimeRange = this->iSensorMode->getExposureTimeRange();
+    //printf("-Sensor Exposure Range min %ju, max %ju\n", limitExposureTimeRange.min(), limitExposureTimeRange.max());
+    Size2D<uint32_t> sensorResolution = this->iSensorMode->getResolution();
+
+    //cout<<"-Sensor Resolution: "<< iSensorMode->getResolution().height() << " x " << iSensorMode->getResolution().width() <<endl;
+    EXIT_IF_NOT_OK(this->iSourceSettings->setSensorMode(sensorMode),"Unable to set Sensor Mode");
+
+    //INTIALIZES THE CAMERA PARAMETERS OF THE CAMERA STARTING
+    EXIT_IF_NOT_OK(this->iRequest->enableOutputStream(stream.get()),"Failed to enable stream in capture request");
+
+    //const uint64_t THIRD_OF_A_SECOND = 500000;
+    EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(curExposure)),"Unable to set the Source Settings Exposure Time Range");
+
+    /// 3. GET THE GAIN RANGE FROM THE CHANGED EXPOSURE
+    ArgusSamples::Range<float> sensorModeAnalogGainRange = iSensorMode->getAnalogGainRange();
+    //printf("-Sensor Analog Gain range min %f, max %f\n", sensorModeAnalogGainRange.min(), sensorModeAnalogGainRange.max());
+    EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(sensorModeAnalogGainRange.min())), "Unable to set the Source Settings Gain Range");
+
+    /// 4. SET THE GAIN RANGE TO MINIMUM
+    ArgusSamples::Range<long unsigned int> sensorFrameDurationRange = this->iSensorMode->getFrameDurationRange();
+    //printf("-Frame Duration Range min %f, max %f\n", sensorFrameDurationRange.min(), sensorFrameDurationRange.max());
+    EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
+    EXIT_IF_NOT_OK(this->iSession->repeat(this->request.get()), "Unable to submit repeat() request");
+
     // Continuous Capture Settings
     if (this->captureMode == 0) {
 
@@ -106,54 +154,6 @@ bool Camera::initCam(){
         this->queue = UniqueObj<EventQueue>(this->iEventProvider->createEventQueue(eventTypes));
         this->iQueue = interface_cast<IEventQueue>(this->queue);
         EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
-
-        //SETTINGS INTERFACE
-        this->iSourceSettings = interface_cast<ISourceSettings>(this->iRequest->getSourceSettings());
-        EXIT_IF_NULL(this->iSourceSettings, "Failed to get source settings interface");
-
-        //CAMERA PROPERTIES
-        this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
-        EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
-
-        std::vector<SensorMode*> sensorModes;
-        this->iCameraProperties->getBasicSensorModes(&sensorModes);
-        std::vector<SensorMode*> modes;
-        this->iCameraProperties->getAllSensorModes(&modes);
-        if (sensorModes.size() == 0)
-            cout <<"Failed to get sensor modes"<<endl;
-
-        //SENSOR MODE
-        // Index as 2 is 60fps, 0 is 30 fps (fix at 0 for now)
-        SensorMode *sensorMode = sensorModes[0];
-        this->iSensorMode = interface_cast<ISensorMode>(sensorModes[0]);
-        EXIT_IF_NULL(this->iSensorMode, "Failed to get sensor mode interface");
-
-        emit returnRes(this->iSensorMode->getResolution().height(), this->cameraDeviceIndex);
-
-        //GET EXPOSURE TIME RANGE AND RESOLUTION
-        ArgusSamples::Range<uint64_t> limitExposureTimeRange = this->iSensorMode->getExposureTimeRange();
-        //printf("-Sensor Exposure Range min %ju, max %ju\n", limitExposureTimeRange.min(), limitExposureTimeRange.max());
-        Size2D<uint32_t> sensorResolution = this->iSensorMode->getResolution();
-
-        //cout<<"-Sensor Resolution: "<< iSensorMode->getResolution().height() << " x " << iSensorMode->getResolution().width() <<endl;
-        EXIT_IF_NOT_OK(this->iSourceSettings->setSensorMode(sensorMode),"Unable to set Sensor Mode");
-
-        //INTIALIZES THE CAMERA PARAMETERS OF THE CAMERA STARTING
-        EXIT_IF_NOT_OK(this->iRequest->enableOutputStream(stream.get()),"Failed to enable stream in capture request");
-
-        //const uint64_t THIRD_OF_A_SECOND = 500000;
-        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(curExposure)),"Unable to set the Source Settings Exposure Time Range");
-
-        /// 3. GET THE GAIN RANGE FROM THE CHANGED EXPOSURE
-        ArgusSamples::Range<float> sensorModeAnalogGainRange = iSensorMode->getAnalogGainRange();
-        //printf("-Sensor Analog Gain range min %f, max %f\n", sensorModeAnalogGainRange.min(), sensorModeAnalogGainRange.max());
-        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(sensorModeAnalogGainRange.min())), "Unable to set the Source Settings Gain Range");
-
-        /// 4. SET THE GAIN RANGE TO MINIMUM
-        ArgusSamples::Range<long unsigned int> sensorFrameDurationRange = this->iSensorMode->getFrameDurationRange();
-        //printf("-Frame Duration Range min %f, max %f\n", sensorFrameDurationRange.min(), sensorFrameDurationRange.max());
-        EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
-        EXIT_IF_NOT_OK(this->iSession->repeat(this->request.get()), "Unable to submit repeat() request");
 
         runCts();
     }
@@ -190,12 +190,9 @@ bool Camera::runCts()
     this->startTime = std::chrono::high_resolution_clock::now();
     this->finishTime = std::chrono::high_resolution_clock::now();
 
-    for (this->frameCaptureLoop = 1; this->frameCaptureLoop < CAPTURE_COUNT; this->frameCaptureLoop++)
+    // INVESTIGATE THIS LOOP
+    while (!this->stopButtonPressed)
     {
-        if (stopButtonPressed){
-            break;
-        }
-
         while(pauseButtonPressed){
             sleep(1);
         }
@@ -313,6 +310,7 @@ bool Camera::frameRequest()
 
     /// START IMAGE PROCESSING
     /// The goal of this processing pipeline is to have the image in a floodfill binary space so that defects can be identified
+    ///
 
     Mat imgProc, imgTh, imgGray, imgFF;
 
@@ -324,6 +322,7 @@ bool Camera::frameRequest()
     // 255 will indicate an abnormality; a defect
     cv::threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
+    // (960 by 540)
     imgFF=imgTh.clone();
 
     // floodfill() starts at a seed point and fills the component with the specified color
@@ -331,10 +330,12 @@ bool Camera::frameRequest()
 
     // ccomp is used to compose the bouding are for the "red circle" around the defect
     Rect ccomp;
+    Rect roi(384,0,192,540);
 
-    for(int m=0;m<imgFF.rows;m++)
+
+    for(int m = roi.y; m < (roi.y + roi.height); m++)
     {
-        for(int n=0;n<imgFF.cols;n++)
+        for(int n = roi.x; n < (roi.x+roi.width); n++)
         {
             int iPixel=imgFF.at<uchar>(m,n);
             // Defect in the area
@@ -397,16 +398,17 @@ bool Camera::frameRequest()
     this->mutex.unlock();
 
     if(this->captureMode == 0) {
-        sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
 
         // Frame Rate Information
         finishTime = std::chrono::high_resolution_clock::now();
         // In nanosecond ticks
         float totalDuration= std::chrono::duration_cast<std::chrono::nanoseconds>(finishTime-startTime).count();
 
-        emit returnFrameRate((frameCaptureLoop*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
-        emit returnCurrFrameRate(1.0/(sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
+        emit returnFrameRate((this->frameCaptureCount*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
+        emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
     }
+
     return true;
 }
 

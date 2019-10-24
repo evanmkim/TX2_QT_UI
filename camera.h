@@ -71,8 +71,6 @@ private:
 
     // Exposure Settings
     const int DEFAULT_EXPOSURE_TIME = 5000000;
-    const int CAPTURE_COUNT = 700000;
-
     int curExposure=DEFAULT_EXPOSURE_TIME;
     int curFocus=2;
     int curGain=1;
@@ -93,7 +91,6 @@ private:
     chrono::high_resolution_clock::time_point finishTime;
 
     uint64_t previousFrameNum=0;
-
 
     // Session Interfaces
     Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
@@ -125,6 +122,9 @@ private:
     ISensorMode *iSensorMode = nullptr;
 
     const ICaptureMetadata *iMetadata = nullptr;
+
+    Argus::UniqueObj<EGLStream::Frame> frame;
+    EGLStream::IFrame  *iFrame = nullptr;
 
     // CV Processing
     int DisplayIndex=1;

@@ -54,14 +54,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->gainValues.push_back(ui->GainLabel_2);
     this->gainValues.push_back(ui->GainLabel_3);
 
-    ///THREAD INITIALIZATION
-
+    // Thread Initialization
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras.push_back(std::unique_ptr<Camera>(new Camera(i)));
     }
     this->trigger = std::unique_ptr<Trigger>(new Trigger);
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
+
         // Buttons
         connect(ui->stopButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::stopRequest);
         connect(ui->pauseButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::pauseRequest);
@@ -97,6 +97,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pauseButton, &QPushButton::clicked, this->trigger.get(), &Trigger::pauseRequest);
 
     ui->pauseButton->setCheckable(true);
+
+    QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
+    ui->TaymerLogo->setAlignment(Qt::AlignCenter);
+    QPixmap logo;
+
+    if (logo.load(filename)) {
+        logo = logo.scaled(ui->TaymerLogo->size(),Qt::KeepAspectRatio);
+        ui->TaymerLogo->setPixmap(logo);
+    } else {
+        cout << "Unable to load, bad filename" << endl;
+    }
 }
 
 

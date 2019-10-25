@@ -24,9 +24,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    int ExposureValue=300000;
-    float GainInitialValue=1.0;
-
 private slots:
 
     // Push Buttons

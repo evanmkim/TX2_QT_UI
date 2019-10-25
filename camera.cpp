@@ -97,6 +97,9 @@ bool Camera::initCam(){
     this->iSourceSettings = interface_cast<ISourceSettings>(this->iRequest->getSourceSettings());
     EXIT_IF_NULL(this->iSourceSettings, "Failed to get source settings interface");
 
+    //AUTOCONTROL SETTING INTERFACE
+    this->iAutoControlSettings = interface_cast<IAutoControlSettings>(this->iRequest->getAutoControlSettings());
+
     //CAMERA PROPERTIES
     this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
     EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
@@ -117,9 +120,9 @@ bool Camera::initCam(){
     emit returnRes(this->iSensorMode->getResolution().height(), this->cameraDeviceIndex);
 
     //GET EXPOSURE TIME RANGE AND RESOLUTION
-    ArgusSamples::Range<uint64_t> limitExposureTimeRange = this->iSensorMode->getExposureTimeRange();
+    //ArgusSamples::Range<uint64_t> limitExposureTimeRange = this->iSensorMode->getExposureTimeRange();
     //printf("-Sensor Exposure Range min %ju, max %ju\n", limitExposureTimeRange.min(), limitExposureTimeRange.max());
-    Size2D<uint32_t> sensorResolution = this->iSensorMode->getResolution();
+    //Size2D<uint32_t> sensorResolution = this->iSensorMode->getResolution();
 
     //cout<<"-Sensor Resolution: "<< iSensorMode->getResolution().height() << " x " << iSensorMode->getResolution().width() <<endl;
     EXIT_IF_NOT_OK(this->iSourceSettings->setSensorMode(sensorMode),"Unable to set Sensor Mode");
@@ -128,17 +131,17 @@ bool Camera::initCam(){
     EXIT_IF_NOT_OK(this->iRequest->enableOutputStream(stream.get()),"Failed to enable stream in capture request");
 
     //const uint64_t THIRD_OF_A_SECOND = 500000;
-    EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(curExposure)),"Unable to set the Source Settings Exposure Time Range");
+    //EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(curExposure)),"Unable to set the Source Settings Exposure Time Range");
 
     /// 3. GET THE GAIN RANGE FROM THE CHANGED EXPOSURE
-    ArgusSamples::Range<float> sensorModeAnalogGainRange = iSensorMode->getAnalogGainRange();
+    //ArgusSamples::Range<float> sensorModeAnalogGainRange = iSensorMode->getAnalogGainRange();
     //printf("-Sensor Analog Gain range min %f, max %f\n", sensorModeAnalogGainRange.min(), sensorModeAnalogGainRange.max());
-    EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(sensorModeAnalogGainRange.min())), "Unable to set the Source Settings Gain Range");
+    //EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(sensorModeAnalogGainRange.min())), "Unable to set the Source Settings Gain Range");
 
     /// 4. SET THE GAIN RANGE TO MINIMUM
-    ArgusSamples::Range<long unsigned int> sensorFrameDurationRange = this->iSensorMode->getFrameDurationRange();
+    //ArgusSamples::Range<long unsigned int> sensorFrameDurationRange = this->iSensorMode->getFrameDurationRange();
     //printf("-Frame Duration Range min %f, max %f\n", sensorFrameDurationRange.min(), sensorFrameDurationRange.max());
-    EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
+    //EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
     EXIT_IF_NOT_OK(this->iSession->repeat(this->request.get()), "Unable to submit repeat() request");
 
     // Continuous Capture Settings
@@ -212,9 +215,9 @@ bool Camera::runCts()
         this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
         EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
-        ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
-        uint64_t frameExposureTime = this->iMetadata->getSensorExposureTime();
-        float frameGain = this->iMetadata->getSensorAnalogGain();
+//        ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
+//        uint64_t frameExposureTime = this->iMetadata->getSensorExposureTime();
+//        float frameGain = this->iMetadata->getSensorAnalogGain();
         //printf("Frame metadata ExposureTime %ju, Analog Gain %f\n", frameExposureTime, frameGain); ///CHANGE THIS
 
         ///SUPPORTED FRAME RATE
@@ -223,15 +226,13 @@ bool Camera::runCts()
         //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
         /// SET EXPOSURE TIME WITH UI
-        const uint64_t THIRD_OF_A_SECOND = this->curExposure;
-        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(THIRD_OF_A_SECOND)),"Unable to set the Source Settings Exposure Time Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
 
         ///SET GAIN WITH UI
-        float newGainValue = this->curGain;
-        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(newGainValue)), "Unable to set the Source Settings Gain Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
 
-        const uint64_t newFocusPos = curFocus;
-        EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(curFocus)), "Unable to set the Frame Duration Range");
+        ///FIX ISP GAIN MANUALLY
+        EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
 
         frameRequest();
     }
@@ -330,7 +331,7 @@ bool Camera::frameRequest()
 
     // ccomp is used to compose the bouding are for the "red circle" around the defect
     Rect ccomp;
-    Rect roi(384,0,192,540);
+    Rect roi(392,0,192,540);
 
 
     for(int m = roi.y; m < (roi.y + roi.height); m++)

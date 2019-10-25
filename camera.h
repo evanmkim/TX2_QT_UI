@@ -70,10 +70,8 @@ protected:
 private:
 
     // Exposure Settings
-    const int DEFAULT_EXPOSURE_TIME = 5000000;
-    int curExposure=DEFAULT_EXPOSURE_TIME;
-    int curFocus=2;
-    int curGain=1;
+    int curExposure=0;
+    int curGain=0;
 
     // Session Info
     Argus::Status status;
@@ -120,6 +118,8 @@ private:
     ISourceSettings *iSourceSettings = nullptr;
     ICameraProperties *iCameraProperties = nullptr;
     ISensorMode *iSensorMode = nullptr;
+
+    IAutoControlSettings *iAutoControlSettings = nullptr;
 
     const ICaptureMetadata *iMetadata = nullptr;
 

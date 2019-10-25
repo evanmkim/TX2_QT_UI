@@ -88,10 +88,10 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(this->TX2Cameras[i].get(), &Camera::returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
 
         // Slider Elements
-        this->exposureSliders[i]->setRange(30,40000);
-        this->exposureSliders[i]->setValue(5000);
-        this->gainSliders[i]->setRange(10.0,2500.0);
-        this->gainSliders[i]->setValue(10.0);
+        this->exposureSliders[i]->setRange(30,1000);
+        this->exposureSliders[i]->setValue(50);
+        this->gainSliders[i]->setRange(1,250);
+        this->gainSliders[i]->setValue(50);
     }
     connect(ui->stopButton, &QPushButton::clicked, this->trigger.get(), &Trigger::stopRequest);
     connect(ui->pauseButton, &QPushButton::clicked, this->trigger.get(), &Trigger::pauseRequest);
@@ -181,9 +181,7 @@ void MainWindow::displayExposureVal(int newValue, int camIndex)
 
 void MainWindow::displayGainVal(int newValue, int camIndex)
 {
-    int value = newValue/10;
-
-    QString strGainTime=QString::number(value);
+    QString strGainTime=QString::number(newValue);
     this->gainValues[camIndex]->setText(strGainTime);
 }
 

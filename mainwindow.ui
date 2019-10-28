@@ -14,105 +14,11 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QFrame" name="imageDisplay">
-    <property name="geometry">
-     <rect>
-      <x>790</x>
-      <y>0</y>
-      <width>1011</width>
-      <height>1001</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>160</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 1</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="QImageLabel1">
-     <property name="geometry">
-      <rect>
-       <x>350</x>
-       <y>10</y>
-       <width>549</width>
-       <height>309</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_7">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>490</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 2</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="QImageLabel2">
-     <property name="geometry">
-      <rect>
-       <x>350</x>
-       <y>340</y>
-       <width>549</width>
-       <height>309</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_9">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>820</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CAMERA 3</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="QImageLabel3">
-     <property name="geometry">
-      <rect>
-       <x>350</x>
-       <y>670</y>
-       <width>549</width>
-       <height>309</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Live Label</string>
-     </property>
-    </widget>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>340</y>
+      <x>50</x>
+      <y>360</y>
       <width>451</width>
       <height>31</height>
      </rect>
@@ -137,8 +43,8 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>380</y>
+      <x>50</x>
+      <y>410</y>
       <width>451</width>
       <height>31</height>
      </rect>
@@ -177,10 +83,10 @@
    <widget class="QTabWidget" name="camPages">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>480</y>
+      <x>50</x>
+      <y>500</y>
       <width>451</width>
-      <height>441</height>
+      <height>451</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -847,8 +753,8 @@
    <widget class="QLabel" name="TaymerLogo">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>60</y>
+      <x>180</x>
+      <y>30</y>
       <width>201</width>
       <height>151</height>
      </rect>
@@ -866,15 +772,15 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>220</y>
-      <width>451</width>
+      <x>50</x>
+      <y>240</y>
+      <width>461</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>NanumGothic</family>
+      <family>Ubuntu</family>
       <pointsize>20</pointsize>
       <weight>75</weight>
       <bold>true</bold>
@@ -882,6 +788,157 @@
     </property>
     <property name="text">
      <string>Leopard Imaging Surface Inspection </string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="QImageLabel1">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>50</y>
+      <width>320</width>
+      <height>540</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CAM 1 LIVE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="QImageLabel2">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>50</y>
+      <width>320</width>
+      <height>540</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CAM 2 LIVE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="QImageLabel3">
+    <property name="geometry">
+     <rect>
+      <x>1430</x>
+      <y>50</y>
+      <width>320</width>
+      <height>540</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CAM 3 LIVE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>850</x>
+      <y>20</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>CAMERA 1</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>1190</x>
+      <y>20</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>CAMERA 2</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>1530</x>
+      <y>20</y>
+      <width>121</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>CAMERA 3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>570</x>
+      <y>310</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Live Defect Feed</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>576</x>
+      <y>780</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <italic>false</italic>
+     </font>
+    </property>
+    <property name="text">
+     <string>Previous Defect</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="QImageLabel1_2">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>610</y>
+      <width>213</width>
+      <height>360</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CAM 1 LIVE</string>
     </property>
    </widget>
   </widget>

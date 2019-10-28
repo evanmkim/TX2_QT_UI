@@ -331,7 +331,7 @@ bool Camera::frameRequest()
 
     // ccomp is used to compose the bouding are for the "red circle" around the defect
     Rect ccomp;
-    Rect roi(392,0,192,540);
+    Rect roi(330,0,320,540);
 
 
     for(int m = roi.y; m < (roi.y + roi.height); m++)
@@ -368,7 +368,7 @@ bool Camera::frameRequest()
     imShow[this->cameraDeviceIndex][4]=imgGray.clone();
 
     QImage  Qimg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
-    Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex];
+    Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex](roi);
     QImage QimgDefect = ASM::cvMatToQImage(tej);
 
     //emit returnQImage(Qimg.rgbSwapped(), this->cameraDeviceIndex);

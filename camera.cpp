@@ -339,7 +339,6 @@ bool Camera::frameRequest()
         for(int n = roi.x; n < (roi.x+roi.width); n++)
         {
             int iPixel=imgFF.at<uchar>(m,n);
-            // Defect in the area
             if(iPixel==255)
             {
                 int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
@@ -350,6 +349,7 @@ bool Camera::frameRequest()
                 else
                 {
                     circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),30,Scalar(0,0,255),2,LINE_8);
+                    this->defectFound = true;
                 }
             }
         }
@@ -367,12 +367,17 @@ bool Camera::frameRequest()
     imShow[this->cameraDeviceIndex][3]=imgFF.clone();
     imShow[this->cameraDeviceIndex][4]=imgGray.clone();
 
-    QImage  Qimg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
+    //QImage  QImg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
     Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex](roi);
-    QImage QimgDefect = ASM::cvMatToQImage(tej);
+    QImage QImgDefect = ASM::cvMatToQImage(tej);
 
     //emit returnQImage(Qimg.rgbSwapped(), this->cameraDeviceIndex);
-    emit returnQDefectImage(QimgDefect, this->cameraDeviceIndex);
+    emit returnQDefectImage(QImgDefect, this->cameraDeviceIndex);
+
+    if (this->defectFound) {
+        emit returnQPrevDefectImage(QImgDefect, this->cameraDeviceIndex);
+        this->defectFound = false;
+    }
 
 
     //START UNMAPPING

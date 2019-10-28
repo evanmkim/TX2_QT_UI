@@ -17,7 +17,7 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>70</x>
       <y>360</y>
       <width>451</width>
       <height>31</height>
@@ -43,7 +43,7 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>70</x>
       <y>410</y>
       <width>451</width>
       <height>31</height>
@@ -83,7 +83,7 @@
    <widget class="QTabWidget" name="camPages">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>70</x>
       <y>500</y>
       <width>451</width>
       <height>451</height>
@@ -753,7 +753,7 @@
    <widget class="QLabel" name="TaymerLogo">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>200</x>
       <y>30</y>
       <width>201</width>
       <height>151</height>
@@ -772,7 +772,7 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>70</x>
       <y>240</y>
       <width>461</width>
       <height>41</height>
@@ -790,39 +790,39 @@
      <string>Leopard Imaging Surface Inspection </string>
     </property>
    </widget>
-   <widget class="QLabel" name="QImageLabel1">
+   <widget class="QLabel" name="QDefectLabel">
     <property name="geometry">
      <rect>
-      <x>750</x>
+      <x>890</x>
       <y>50</y>
-      <width>320</width>
-      <height>540</height>
+      <width>261</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="text">
      <string>CAM 1 LIVE</string>
     </property>
    </widget>
-   <widget class="QLabel" name="QImageLabel2">
+   <widget class="QLabel" name="QDefectLabel_2">
     <property name="geometry">
      <rect>
-      <x>1090</x>
+      <x>1170</x>
       <y>50</y>
-      <width>320</width>
-      <height>540</height>
+      <width>261</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="text">
      <string>CAM 2 LIVE</string>
     </property>
    </widget>
-   <widget class="QLabel" name="QImageLabel3">
+   <widget class="QLabel" name="QDefectLabel_3">
     <property name="geometry">
      <rect>
-      <x>1430</x>
+      <x>1450</x>
       <y>50</y>
-      <width>320</width>
-      <height>540</height>
+      <width>261</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="text">
@@ -832,7 +832,7 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>850</x>
+      <x>960</x>
       <y>20</y>
       <width>121</width>
       <height>17</height>
@@ -852,7 +852,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>1190</x>
+      <x>1240</x>
       <y>20</y>
       <width>121</width>
       <height>17</height>
@@ -872,7 +872,7 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>1530</x>
+      <x>1520</x>
       <y>20</y>
       <width>121</width>
       <height>17</height>
@@ -892,8 +892,8 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>310</y>
+      <x>640</x>
+      <y>280</y>
       <width>121</width>
       <height>21</height>
      </rect>
@@ -912,8 +912,8 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>576</x>
-      <y>780</y>
+      <x>650</x>
+      <y>770</y>
       <width>121</width>
       <height>20</height>
      </rect>
@@ -928,17 +928,43 @@
      <string>Previous Defect</string>
     </property>
    </widget>
-   <widget class="QLabel" name="QImageLabel1_2">
+   <widget class="QLabel" name="QPrevDefectLabel">
     <property name="geometry">
      <rect>
-      <x>810</x>
-      <y>610</y>
-      <width>213</width>
-      <height>360</height>
+      <x>890</x>
+      <y>540</y>
+      <width>261</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="text">
-     <string>CAM 1 LIVE</string>
+     <string>CAM 1 PREV</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="QPrevDefectLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>1170</x>
+      <y>540</y>
+      <width>261</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CAM 2 PREV</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="QPrevDefectLabel_3">
+    <property name="geometry">
+     <rect>
+      <x>1450</x>
+      <y>540</y>
+      <width>261</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CAM 3 PREV</string>
     </property>
    </widget>
   </widget>

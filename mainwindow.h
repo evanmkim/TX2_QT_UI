@@ -33,8 +33,9 @@ private slots:
     void on_pauseButton_clicked(bool checked);
 
     // Display Data
-    void displayQImage(QImage, int);
+    //void displayQImage(QImage, int);
     void displayQDefectImage(QImage, int);
+    void displayQPrevDefectImage(QImage, int);
     void displayRes(int, int);
     void displayFrameRate(double, int);
     void displayCurrFrameRate(double, int);
@@ -52,6 +53,7 @@ private:
 
     std::vector<QLabel *> images;
     std::vector<QLabel *> defectImages;
+    std::vector<QLabel *> prevDefectImages;
     std::vector<QLabel *> resolutions;
     std::vector<QLabel *> frameRates;
     std::vector<QLabel *> currFrameRates;

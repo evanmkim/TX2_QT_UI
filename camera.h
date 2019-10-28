@@ -135,12 +135,15 @@ private:
     QMutex mutex;
     static int frameFinished;
 
+    bool defectFound = false;
+
     bool runCts();
     void endCapture();
 
 signals:
-    void returnQImage(QImage, int);
+    //void returnQImage(QImage, int);
     void returnQDefectImage(QImage, int);
+    void returnQPrevDefectImage(QImage, int);
     void returnRes(int, int);
     void returnFrameFinished(bool);
     void returnFrameRate(double, int);

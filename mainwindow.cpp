@@ -18,13 +18,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // UI Label Vector Assignment
-    this->images.push_back(ui->QImageLabel1);
-    this->images.push_back(ui->QImageLabel2);
-    this->images.push_back(ui->QImageLabel3);
+//    this->images.push_back(ui->QImageLabel1);
+//    this->images.push_back(ui->QImageLabel2);
+//    this->images.push_back(ui->QImageLabel3);
 
-    this->defectImages.push_back(ui->QImageLabel1);
-    this->defectImages.push_back(ui->QImageLabel2);
-    this->defectImages.push_back(ui->QImageLabel3);
+    this->defectImages.push_back(ui->QDefectLabel);
+    this->defectImages.push_back(ui->QDefectLabel_2);
+    this->defectImages.push_back(ui->QDefectLabel_3);
+
+    this->prevDefectImages.push_back(ui->QPrevDefectLabel);
+    this->prevDefectImages.push_back(ui->QPrevDefectLabel_2);
+    this->prevDefectImages.push_back(ui->QPrevDefectLabel_3);
 
     this->resolutions.push_back(ui->labelResolution);
     this->resolutions.push_back(ui->labelResolution_2);
@@ -72,8 +76,9 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(this->gainSliders[i], &QSlider::valueChanged, this->TX2Cameras[i].get(), &Camera::setGain);
 
         // Display Data
-        connect(this->TX2Cameras[i].get(),&Camera::returnQImage,this,&MainWindow::displayQImage);
+        //connect(this->TX2Cameras[i].get(),&Camera::returnQImage,this,&MainWindow::displayQImage);
         connect(this->TX2Cameras[i].get(),&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
+        connect(this->TX2Cameras[i].get(),&Camera::returnQPrevDefectImage,this,&MainWindow::displayQPrevDefectImage);
         connect(this->TX2Cameras[i].get(),&Camera::returnRes,this,&MainWindow::displayRes);
         connect(this->TX2Cameras[i].get(),&Camera::returnFrameRate,this,&MainWindow::displayFrameRate);
         connect(this->TX2Cameras[i].get(),&Camera::returnCurrFrameRate,this,&MainWindow::displayCurrFrameRate);
@@ -152,13 +157,13 @@ void MainWindow::on_pauseButton_clicked(bool checked)
     }
 }
 
-void MainWindow::displayQImage(QImage img_temp, int camIndex)
-{
-    image=img_temp;
-    QMatrix rm;
-    rm.rotate(0);
-    this->images[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
+//void MainWindow::displayQImage(QImage img_temp, int camIndex)
+//{
+//    image=img_temp;
+//    QMatrix rm;
+//    rm.rotate(0);
+//    this->images[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+//}
 
 void MainWindow::displayQDefectImage(QImage img_temp, int camIndex)
 {
@@ -166,6 +171,14 @@ void MainWindow::displayQDefectImage(QImage img_temp, int camIndex)
     QMatrix rm;
     rm.rotate(0);
     this->defectImages[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void MainWindow::displayQPrevDefectImage(QImage img_temp, int camIndex)
+{
+    image=img_temp;
+    QMatrix rm;
+    rm.rotate(0);
+    this->prevDefectImages[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void MainWindow::displayRes(int sensorRes, int camIndex)

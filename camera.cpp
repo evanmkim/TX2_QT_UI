@@ -144,22 +144,27 @@ bool Camera::initCam(){
     //EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
     EXIT_IF_NOT_OK(this->iSession->repeat(this->request.get()), "Unable to submit repeat() request");
 
+    this->startTime = std::chrono::high_resolution_clock::now();
+    this->finishTime = std::chrono::high_resolution_clock::now();
+
     // Continuous Capture Settings
+    //if (this->captureMode == 0) {
+
+    //EVENT PROVIDER
+    this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
+    EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");
+
+    std::vector<EventType> eventTypes;
+    eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
+
+    this->queue = UniqueObj<EventQueue>(this->iEventProvider->createEventQueue(eventTypes));
+    this->iQueue = interface_cast<IEventQueue>(this->queue);
+    EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
+
     if (this->captureMode == 0) {
-
-        //EVENT PROVIDER
-        this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
-        EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");
-
-        std::vector<EventType> eventTypes;
-        eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
-
-        this->queue = UniqueObj<EventQueue>(this->iEventProvider->createEventQueue(eventTypes));
-        this->iQueue = interface_cast<IEventQueue>(this->queue);
-        EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
-
         runCts();
     }
+    //}
     endCapture();
 }
 
@@ -190,17 +195,12 @@ void Camera::endCapture() {
 
 bool Camera::runCts()
 {
-    this->startTime = std::chrono::high_resolution_clock::now();
-    this->finishTime = std::chrono::high_resolution_clock::now();
-
     // INVESTIGATE THIS LOOP
     while (!this->stopButtonPressed)
     {
         while(pauseButtonPressed){
             sleep(1);
         }
-
-        const uint64_t ONE_SECOND = 1000000000;
         ///WAIT FOR EVENTS TO GET QUEUED
         this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
         EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
@@ -215,9 +215,9 @@ bool Camera::runCts()
         this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
         EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
-//        ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
-//        uint64_t frameExposureTime = this->iMetadata->getSensorExposureTime();
-//        float frameGain = this->iMetadata->getSensorAnalogGain();
+        //        ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
+        //        uint64_t frameExposureTime = this->iMetadata->getSensorExposureTime();
+        //        float frameGain = this->iMetadata->getSensorAnalogGain();
         //printf("Frame metadata ExposureTime %ju, Analog Gain %f\n", frameExposureTime, frameGain); ///CHANGE THIS
 
         ///SUPPORTED FRAME RATE
@@ -241,6 +241,36 @@ bool Camera::runCts()
 bool Camera::frameRequest()
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
+
+    if (this->captureMode == 1){
+        ///WAIT FOR EVENTS TO GET QUEUED
+        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
+        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
+
+        ///GET EVENT CAPTURE
+        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
+        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
+        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
+
+        ///GET METADATA
+        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
+        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
+        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
+
+        ///SUPPORTED FRAME RATE
+        this->previousTimeStamp=this->sensorTimeStamp;
+        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
+
+        /// SET EXPOSURE TIME WITH UI
+        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
+
+        ///SET GAIN WITH UI
+        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
+
+        ///FIX ISP GAIN MANUALLY
+        EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
+    }
 
     /// START IMAGE GENERATION
 
@@ -403,17 +433,17 @@ bool Camera::frameRequest()
     }
     this->mutex.unlock();
 
-    if(this->captureMode == 0) {
-        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+    //if(this->captureMode == 0) {
+    this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
 
-        // Frame Rate Information
-        finishTime = std::chrono::high_resolution_clock::now();
-        // In nanosecond ticks
-        float totalDuration= std::chrono::duration_cast<std::chrono::nanoseconds>(finishTime-startTime).count();
+    // Frame Rate Information
+    finishTime = std::chrono::high_resolution_clock::now();
+    // In nanosecond ticks
+    float totalDuration= std::chrono::duration_cast<std::chrono::nanoseconds>(finishTime-startTime).count();
 
-        emit returnFrameRate((this->frameCaptureCount*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
-        emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
-    }
+    emit returnFrameRate((this->frameCaptureCount*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
+    emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
+    //}
 
     return true;
 }

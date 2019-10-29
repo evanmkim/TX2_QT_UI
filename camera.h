@@ -80,6 +80,7 @@ private:
     int cameraDeviceIndex=0;
 
     // Session Frame Rate
+    const uint64_t ONE_SECOND = 1000000000;
     float previousTimeStamp=0.0;
     float sensorTimeStamp=0.0;
 

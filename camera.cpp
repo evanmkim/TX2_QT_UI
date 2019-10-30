@@ -372,7 +372,7 @@ bool Camera::frameRequest()
             if(iPixel==255)
             {
                 int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
-                if(iArea<40)
+                if(iArea<100)
                 {
                     floodFill(imgFF,Point(n,m),Scalar(0));
                 }

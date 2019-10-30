@@ -164,6 +164,7 @@ bool Camera::initCam(){
     if (this->captureMode == 0) {
         runCts();
     }
+    //}
     endCapture();
 }
 

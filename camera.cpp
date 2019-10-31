@@ -366,19 +366,20 @@ bool Camera::frameRequest()
 
     for(int m = roi.y; m < (roi.y + roi.height); m++)
     {
+
         for(int n = roi.x; n < (roi.x+roi.width); n++)
         {
             int iPixel=imgFF.at<uchar>(m,n);
             if(iPixel==255)
             {
                 int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
-                if(iArea<100)
+                if(iArea<75)
                 {
                     floodFill(imgFF,Point(n,m),Scalar(0));
                 }
                 else
                 {
-                    circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),30,Scalar(0,0,255),2,LINE_8);
+                    circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),40,Scalar(0,0,255),2,LINE_8);
                     this->defectFound = true;
                 }
             }
@@ -387,7 +388,7 @@ bool Camera::frameRequest()
 
     if (this->captureButtonPressed) {
         string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(this->frameCaptureCount) + ".png";
-        cv::imwrite(savepath, imgProc);
+        cv::imwrite(savepath, (imgProc)(roi));
         this->captureButtonPressed = false;
     }
 

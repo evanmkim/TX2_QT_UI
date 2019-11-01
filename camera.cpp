@@ -147,9 +147,6 @@ bool Camera::initCam(){
     this->startTime = std::chrono::high_resolution_clock::now();
     this->finishTime = std::chrono::high_resolution_clock::now();
 
-    // Continuous Capture Settings
-    //if (this->captureMode == 0) {
-
     //EVENT PROVIDER
     this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
     EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");
@@ -342,7 +339,7 @@ bool Camera::frameRequest()
     /// The goal of this processing pipeline is to have the image in a floodfill binary space so that defects can be identified
     ///
 
-    Mat imgProc, imgTh, imgGray, imgFF;
+    Mat imgProc, imgTh, imgGray, imgFF, cannyEdges, imgBlurred;
 
     imgProc=img.clone();
 
@@ -350,7 +347,11 @@ bool Camera::frameRequest()
     cv::cvtColor( imgProc, imgGray, CV_BGR2GRAY );
     // threshold() is used here to get a bi-level (binary) image out of a grayscale one with a max value of 255
     // 255 will indicate an abnormality; a defect
-    cv::threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
+    cv::threshold(imgGray,imgTh,70,255,THRESH_BINARY);
+
+    cv::medianBlur(imgProc, imgBlurred, 3);
+
+    cv::Canny(imgBlurred, cannyEdges, 105, 125);
 
     // (960 by 540)
     imgFF=imgTh.clone();
@@ -391,10 +392,13 @@ bool Camera::frameRequest()
     }
 
     // Display different processed images by setting DisplayIndex (default to 1)
-    imShow[this->cameraDeviceIndex][1]=imgProc.clone();
-    imShow[this->cameraDeviceIndex][2]=imgTh.clone();
-    imShow[this->cameraDeviceIndex][3]=imgFF.clone();
-    imShow[this->cameraDeviceIndex][4]=imgGray.clone();
+    imShow[this->cameraDeviceIndex][0]=imgProc.clone();
+    imShow[this->cameraDeviceIndex][1]=imgTh.clone();
+    imShow[this->cameraDeviceIndex][2]=imgFF.clone();
+    imShow[this->cameraDeviceIndex][3]=imgGray.clone();
+    imShow[this->cameraDeviceIndex][4]=imgBlurred.clone();
+    imShow[this->cameraDeviceIndex][5]=cannyEdges.clone();
+
 
     //QImage  QImg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
     Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex](roi);

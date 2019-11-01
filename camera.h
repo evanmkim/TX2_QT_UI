@@ -128,7 +128,7 @@ private:
     EGLStream::IFrame  *iFrame = nullptr;
 
     // CV Processing
-    int DisplayIndex=4;
+    int DisplayIndex=5;
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
 

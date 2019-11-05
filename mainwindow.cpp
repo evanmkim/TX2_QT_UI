@@ -18,9 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // UI Label Vector Assignment
-//    this->images.push_back(ui->QImageLabel1);
-//    this->images.push_back(ui->QImageLabel2);
-//    this->images.push_back(ui->QImageLabel3);
 
     this->defectImages.push_back(ui->QDefectLabel);
     this->defectImages.push_back(ui->QDefectLabel_2);
@@ -76,7 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(this->gainSliders[i], &QSlider::valueChanged, this->TX2Cameras[i].get(), &Camera::setGain);
 
         // Display Data
-        //connect(this->TX2Cameras[i].get(),&Camera::returnQImage,this,&MainWindow::displayQImage);
         connect(this->TX2Cameras[i].get(),&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
         connect(this->TX2Cameras[i].get(),&Camera::returnQPrevDefectImage,this,&MainWindow::displayQPrevDefectImage);
         connect(this->TX2Cameras[i].get(),&Camera::returnRes,this,&MainWindow::displayRes);
@@ -103,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->pauseButton->setCheckable(true);
 
+    // Taymer Logo
     QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
     ui->TaymerLogo->setAlignment(Qt::AlignCenter);
     QPixmap logo;
@@ -156,14 +153,6 @@ void MainWindow::on_pauseButton_clicked(bool checked)
         ui->pauseButton->setText("Pause");
     }
 }
-
-//void MainWindow::displayQImage(QImage img_temp, int camIndex)
-//{
-//    image=img_temp;
-//    QMatrix rm;
-//    rm.rotate(0);
-//    this->images[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->images[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-//}
 
 void MainWindow::displayQDefectImage(QImage img_temp, int camIndex)
 {

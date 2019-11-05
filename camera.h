@@ -51,8 +51,7 @@ class Camera : public QThread
 public:
     explicit Camera(QObject *parent = 0);
 
-    Camera(int camDeviceIndex = 0) : cameraDeviceIndex(camDeviceIndex){}
-
+    Camera(int camDeviceIndex, QMutex *mutex, int *frameFinished);
     bool initCam();
 
     // boolean flags set by MainWindow on_clicked methods
@@ -133,8 +132,8 @@ private:
     ArgusSamples::EGLDisplayHolder g_display;
 
     // Provides exclusive write access to frameFinished
-    QMutex mutex;
-    static int frameFinished;
+    QMutex *mutex;
+    int *frameFinished;
 
     bool defectFound = false;
 

@@ -55,9 +55,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->gainValues.push_back(ui->GainLabel_2);
     this->gainValues.push_back(ui->GainLabel_3);
 
+    this->frameFinished = 0;
+
     // Thread Initialization
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras.push_back(std::unique_ptr<Camera>(new Camera(i)));
+        this->TX2Cameras.push_back(std::unique_ptr<Camera>(new Camera(i, &(this->mutex), &(this->frameFinished))));
     }
     this->trigger = std::unique_ptr<Trigger>(new Trigger);
 

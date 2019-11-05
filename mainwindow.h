@@ -50,6 +50,8 @@ private:
     QImage defectImage;
     int numTX2Cameras = 3;
     double BGR[];
+    int frameFinished = 0;
+    QMutex mutex;
 
     std::vector<QLabel *> images;
     std::vector<QLabel *> defectImages;

@@ -29,7 +29,11 @@ using namespace std;
 
 Camera::Camera(QObject *parent) : QThread(parent) {}
 
-int Camera::frameFinished = 0;
+Camera::Camera(int camDeviceIndex, QMutex *mutex, int *frameFinished) {
+    this->cameraDeviceIndex = camDeviceIndex;
+    this->mutex = mutex;
+    this->frameFinished = frameFinished;
+}
 
 void Camera::run()
 {
@@ -422,17 +426,18 @@ bool Camera::frameRequest()
     NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
     NvBufferDestroy (dmabuf_fd);
 
-    this->mutex.lock();
-    Camera::frameFinished++;
+    mutex->lock();
+    (*frameFinished)++;
+    cout << "frameFinished:" << *frameFinished << endl;
     this->frameCaptureCount++;
 
     // Requests a new frame when all three frames have been displayed
-    if(Camera::frameFinished == 3)
+    if(*frameFinished == 3)
     {
-        Camera::frameFinished = 0;
+        *frameFinished = 0;
         emit returnFrameFinished(true);
     }
-    this->mutex.unlock();
+    mutex->unlock();
 
     //if(this->captureMode == 0) {
     this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();

@@ -21,7 +21,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow();
     ~MainWindow();
 
 private slots:
@@ -44,14 +44,20 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::vector<std::unique_ptr<Camera>> TX2Cameras;
-    std::unique_ptr<Trigger> trigger;
+
+    // Vector of Camera Objects
+    std::vector<Camera *> TX2Cameras;
+    std::vector<QThread *> TX2CameraThreads;
+
+    Trigger* trigger;
     QImage image;
     QImage defectImage;
     int numTX2Cameras = 3;
     double BGR[];
     int frameFinished = 0;
     QMutex mutex;
+
+    void layoutUi();
 
     std::vector<QLabel *> images;
     std::vector<QLabel *> defectImages;

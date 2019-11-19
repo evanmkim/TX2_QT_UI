@@ -44,15 +44,12 @@ using namespace Argus;
 using namespace cv;
 using namespace std;
 
-class Camera : public QThread
+class Camera : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Camera(QObject *parent = 0);
-
-    Camera(int camDeviceIndex, QMutex *mutex, int *frameFinished);
-    bool initCam();
+    Camera(int camDeviceIndex);
 
     // boolean flags set by MainWindow on_clicked methods
     bool stopButtonPressed = false;
@@ -63,8 +60,11 @@ public:
     // Triggered Mode: 1
     int captureMode = 0;
 
-protected:
-    void run();
+    int cameraDeviceIndex=0;
+
+    // Provides exclusive write access to frameFinished
+    //QMutex *mutex;
+    //int *frameFinished;
 
 private:
 
@@ -76,7 +76,6 @@ private:
     Argus::Status status;
     std::vector<CameraDevice *> cameraDevices;
     int frameCaptureCount=0;
-    int cameraDeviceIndex=0;
 
     // Session Frame Rate
     const uint64_t ONE_SECOND = 1000000000;
@@ -131,10 +130,6 @@ private:
     Mat imShow[4][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
 
-    // Provides exclusive write access to frameFinished
-    QMutex *mutex;
-    int *frameFinished;
-
     bool defectFound = false;
 
     bool runCts();
@@ -152,6 +147,7 @@ signals:
     void returnGainVal(int, int);
 
 public slots:
+    bool initCam();
     void stopRequest();
     void pauseRequest(bool);
     bool frameRequest();

@@ -1,4 +1,4 @@
-#include "camera.h"
+    #include "camera.h"
 #include <QString>
 #include <iostream>
 #include <string>
@@ -26,24 +26,10 @@
 using namespace Argus;
 using namespace std;
 
-
-Camera::Camera(QObject *parent) : QThread(parent) {}
-
-Camera::Camera(int camDeviceIndex, QMutex *mutex, int *frameFinished) {
+Camera::Camera(int camDeviceIndex) {
     this->cameraDeviceIndex = camDeviceIndex;
-    this->mutex = mutex;
-    this->frameFinished = frameFinished;
 }
 
-void Camera::run()
-{
-    cout << "Starting Camera" << this->cameraDeviceIndex << endl;
-    msleep(3000); //Need this
-    initCam();
-}
-
-
-// When init returns success or failure, the thread exits through Camera::run()
 bool Camera::initCam(){
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
@@ -194,12 +180,11 @@ void Camera::endCapture() {
     cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
 
     // Exit this thread
-    this->exit();
+    //this->exit();
 }
 
 bool Camera::runCts()
 {
-    // INVESTIGATE THIS LOOP
     while (!this->stopButtonPressed)
     {
         while(pauseButtonPressed){
@@ -289,157 +274,156 @@ bool Camera::frameRequest()
     // Cast image to an IImageNativeBuffer
     EGLStream::NV::IImageNativeBuffer *iImageNativeBuffer = interface_cast<EGLStream::NV::IImageNativeBuffer> (image);
     EXIT_IF_NULL(iImageNativeBuffer, "Failed to get iImageNativeBuffer");
-    Argus::Size2D<uint32_t> size(1920, 1080); //1920, 1080//1280,720
+//    Argus::Size2D<uint32_t> size(1920, 1080); //1920, 1080//1280,720
 
-    // (Direct Memory Access Buffer File Directory) (YUV420 is similar to Y'CbCr. YUV is analog and Y'CbCr is digital)
-    int dmabuf_fd = iImageNativeBuffer->createNvBuffer(size, NvBufferColorFormat_YUV420,NvBufferLayout_Pitch);
+//    // (Direct Memory Access Buffer File Directory) (YUV420 is similar to Y'CbCr. YUV is analog and Y'CbCr is digital)
+//    int dmabuf_fd = iImageNativeBuffer->createNvBuffer(size, NvBufferColorFormat_YUV420,NvBufferLayout_Pitch);
 
-    std::vector<cv::Mat> channels;
-    std::vector<cv::Mat> resizedChannels;
-    cv::Mat img;
+//    std::vector<cv::Mat> channels;
+//    std::vector<cv::Mat> resizedChannels;
+//    cv::Mat img;
 
-    // Pointers to three dma address planes
-    void *data_mem1;
-    void *data_mem2;
-    void *data_mem3;
+//    // Pointers to three dma address planes
+//    void *data_mem1;
+//    void *data_mem2;
+//    void *data_mem3;
 
-    channels.clear();
+//    channels.clear();
 
-    /// START MAPPING (essentially optimizing memory access for the CPU)
+//    /// START MAPPING (essentially optimizing memory access for the CPU)
 
-    NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
-    NvBufferMemSyncForCpu(dmabuf_fd, 0 , &data_mem1);
-    //NvBufferMemSyncForDevice(dmabuf_fd, 0 , &data_mem1);
-    // CV_8UC1 means a 8-bit single-channel array
-    channels.push_back(cv::Mat(1080, 1920, CV_8UC1, data_mem1, 2048));//540, 960 // 1080, 1920 // 720, 1280 //480 , 640 //360,480
+//    NvBufferMemMap(dmabuf_fd, 0, NvBufferMem_Read_Write, &data_mem1);
+//    NvBufferMemSyncForCpu(dmabuf_fd, 0 , &data_mem1);
+//    //NvBufferMemSyncForDevice(dmabuf_fd, 0 , &data_mem1);
+//    // CV_8UC1 means a 8-bit single-channel array
+//    channels.push_back(cv::Mat(1080, 1920, CV_8UC1, data_mem1, 2048));//540, 960 // 1080, 1920 // 720, 1280 //480 , 640 //360,480
 
-    NvBufferMemMap(dmabuf_fd, 1, NvBufferMem_Read_Write, &data_mem2);
-    NvBufferMemSyncForCpu(dmabuf_fd, 1 , &data_mem2);
-    //NvBufferMemSyncForDevice(dmabuf_fd, 1 , &data_mem2);
-    channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem2,1024)); //270, 480//540, 960 //360,640 //180,240
+//    NvBufferMemMap(dmabuf_fd, 1, NvBufferMem_Read_Write, &data_mem2);
+//    NvBufferMemSyncForCpu(dmabuf_fd, 1 , &data_mem2);
+//    //NvBufferMemSyncForDevice(dmabuf_fd, 1 , &data_mem2);
+//    channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem2,1024)); //270, 480//540, 960 //360,640 //180,240
 
-    NvBufferMemMap(dmabuf_fd, 2, NvBufferMem_Read_Write, &data_mem3);
-    NvBufferMemSyncForCpu(dmabuf_fd, 2 , &data_mem3);
-    //NvBufferMemSyncForDevice(dmabuf_fd, 2 , &data_mem3);
-    channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem3, 1024)); //23040
+//    NvBufferMemMap(dmabuf_fd, 2, NvBufferMem_Read_Write, &data_mem3);
+//    NvBufferMemSyncForCpu(dmabuf_fd, 2 , &data_mem3);
+//    //NvBufferMemSyncForDevice(dmabuf_fd, 2 , &data_mem3);
+//    channels.push_back(cv::Mat(540, 960, CV_8UC1, data_mem3, 1024)); //23040
 
-    cv::Mat J,K,L;
+//    cv::Mat J,K,L;
 
-    resize(channels[0], J,cv::Size(960, 540), 0, 0, cv::INTER_AREA); //640, 480 //960, 540 //480, 270
-    //resize(channels[1], K,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
-    //resize(channels[2], L,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
+//    resize(channels[0], J,cv::Size(960, 540), 0, 0, cv::INTER_AREA); //640, 480 //960, 540 //480, 270
+//    //resize(channels[1], K,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
+//    //resize(channels[2], L,cv::Size(640, 480), 0, 0, cv::INTER_AREA);
 
-    K=channels[1];
-    L=channels[2];
+//    K=channels[1];
+//    L=channels[2];
 
-    resizedChannels.push_back(J);
-    resizedChannels.push_back(K);
-    resizedChannels.push_back(L);
+//    resizedChannels.push_back(J);
+//    resizedChannels.push_back(K);
+//    resizedChannels.push_back(L);
 
-    // merge() merges several arrays to make a single, multi-channel array (img)
-    // Think a 2-D array where each element in the array has multiple valies (RGB, YUV etc). This is a multi-channel array
-    // A single channel array would just have one value per element
-    cv::merge ( resizedChannels, img );
-    // cvtColor() converts from the YCrCb space to RGB color space
-    cv::cvtColor ( img,img,CV_YCrCb2RGB );
+//    // merge() merges several arrays to make a single, multi-channel array (img)
+//    // Think a 2-D array where each element in the array has multiple valies (RGB, YUV etc). This is a multi-channel array
+//    // A single channel array would just have one value per element
+//    cv::merge ( resizedChannels, img );
+//    // cvtColor() converts from the YCrCb space to RGB color space
+//    cv::cvtColor ( img,img,CV_YCrCb2RGB );
 
-    /// START IMAGE PROCESSING
-    /// The goal of this processing pipeline is to have the image in a floodfill binary space so that defects can be identified
-    ///
+//    /// START IMAGE PROCESSING
+//    /// The goal of this processing pipeline is to have the image in a floodfill binary space so that defects can be identified
+//    ///
 
-    Mat imgProc, imgTh, imgGray, imgFF;
+//    Mat imgProc, imgTh, imgGray, imgFF;
 
-    imgProc=img.clone();
+//    imgProc=img.clone();
 
-    // cvtColor() converts from the RGB (or BGR) space to grayscale-channeled image (multichannel to singe channel so we can apply thresholding)
-    cv::cvtColor( imgProc, imgGray, CV_BGR2GRAY );
-    // threshold() is used here to get a bi-level (binary) image out of a grayscale one with a max value of 255
-    // 255 will indicate an abnormality; a defect
-    cv::threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
+//    // cvtColor() converts from the RGB (or BGR) space to grayscale-channeled image (multichannel to singe channel so we can apply thresholding)
+//    cv::cvtColor( imgProc, imgGray, CV_BGR2GRAY );
+//    // threshold() is used here to get a bi-level (binary) image out of a grayscale one with a max value of 255
+//    // 255 will indicate an abnormality; a defect
+//    cv::threshold(imgGray,imgTh,150,255,THRESH_BINARY_INV);
 
-    // (960 by 540)
-    imgFF=imgTh.clone();
+//    // (960 by 540)
+//    imgFF=imgTh.clone();
 
-    // floodfill() starts at a seed point and fills the component with the specified color
-    cv::floodFill(imgFF,cv::Point(5,5),Scalar(0));
+//    // floodfill() starts at a seed point and fills the component with the specified color
+//    cv::floodFill(imgFF,cv::Point(5,5),Scalar(0));
 
-    // ccomp is used to compose the bouding are for the "red circle" around the defect
-    Rect ccomp;
-    Rect roi(330,0,320,540);
+//    // ccomp is used to compose the bouding are for the "red circle" around the defect
+//    Rect ccomp;
+//    Rect roi(330,0,320,540);
 
 
-    for(int m = roi.y; m < (roi.y + roi.height); m++)
-    {
+//    for(int m = roi.y; m < (roi.y + roi.height); m++)
+//    {
 
-        for(int n = roi.x; n < (roi.x+roi.width); n++)
-        {
-            int iPixel=imgFF.at<uchar>(m,n);
-            if(iPixel==255)
-            {
-                int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
-                if(iArea<75)
-                {
-                    floodFill(imgFF,Point(n,m),Scalar(0));
-                }
-                else
-                {
-                    circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),40,Scalar(0,0,255),2,LINE_8);
-                    this->defectFound = true;
-                }
-            }
-        }
-    }
+//        for(int n = roi.x; n < (roi.x+roi.width); n++)
+//        {
+//            int iPixel=imgFF.at<uchar>(m,n);
+//            if(iPixel==255)
+//            {
+//                int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
+//                if(iArea<75)
+//                {
+//                    floodFill(imgFF,Point(n,m),Scalar(0));
+//                }
+//                else
+//                {
+//                    circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),40,Scalar(0,0,255),2,LINE_8);
+//                    this->defectFound = true;
+//                }
+//            }
+//        }
+//    }
 
-    if (this->captureButtonPressed) {
-        string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(this->frameCaptureCount) + ".png";
-        cv::imwrite(savepath, (imgProc)(roi));
-        this->captureButtonPressed = false;
-    }
+//    if (this->captureButtonPressed) {
+//        string savepath = "/home/nvidia/capture" + std::to_string(this->cameraDeviceIndex) + "_" + std::to_string(this->frameCaptureCount) + ".png";
+//        cv::imwrite(savepath, (imgProc)(roi));
+//        this->captureButtonPressed = false;
+//    }
 
     // Display different processed images by setting DisplayIndex (default to 1)
-    imShow[this->cameraDeviceIndex][1]=imgProc.clone();
-    imShow[this->cameraDeviceIndex][2]=imgTh.clone();
-    imShow[this->cameraDeviceIndex][3]=imgFF.clone();
-    imShow[this->cameraDeviceIndex][4]=imgGray.clone();
+    //imShow[this->cameraDeviceIndex][1]=imgProc.clone();
+    //imShow[this->cameraDeviceIndex][2]=imgTh.clone();
+    //imShow[this->cameraDeviceIndex][3]=imgFF.clone();
+    //imShow[this->cameraDeviceIndex][4]=imgGray.clone();
 
     //QImage  QImg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
-    Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex](roi);
-    QImage QImgDefect = ASM::cvMatToQImage(tej);
+    //Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex](roi);
+    //QImage QImgDefect = ASM::cvMatToQImage(tej);
 
     //emit returnQImage(Qimg.rgbSwapped(), this->cameraDeviceIndex);
-    emit returnQDefectImage(QImgDefect, this->cameraDeviceIndex);
+    //emit returnQDefectImage(QImgDefect, this->cameraDeviceIndex);
 
-    if (this->defectFound) {
-        emit returnQPrevDefectImage(QImgDefect, this->cameraDeviceIndex);
-        this->defectFound = false;
-    }
+    //if (this->defectFound) {
+        //emit returnQPrevDefectImage(QImgDefect, this->cameraDeviceIndex);
+        //this->defectFound = false;
+    //}
 
 
     //START UNMAPPING
-    if ((this->frameCaptureCount)%10 == 0)
-    {
-        this->iSession->repeat(this->request.get());
-    }
+    //if ((this->frameCaptureCount)%10 == 0)
+    //{
+        //this->iSession->repeat(this->request.get());
+    //}
 
-    NvBufferMemUnMap (dmabuf_fd, 0, &data_mem1);
-    NvBufferMemUnMap (dmabuf_fd, 1, &data_mem2);
-    NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
-    NvBufferDestroy (dmabuf_fd);
+//    NvBufferMemUnMap (dmabuf_fd, 0, &data_mem1);
+//    NvBufferMemUnMap (dmabuf_fd, 1, &data_mem2);
+//    NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
+//    NvBufferDestroy (dmabuf_fd);
 
-    mutex->lock();
-    (*frameFinished)++;
-    cout << "frameFinished:" << *frameFinished << endl;
+    //mutex->lock();
+    //(*frameFinished)++;
+    //cout << "frameFinished:" << *frameFinished << endl;
     this->frameCaptureCount++;
 
     // Requests a new frame when all three frames have been displayed
-    if(*frameFinished == 3)
-    {
-        *frameFinished = 0;
-        emit returnFrameFinished(true);
-    }
-    mutex->unlock();
+    //if(*frameFinished == 3)
+    //{
+        //*frameFinished = 0;
+        //emit returnFrameFinished(true);
+    //}
+    //mutex->unlock();
 
-    //if(this->captureMode == 0) {
     this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
 
     // Frame Rate Information
@@ -449,7 +433,6 @@ bool Camera::frameRequest()
 
     emit returnFrameRate((this->frameCaptureCount*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
     emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
-    //}
 
     return true;
 }

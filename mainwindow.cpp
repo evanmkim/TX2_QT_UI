@@ -7,16 +7,62 @@
 #include <algorithm>
 #include <QKeyEvent>
 
-
-
-MainWindow::MainWindow(QWidget *parent) :
-
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow()
 {
-
+    ui = new Ui::MainWindow();
     ui->setupUi(this);
+    this->layoutUi();
 
+    // Thread Initialization
+    cout << "Initializing Threads" << endl;
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras.push_back(new Camera(i));
+    }
+    //this->trigger = new Trigger();
+
+    // Signals and Slots
+    cout << "Setting up Signals and Slots" << endl;
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+
+        // Buttons
+        connect(ui->stopButton, &QPushButton::clicked, this->TX2Cameras[i], &Camera::stopRequest);
+        connect(ui->pauseButton, &QPushButton::clicked, this->TX2Cameras[i], &Camera::pauseRequest);
+        connect(ui->captureButton, &QPushButton::clicked, this->TX2Cameras[i], &Camera::saveRequest);
+
+        //Sliders
+        connect(this->exposureSliders[i], &QSlider::valueChanged, this->TX2Cameras[i], &Camera::setExposure);
+        connect(this->gainSliders[i], &QSlider::valueChanged, this->TX2Cameras[i], &Camera::setGain);
+
+        // Display Data
+        connect(this->TX2Cameras[i],&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
+        connect(this->TX2Cameras[i],&Camera::returnQPrevDefectImage,this,&MainWindow::displayQPrevDefectImage);
+        connect(this->TX2Cameras[i],&Camera::returnRes,this,&MainWindow::displayRes);
+        connect(this->TX2Cameras[i],&Camera::returnFrameRate,this,&MainWindow::displayFrameRate);
+        connect(this->TX2Cameras[i],&Camera::returnCurrFrameRate,this,&MainWindow::displayCurrFrameRate);
+        connect(this->TX2Cameras[i],&Camera::returnExposureVal,this,&MainWindow::displayExposureVal);
+        connect(this->TX2Cameras[i],&Camera::returnGainVal,this,&MainWindow::displayGainVal);
+
+        // UI Trigger
+        //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::frameRequest);
+
+        // Hardware Trigger
+        //connect(this->trigger, &Trigger::captureRequest, this->TX2Cameras[i], &Camera::frameRequest);
+        //connect(this->TX2Cameras[i], &Camera::returnFrameFinished, this->trigger, &Trigger::captureComplete);
+
+        // Slider Elements
+        this->exposureSliders[i]->setRange(30,1000);
+        this->exposureSliders[i]->setValue(50);
+        this->gainSliders[i]->setRange(1,250);
+        this->gainSliders[i]->setValue(50);
+    }
+    //connect(ui->stopButton, &QPushButton::clicked, this->trigger, &Trigger::stopRequest);
+    //connect(ui->pauseButton, &QPushButton::clicked, this->trigger, &Trigger::pauseRequest);
+
+    ui->pauseButton->setCheckable(true);
+
+}
+
+void MainWindow::layoutUi() {
     // UI Label Vector Assignment
 
     this->defectImages.push_back(ui->QDefectLabel);
@@ -55,52 +101,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->gainValues.push_back(ui->GainLabel_2);
     this->gainValues.push_back(ui->GainLabel_3);
 
-    this->frameFinished = 0;
-
-    // Thread Initialization
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras.push_back(std::unique_ptr<Camera>(new Camera(i, &(this->mutex), &(this->frameFinished))));
-    }
-    this->trigger = std::unique_ptr<Trigger>(new Trigger);
-
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-
-        // Buttons
-        connect(ui->stopButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::stopRequest);
-        connect(ui->pauseButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::pauseRequest);
-        connect(ui->captureButton, &QPushButton::clicked, this->TX2Cameras[i].get(), &Camera::saveRequest);
-
-        //Sliders
-        connect(this->exposureSliders[i], &QSlider::valueChanged, this->TX2Cameras[i].get(), &Camera::setExposure);
-        connect(this->gainSliders[i], &QSlider::valueChanged, this->TX2Cameras[i].get(), &Camera::setGain);
-
-        // Display Data
-        connect(this->TX2Cameras[i].get(),&Camera::returnQDefectImage,this,&MainWindow::displayQDefectImage);
-        connect(this->TX2Cameras[i].get(),&Camera::returnQPrevDefectImage,this,&MainWindow::displayQPrevDefectImage);
-        connect(this->TX2Cameras[i].get(),&Camera::returnRes,this,&MainWindow::displayRes);
-        connect(this->TX2Cameras[i].get(),&Camera::returnFrameRate,this,&MainWindow::displayFrameRate);
-        connect(this->TX2Cameras[i].get(),&Camera::returnCurrFrameRate,this,&MainWindow::displayCurrFrameRate);
-        connect(this->TX2Cameras[i].get(),&Camera::returnExposureVal,this,&MainWindow::displayExposureVal);
-        connect(this->TX2Cameras[i].get(),&Camera::returnGainVal,this,&MainWindow::displayGainVal);
-
-        // UI Trigger
-        //connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), &Camera::frameRequest);
-
-        // Hardware Trigger
-        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), &Camera::frameRequest);
-        connect(this->TX2Cameras[i].get(), &Camera::returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
-
-        // Slider Elements
-        this->exposureSliders[i]->setRange(30,1000);
-        this->exposureSliders[i]->setValue(50);
-        this->gainSliders[i]->setRange(1,250);
-        this->gainSliders[i]->setValue(50);
-    }
-    connect(ui->stopButton, &QPushButton::clicked, this->trigger.get(), &Trigger::stopRequest);
-    connect(ui->pauseButton, &QPushButton::clicked, this->trigger.get(), &Trigger::pauseRequest);
-
-    ui->pauseButton->setCheckable(true);
-
     // Taymer Logo
     QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
     ui->TaymerLogo->setAlignment(Qt::AlignCenter);
@@ -118,14 +118,25 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+       delete this->TX2Cameras[i];
+       delete this->TX2CameraThreads[i];
+    }
 }
 
 // Start into continuous capture at 30 fps (for live view)
 void MainWindow::on_ctsModeStartButton_clicked()
 {
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->captureMode = 0;
-        this->TX2Cameras[i]->start();
+//        this->TX2Cameras[i]->captureMode = 0;
+//        this->TX2Cameras[i]->cameraDeviceIndex = i;
+//        this->TX2Cameras[i]->mutex = &(this->mutex);
+//        this->TX2Cameras[i]->frameFinished = &(this->frameFinished);
+        this->TX2CameraThreads.push_back(new QThread());
+        this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
+        this->TX2CameraThreads[i]->start();
+        this->TX2Cameras[i]->initCam();
     }
 }
 
@@ -134,7 +145,6 @@ void MainWindow::on_tgrModeStartButton_clicked()
 {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->captureMode = 1;
-        this->TX2Cameras[i]->start();
     }
     this->trigger->start();
 }

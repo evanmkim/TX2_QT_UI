@@ -63,8 +63,8 @@ public:
 private:
 
     // Exposure Settings
-    int curExposure=0;
-    int curGain=0;
+    int curExposure=50000;
+    int curGain=50;
 
     // Session Info
     Argus::Status status;

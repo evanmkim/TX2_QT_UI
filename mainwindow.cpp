@@ -189,12 +189,12 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnExposureVal(int, int)),         this, SLOT(displayExposureVal(int, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnGainVal(int, int)),             this, SLOT(displayGainVal(int, int)));
 
-        //    //UI Trigger
-        //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+    //    //UI Trigger
+    //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
 
-        //    //Hardware Trigger
-        //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
-        //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
+    //    //Hardware Trigger
+    //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+    //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
 
         //Slider Elements
         this->exposureSliders[i]->setRange(30,1000);
@@ -202,8 +202,8 @@ void MainWindow::setupUiLayout() {
         this->gainSliders[i]->setRange(1,250);
         this->gainSliders[i]->setValue(50);
     }
-    //    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
-    //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
+//    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
+//    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
 
     ui->pauseButton->setCheckable(true);
 

@@ -44,15 +44,12 @@ using namespace Argus;
 using namespace cv;
 using namespace std;
 
-class Camera : public QThread
+class Camera : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Camera(QObject *parent = 0);
-
-    Camera(int camDeviceIndex, QMutex *mutex, int *frameFinished);
-    bool initCam();
+    Camera(int camDeviceIndex);
 
     // boolean flags set by MainWindow on_clicked methods
     bool stopButtonPressed = false;
@@ -62,9 +59,6 @@ public:
     // Continuous Mode: 0
     // Triggered Mode: 1
     int captureMode = 0;
-
-protected:
-    void run();
 
 private:
 
@@ -76,7 +70,7 @@ private:
     Argus::Status status;
     std::vector<CameraDevice *> cameraDevices;
     int frameCaptureCount=0;
-    int cameraDeviceIndex=0;
+    int cameraDeviceIndex;
 
     // Session Frame Rate
     const uint64_t ONE_SECOND = 1000000000;
@@ -121,6 +115,8 @@ private:
 
     IAutoControlSettings *iAutoControlSettings = nullptr;
 
+    IDenoiseSettings *iDenoiseSettings = nullptr;
+
     const ICaptureMetadata *iMetadata = nullptr;
 
     Argus::UniqueObj<EGLStream::Frame> frame;
@@ -141,6 +137,9 @@ private:
     void endCapture();
 
 signals:
+
+    void finished();
+
     //void returnQImage(QImage, int);
     void returnQDefectImage(QImage, int);
     void returnQPrevDefectImage(QImage, int);
@@ -152,7 +151,7 @@ signals:
     void returnGainVal(int, int);
 
 public slots:
-    void stopRequest();
+    bool initCam();
     void pauseRequest(bool);
     bool frameRequest();
     void saveRequest();

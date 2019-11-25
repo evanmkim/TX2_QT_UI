@@ -5,16 +5,16 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT       += multimedia multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = ExposureUI
 TEMPLATE = app
+CONFIG += qt
+QT += widgets
+QT       += multimedia multimediawidgets
+TARGET = ExposureUI
 
 CONFIG += c++11
-
-CONFIG += console
 
 INCLUDEPATH += /usr/local/include \
                /usr/local/include/opencv \
@@ -27,27 +27,18 @@ LIBS += /usr/local/lib/libopencv_highgui.so \
         /usr/local/lib/libopencv_imgproc.so \
         /usr/local/lib/libopencv_features2d.so \
         /usr/local/lib/libopencv_imgcodecs.so \
+        /usr/local/lib/libopencv_imgcodecs.so.3.4 \
         /usr/lib/aarch64-linux-gnu/tegra/libargus.so \
         /usr/lib/aarch64-linux-gnu/libQt5Multimedia.so.5.5 \
         /usr/lib/aarch64-linux-gnu/libv4l2.so \
-        /usr/lib/aarch64-linux-gnu/libX11.so \
         /usr/lib/aarch64-linux-gnu/libX11.so\
         /usr/lib/aarch64-linux-gnu/libXext.so \
         /usr/lib/aarch64-linux-gnu/libjpeg.so \
         /usr/lib/aarch64-linux-gnu/tegra-egl/libEGL.so \
         /usr/lib/aarch64-linux-gnu/tegra-egl/libGLESv2.so.2 \
-        /usr/lib/aarch64-linux-gnu/tegra-egl/libEGL.so \
         /usr/lib/aarch64-linux-gnu/libexpat.so \
         /usr/lib/aarch64-linux-gnu/tegra/libnvbuf_utils.so \
         /usr/lib/aarch64-linux-gnu/tegra/libnvbuf_utils.so.1.0.0
-
-
-LIBS += /usr/local/lib/libopencv_highgui.so \
-        /usr/local/lib/libopencv_core.so    \
-        /usr/local/lib/libopencv_videoio.so \
-        /usr/local/lib/libopencv_features2d.so \
-        /usr/local/lib/libopencv_imgproc.so \
-        /usr/local/lib/libopencv_imgcodecs.so.3.4
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -126,3 +117,8 @@ HEADERS  += mainwindow.h \
     trigger.h
 
 FORMS    += mainwindow.ui
+
+MOC_DIR     = build
+OBJECTS_DIR = build
+DEST_DIR    = .
+

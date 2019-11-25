@@ -494,7 +494,7 @@ public:
     };
 
     /**
-     * Set the window GUI. 'iGuiContainer' contains 'iGuiElementWindow' and 'iGuiElementView'.
+     * Set the window Gui-> 'iGuiContainer' contains 'iGuiElementWindow' and 'iGuiElementView'.
      * If 'iGuiContainer' is NULL the default GUI is used.
      * When the function succeeds the class takes the ownership of the passed in elements.
      *

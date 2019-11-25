@@ -26,24 +26,11 @@
 using namespace Argus;
 using namespace std;
 
-
-Camera::Camera(QObject *parent) : QThread(parent) {}
-
-Camera::Camera(int camDeviceIndex, QMutex *mutex, int *frameFinished) {
+Camera::Camera(int camDeviceIndex) {
     this->cameraDeviceIndex = camDeviceIndex;
-    this->mutex = mutex;
-    this->frameFinished = frameFinished;
+
 }
 
-void Camera::run()
-{
-    cout << "Starting Camera" << this->cameraDeviceIndex << endl;
-    msleep(3000); //Need this
-    initCam();
-}
-
-
-// When init returns success or failure, the thread exits through Camera::run()
 bool Camera::initCam(){
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
@@ -103,6 +90,14 @@ bool Camera::initCam(){
 
     //AUTOCONTROL SETTING INTERFACE
     this->iAutoControlSettings = interface_cast<IAutoControlSettings>(this->iRequest->getAutoControlSettings());
+    EXIT_IF_NULL(this->iAutoControlSettings, "Failed to get source settings interface");
+
+    //DENOISE SETTING INTERFACE
+    this->iDenoiseSettings = interface_cast<IDenoiseSettings>(this->request);
+    EXIT_IF_NULL(this->iDenoiseSettings, "Failed to get source settings interface");
+
+    this->iDenoiseSettings->setDenoiseMode(DENOISE_MODE_OFF);
+    this->iDenoiseSettings->setDenoiseStrength(0.0f);
 
     //CAMERA PROPERTIES
     this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
@@ -165,10 +160,7 @@ bool Camera::initCam(){
     this->iQueue = interface_cast<IEventQueue>(this->queue);
     EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
 
-    if (this->captureMode == 0) {
-        runCts();
-    }
-    //}
+    runCts();
     endCapture();
 }
 
@@ -193,13 +185,11 @@ void Camera::endCapture() {
     this->g_display.cleanup();
     cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
 
-    // Exit this thread
-    this->exit();
+    emit finished();
 }
 
 bool Camera::runCts()
 {
-    // INVESTIGATE THIS LOOP
     while (!this->stopButtonPressed)
     {
         while(pauseButtonPressed){
@@ -218,11 +208,6 @@ bool Camera::runCts()
         const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
         this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
         EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
-
-        //        ///GET EXPOSURE TIME AND ANALOG GAIN FROM METADATA
-        //        uint64_t frameExposureTime = this->iMetadata->getSensorExposureTime();
-        //        float frameGain = this->iMetadata->getSensorAnalogGain();
-        //printf("Frame metadata ExposureTime %ju, Analog Gain %f\n", frameExposureTime, frameGain); ///CHANGE THIS
 
         ///SUPPORTED FRAME RATE
         this->previousTimeStamp=this->sensorTimeStamp;
@@ -246,35 +231,34 @@ bool Camera::frameRequest()
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
-    if (this->captureMode == 1){
-        ///WAIT FOR EVENTS TO GET QUEUED
-        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
-        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
+    ///WAIT FOR EVENTS TO GET QUEUED
+    this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
+    EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
 
-        ///GET EVENT CAPTURE
-        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
-        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
-        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
+    ///GET EVENT CAPTURE
+    const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
+    const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
+    EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
 
-        ///GET METADATA
-        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
-        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
-        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
+    ///GET METADATA
+    const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
+    this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
+    EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
-        ///SUPPORTED FRAME RATE
-        this->previousTimeStamp=this->sensorTimeStamp;
-        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
-        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
+    ///SUPPORTED FRAME RATE
+    this->previousTimeStamp=this->sensorTimeStamp;
+    this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+    //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
-        /// SET EXPOSURE TIME WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
+    /// SET EXPOSURE TIME WITH UI
+    EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
 
-        ///SET GAIN WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
+    ///SET GAIN WITH UI
+    EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
 
-        ///FIX ISP GAIN MANUALLY
-        EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
-    }
+    ///FIX ISP GAIN MANUALLY
+    EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
+
 
     /// START IMAGE GENERATION
 
@@ -426,18 +410,18 @@ bool Camera::frameRequest()
     NvBufferMemUnMap (dmabuf_fd, 2, &data_mem3);
     NvBufferDestroy (dmabuf_fd);
 
-    mutex->lock();
-    (*frameFinished)++;
-    cout << "frameFinished:" << *frameFinished << endl;
+    //mutex->lock();
+    //(*frameFinished)++;
+    //cout << "frameFinished:" << *frameFinished << endl;
     this->frameCaptureCount++;
 
     // Requests a new frame when all three frames have been displayed
-    if(*frameFinished == 3)
-    {
-        *frameFinished = 0;
-        emit returnFrameFinished(true);
-    }
-    mutex->unlock();
+    //if(*frameFinished == 3)
+    //{
+    //  *frameFinished = 0;
+    // emit returnFrameFinished(true);
+    //}
+    //mutex->unlock();
 
     //if(this->captureMode == 0) {
     this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
@@ -452,12 +436,6 @@ bool Camera::frameRequest()
     //}
 
     return true;
-}
-
-void Camera::stopRequest()
-{
-    this->stopButtonPressed = true;
-    cout<< "Stop Button Pressed" << endl;
 }
 
 void Camera::pauseRequest(bool checked)

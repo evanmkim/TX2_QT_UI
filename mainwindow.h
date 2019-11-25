@@ -44,6 +44,7 @@ public slots:
 
 private:
 
+    void assignLabels();
     void connectStartSignalsSlots();
     void setupUiLayout();
 

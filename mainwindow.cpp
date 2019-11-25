@@ -11,16 +11,18 @@
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow)
 {
-    this->ui = new Ui::MainWindow();
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->camerasRunning.push_back(false);
         this->TX2CameraThreads.push_back(new QThread());
         this->TX2Cameras.push_back(new Camera(i));
         this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
     }
-    this->ui->setupUi(this);
+
+    ui->setupUi(this);
+    this->assignLabels();
     this->connectStartSignalsSlots();
     this->setupUiLayout();
 }
@@ -54,15 +56,6 @@ void MainWindow::startCamerasCts()
         connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2Cameras[i],       SLOT(deleteLater()));
         connect(this->TX2Cameras[i],       SIGNAL(finished()), this,                      SLOT(camerasFinished()));
         connect(this->TX2CameraThreads[i], SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(deleteLater()));
-
-        // Display Data
-        connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnQPrevDefectImage(QImage, int)), this, SLOT(displayQPrevDefectImage(QImage, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnExposureVal(int, int)),         this, SLOT(displayExposureVal(int, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnGainVal(int, int)),             this, SLOT(displayGainVal(int, int)));
 
         this->TX2CameraThreads[i]->start();
         this->camerasRunning[i] = true;
@@ -136,8 +129,7 @@ void MainWindow::displayGainVal(int newValue, int camIndex)
     this->gainValues[camIndex]->setText(strGainTime);
 }
 
-void MainWindow::setupUiLayout() {
-
+void MainWindow::assignLabels() {
     // UI Label Vector Assignment
 
     this->defectImages.push_back(ui->QDefectLabel);
@@ -175,8 +167,9 @@ void MainWindow::setupUiLayout() {
     this->gainValues.push_back(ui->GainLabel);
     this->gainValues.push_back(ui->GainLabel_2);
     this->gainValues.push_back(ui->GainLabel_3);
+}
 
-    ui->pauseButton->setCheckable(true);
+void MainWindow::setupUiLayout() {
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
         // Buttons
@@ -187,22 +180,32 @@ void MainWindow::setupUiLayout() {
         connect(this->exposureSliders[i], SIGNAL(valueChanged(int)), this->TX2Cameras[i], SLOT(setExposure(int)));
         connect(this->gainSliders[i],     SIGNAL(valueChanged(int)), this->TX2Cameras[i], SLOT(setGain(int)));
 
-    //    //UI Trigger
-    //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+        // Display Data
+        connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnQPrevDefectImage(QImage, int)), this, SLOT(displayQPrevDefectImage(QImage, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnExposureVal(int, int)),         this, SLOT(displayExposureVal(int, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnGainVal(int, int)),             this, SLOT(displayGainVal(int, int)));
 
-    //    //Hardware Trigger
-    //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
-    //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
+        //    //UI Trigger
+        //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+
+        //    //Hardware Trigger
+        //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+        //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
 
         //Slider Elements
         this->exposureSliders[i]->setRange(30,1000);
         this->exposureSliders[i]->setValue(50);
         this->gainSliders[i]->setRange(1,250);
         this->gainSliders[i]->setValue(50);
-
     }
-//    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
-//    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
+    //    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
+    //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
+
+    ui->pauseButton->setCheckable(true);
 
     // Taymer Logo
     QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";

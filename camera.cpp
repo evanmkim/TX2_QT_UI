@@ -231,34 +231,35 @@ bool Camera::frameRequest()
 {
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
-    ///WAIT FOR EVENTS TO GET QUEUED
-    this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
-    EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
+    if (this->captureMode == 1) {
+        ///WAIT FOR EVENTS TO GET QUEUED
+        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
+        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
 
-    ///GET EVENT CAPTURE
-    const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
-    const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
-    EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
+        ///GET EVENT CAPTURE
+        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
+        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
+        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
 
-    ///GET METADATA
-    const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
-    this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
-    EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
+        ///GET METADATA
+        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
+        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
+        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
-    ///SUPPORTED FRAME RATE
-    this->previousTimeStamp=this->sensorTimeStamp;
-    this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
-    //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
+        ///SUPPORTED FRAME RATE
+        this->previousTimeStamp=this->sensorTimeStamp;
+        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
-    /// SET EXPOSURE TIME WITH UI
-    EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
+        /// SET EXPOSURE TIME WITH UI
+        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
 
-    ///SET GAIN WITH UI
-    EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
+        ///SET GAIN WITH UI
+        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
 
-    ///FIX ISP GAIN MANUALLY
-    EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
-
+        ///FIX ISP GAIN MANUALLY
+        EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
+    }
 
     /// START IMAGE GENERATION
 

@@ -23,8 +23,8 @@ public:
 private slots:
 
     // Push Buttons
-    void on_exitButton_clicked();
-    void on_pauseButton_clicked(bool checked);
+//    void on_exitButton_clicked();
+//    void on_pauseButton_clicked(bool checked);
 
     // Display Data
     void displayQDefectImage(QImage, int);
@@ -32,23 +32,26 @@ private slots:
     void displayRes(int, int);
     void displayFrameRate(double, int);
     void displayCurrFrameRate(double, int);
-//    void displayExposureVal(int, int);
-//    void displayGainVal(int, int);
 
     void startCamerasCts();
 //    void startCamerasTgr();
+    void camerasFinished();
 
     void setGain(int);
     void setExposure(int);
 
+    void stopAllRequest();
+    void pauseAllRequest(bool);
+    void captureAllRequest();
+
 public slots:
-    void camerasFinished();
+
     void setupFrameSettings(int);
 
 private:
 
     void assignLabels();
-    void connectStartSignalsSlots();
+    void connectStart();
     void setupUiLayout();
 
     std::vector<bool> camerasRunning;

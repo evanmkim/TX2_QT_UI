@@ -440,28 +440,3 @@ bool Camera::frameRequest()
     return true;
 }
 
-void Camera::pauseRequest(bool checked)
-{
-    this->pauseButtonPressed = checked;
-    cout << "Pause Button Pressed" << endl;
-}
-
-void Camera::saveRequest()
-{
-    this->captureButtonPressed = true;
-    cout << "Capture Button Pressed" << endl;
-}
-
-//void Camera::setExposure(int valueExposureSlider)
-//{
-//    this->curExposure = valueExposureSlider*1000;
-//    cout << "Setting Exposure" << endl;
-//    emit returnExposureVal(valueExposureSlider, this->cameraDeviceIndex);
-//}
-
-//void Camera::setGain(int valueGainSlider)
-//{
-//    this->curGain = valueGainSlider;
-//    cout << "Setting Gain" << endl;
-//    emit returnGainVal(valueGainSlider, this->cameraDeviceIndex);
-//}

@@ -23,11 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
     this->assignLabels();
-    this->connectStartSignalsSlots();
+    this->connectStart();
     this->setupUiLayout();
 }
 
-void MainWindow::connectStartSignalsSlots()
+void MainWindow::connectStart()
 {
     connect(ui->ctsModeStartButton, SIGNAL(clicked()), this, SLOT(startCamerasCts()));
 }
@@ -62,13 +62,115 @@ void MainWindow::startCamerasCts()
     }
 }
 
+void MainWindow::stopAllRequest()
+{
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->stopButtonPressed = true;
+    }
+}
+
+void MainWindow::captureAllRequest()
+{
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->captureButtonPressed = true;
+    }
+}
+
+void MainWindow::pauseAllRequest(bool clicked)
+{
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->pauseButtonPressed = true;
+    }
+
+    if (clicked) {
+        ui->pauseButton->setText("Resume");
+    }
+    else {
+        cout << "resume button pressed" << endl;
+        ui->pauseButton->setText("Pause");
+    }
+}
+
+//void MainWindow::on_exitButton_clicked()
+//{
+//    this->close();
+//}
+
+//void MainWindow::on_pauseButton_clicked(bool checked)
+//{
+//    if (checked) {
+//        ui->pauseButton->setText("Resume");
+//    }
+//    else {
+//        cout << "resume button pressed" << endl;
+//        ui->pauseButton->setText("Pause");
+//    }
+//}
+
+
+void MainWindow::setupUiLayout() {
+
+    // Buttons
+    connect(ui->pauseButton,   SIGNAL(clicked(bool)), this, SLOT(pauseAllRequest(bool)));
+    connect(ui->captureButton, SIGNAL(clicked()),     this, SLOT(saveAllRequest()));
+    connect(ui->stopButton,    SIGNAL(clicked()),     this, SLOT(stopAllRequest()));
+
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+
+        connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
+
+        // Sliders
+        connect(this->exposureSliders[i], SIGNAL(valueChanged(int)), this, SLOT(setExposure(int)));
+        connect(this->gainSliders[i],     SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
+
+        this->exposureSliders[i]->setRange(30,1000);
+        this->exposureSliders[i]->setValue(50);
+        this->exposure = 50000;
+        this->gainSliders[i]->setRange(1,250);
+        this->gainSliders[i]->setValue(50);
+        this->gain = 50;
+
+        // Display Data
+        connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnQPrevDefectImage(QImage, int)), this, SLOT(displayQPrevDefectImage(QImage, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
+
+        //    //UI Trigger
+        //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+
+        //    //Hardware Trigger
+        //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+        //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
+
+
+    }
+    //    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
+    //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
+
+    ui->pauseButton->setCheckable(true);
+
+    // Taymer Logo
+    QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
+    ui->TaymerLogo->setAlignment(Qt::AlignCenter);
+    QPixmap logo;
+
+    if (logo.load(filename)) {
+        logo = logo.scaled(ui->TaymerLogo->size(),Qt::KeepAspectRatio);
+        ui->TaymerLogo->setPixmap(logo);
+    } else {
+        cout << "Unable to load, bad filename" << endl;
+    }
+}
+
 void MainWindow::setGain(int newGain) {
     this->gain = newGain;
 }
 
 
 void MainWindow::setExposure(int newExposure) {
-    this->exposure = newExposure;
+    this->exposure = newExposure*1000;
 }
 
 void MainWindow::setupFrameSettings(int camIndex) {
@@ -76,27 +178,11 @@ void MainWindow::setupFrameSettings(int camIndex) {
     this->TX2Cameras[camIndex]->gain = this->gain;
     this->TX2Cameras[camIndex]->exposure = this->exposure;
 
-    QString strExpTime=QString::number((this->exposure)*1000);
+    QString strExpTime=QString::number(this->exposure);
     this->exposureValues[camIndex]->setText(strExpTime+" µs");
 
-    QString strGainTime=QString::number((this->gain));
+    QString strGainTime=QString::number(this->gain);
     this->gainValues[camIndex]->setText(strGainTime);
-}
-
-void MainWindow::on_exitButton_clicked()
-{
-    this->close();
-}
-
-void MainWindow::on_pauseButton_clicked(bool checked)
-{
-    if (checked) {
-        ui->pauseButton->setText("Resume");
-    }
-    else {
-        cout << "resume button pressed" << endl;
-        ui->pauseButton->setText("Pause");
-    }
 }
 
 void MainWindow::displayQDefectImage(QImage img_temp, int camIndex)
@@ -130,18 +216,6 @@ void MainWindow::displayCurrFrameRate(double currFrameRate, int camIndex) {
     QString strFrameRate=QString::number(currFrameRate)+"  fps";
     this->currFrameRates[camIndex]->setText(strFrameRate);
 }
-
-//void MainWindow::displayExposureVal(int newValue, int camIndex)
-//{
-//    QString strExpTime=QString::number(newValue);
-//    this->exposureValues[camIndex]->setText(strExpTime+" µs");
-//}
-
-//void MainWindow::displayGainVal(int newValue, int camIndex)
-//{
-//    QString strGainTime=QString::number(newValue);
-//    this->gainValues[camIndex]->setText(strGainTime);
-//}
 
 void MainWindow::assignLabels() {
     // UI Label Vector Assignment
@@ -181,63 +255,6 @@ void MainWindow::assignLabels() {
     this->gainValues.push_back(ui->GainLabel);
     this->gainValues.push_back(ui->GainLabel_2);
     this->gainValues.push_back(ui->GainLabel_3);
-}
-
-void MainWindow::setupUiLayout() {
-
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-
-        connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
-
-        // Buttons
-        connect(ui->pauseButton,   SIGNAL(clicked(bool)), this->TX2Cameras[i], SLOT(pauseRequest(bool)));
-        connect(ui->captureButton, SIGNAL(clicked()),     this->TX2Cameras[i], SLOT(saveRequest()));
-        connect(ui->stopButton,    SIGNAL(clicked()),     this,                SLOT(saveRequest()));
-
-        // Sliders
-        connect(this->exposureSliders[i], SIGNAL(valueChanged(int)), this, SLOT(setExposure(int)));
-        connect(this->gainSliders[i],     SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
-
-        // Display Data
-        connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnQPrevDefectImage(QImage, int)), this, SLOT(displayQPrevDefectImage(QImage, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
-//        connect(this->TX2Cameras[i], SIGNAL(returnExposureVal(int, int)),         this, SLOT(displayExposureVal(int, int)));
-//        connect(this->TX2Cameras[i], SIGNAL(returnGainVal(int, int)),             this, SLOT(displayGainVal(int, int)));
-
-    //    //UI Trigger
-    //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
-
-    //    //Hardware Trigger
-    //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
-    //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
-
-        //Slider Elements
-        this->exposureSliders[i]->setRange(30,1000);
-        this->exposureSliders[i]->setValue(50);
-        this->exposure = 50;
-        this->gainSliders[i]->setRange(1,250);
-        this->gainSliders[i]->setValue(50);
-        this->gain = 50;
-    }
-//    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
-//    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
-
-    ui->pauseButton->setCheckable(true);
-
-    // Taymer Logo
-    QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
-    ui->TaymerLogo->setAlignment(Qt::AlignCenter);
-    QPixmap logo;
-
-    if (logo.load(filename)) {
-        logo = logo.scaled(ui->TaymerLogo->size(),Qt::KeepAspectRatio);
-        ui->TaymerLogo->setPixmap(logo);
-    } else {
-        cout << "Unable to load, bad filename" << endl;
-    }
 }
 
 

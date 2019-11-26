@@ -62,8 +62,8 @@ public:
     int captureMode = 0;
 
     // Frame Settings
-    int exposure=50000;
-    int gain=50;
+    int exposure=0;
+    int gain=0;
 
 private:
 
@@ -134,6 +134,8 @@ private:
 
     bool defectFound = false;
 
+    bool frameRequest();
+
     bool runCts();
     void endCapture();
 
@@ -149,16 +151,12 @@ signals:
     void returnFrameFinished(bool);
     void returnFrameRate(double, int);
     void returnCurrFrameRate(double, int);
-//    void returnExposureVal(int, int);
-//    void returnGainVal(int, int);
+
 
 public slots:
+
     bool initCam();
-    void pauseRequest(bool);
-    bool frameRequest();
-    void saveRequest();
-//    void setExposure(int);
-//    void setGain(int);
+
 };
 
 

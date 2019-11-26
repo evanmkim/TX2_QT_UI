@@ -194,6 +194,8 @@ bool Camera::runCts()
         while(pauseButtonPressed){
             sleep(1);
         }
+        emit requestFrameSettings(this->cameraDeviceIndex);
+
         ///WAIT FOR EVENTS TO GET QUEUED
         this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
         EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
@@ -214,10 +216,10 @@ bool Camera::runCts()
         //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
         /// SET EXPOSURE TIME WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->exposure)),"Unable to set the Source Settings Exposure Time Range");
 
         ///SET GAIN WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->gain)), "Unable to set the Source Settings Gain Range");
 
         ///FIX ISP GAIN MANUALLY
         EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
@@ -228,7 +230,7 @@ bool Camera::runCts()
 
 bool Camera::frameRequest()
 {
-    //cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
+    cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
     if (this->captureMode == 1) {
         ///WAIT FOR EVENTS TO GET QUEUED
@@ -251,10 +253,10 @@ bool Camera::frameRequest()
         //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
         /// SET EXPOSURE TIME WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->curExposure)),"Unable to set the Source Settings Exposure Time Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->exposure)),"Unable to set the Source Settings Exposure Time Range");
 
         ///SET GAIN WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->curGain)), "Unable to set the Source Settings Gain Range");
+        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->gain)), "Unable to set the Source Settings Gain Range");
 
         ///FIX ISP GAIN MANUALLY
         EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
@@ -450,16 +452,16 @@ void Camera::saveRequest()
     cout << "Capture Button Pressed" << endl;
 }
 
-void Camera::setExposure(int valueExposureSlider)
-{
-    this->curExposure = valueExposureSlider*1000;
-    cout << "Setting Exposure" << endl;
-    emit returnExposureVal(valueExposureSlider, this->cameraDeviceIndex);
-}
+//void Camera::setExposure(int valueExposureSlider)
+//{
+//    this->curExposure = valueExposureSlider*1000;
+//    cout << "Setting Exposure" << endl;
+//    emit returnExposureVal(valueExposureSlider, this->cameraDeviceIndex);
+//}
 
-void Camera::setGain(int valueGainSlider)
-{
-    this->curGain = valueGainSlider;
-    cout << "Setting Gain" << endl;
-    emit returnGainVal(valueGainSlider, this->cameraDeviceIndex);
-}
+//void Camera::setGain(int valueGainSlider)
+//{
+//    this->curGain = valueGainSlider;
+//    cout << "Setting Gain" << endl;
+//    emit returnGainVal(valueGainSlider, this->cameraDeviceIndex);
+//}

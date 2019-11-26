@@ -62,11 +62,25 @@ void MainWindow::startCamerasCts()
     }
 }
 
-void MainWindow::on_stopButton_clicked()
-{
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->stopButtonPressed = true;
-    }
+void MainWindow::setGain(int newGain) {
+    this->gain = newGain;
+}
+
+
+void MainWindow::setExposure(int newExposure) {
+    this->exposure = newExposure;
+}
+
+void MainWindow::setupFrameSettings(int camIndex) {
+
+    this->TX2Cameras[camIndex]->gain = this->gain;
+    this->TX2Cameras[camIndex]->exposure = this->exposure;
+
+    QString strExpTime=QString::number((this->exposure)*1000);
+    this->exposureValues[camIndex]->setText(strExpTime+" µs");
+
+    QString strGainTime=QString::number((this->gain));
+    this->gainValues[camIndex]->setText(strGainTime);
 }
 
 void MainWindow::on_exitButton_clicked()
@@ -117,17 +131,17 @@ void MainWindow::displayCurrFrameRate(double currFrameRate, int camIndex) {
     this->currFrameRates[camIndex]->setText(strFrameRate);
 }
 
-void MainWindow::displayExposureVal(int newValue, int camIndex)
-{
-    QString strExpTime=QString::number(newValue);
-    this->exposureValues[camIndex]->setText(strExpTime+" µs");
-}
+//void MainWindow::displayExposureVal(int newValue, int camIndex)
+//{
+//    QString strExpTime=QString::number(newValue);
+//    this->exposureValues[camIndex]->setText(strExpTime+" µs");
+//}
 
-void MainWindow::displayGainVal(int newValue, int camIndex)
-{
-    QString strGainTime=QString::number(newValue);
-    this->gainValues[camIndex]->setText(strGainTime);
-}
+//void MainWindow::displayGainVal(int newValue, int camIndex)
+//{
+//    QString strGainTime=QString::number(newValue);
+//    this->gainValues[camIndex]->setText(strGainTime);
+//}
 
 void MainWindow::assignLabels() {
     // UI Label Vector Assignment
@@ -172,13 +186,17 @@ void MainWindow::assignLabels() {
 void MainWindow::setupUiLayout() {
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
+
+        connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
+
         // Buttons
         connect(ui->pauseButton,   SIGNAL(clicked(bool)), this->TX2Cameras[i], SLOT(pauseRequest(bool)));
-        connect(ui->captureButton, SIGNAL(clicked()), this->TX2Cameras[i],     SLOT(saveRequest()));
+        connect(ui->captureButton, SIGNAL(clicked()),     this->TX2Cameras[i], SLOT(saveRequest()));
+        connect(ui->stopButton,    SIGNAL(clicked()),     this,                SLOT(saveRequest()));
 
         // Sliders
-        connect(this->exposureSliders[i], SIGNAL(valueChanged(int)), this->TX2Cameras[i], SLOT(setExposure(int)));
-        connect(this->gainSliders[i],     SIGNAL(valueChanged(int)), this->TX2Cameras[i], SLOT(setGain(int)));
+        connect(this->exposureSliders[i], SIGNAL(valueChanged(int)), this, SLOT(setExposure(int)));
+        connect(this->gainSliders[i],     SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
 
         // Display Data
         connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
@@ -186,8 +204,8 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnExposureVal(int, int)),         this, SLOT(displayExposureVal(int, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnGainVal(int, int)),             this, SLOT(displayGainVal(int, int)));
+//        connect(this->TX2Cameras[i], SIGNAL(returnExposureVal(int, int)),         this, SLOT(displayExposureVal(int, int)));
+//        connect(this->TX2Cameras[i], SIGNAL(returnGainVal(int, int)),             this, SLOT(displayGainVal(int, int)));
 
     //    //UI Trigger
     //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
@@ -199,8 +217,10 @@ void MainWindow::setupUiLayout() {
         //Slider Elements
         this->exposureSliders[i]->setRange(30,1000);
         this->exposureSliders[i]->setValue(50);
+        this->exposure = 50;
         this->gainSliders[i]->setRange(1,250);
         this->gainSliders[i]->setValue(50);
+        this->gain = 50;
     }
 //    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
 //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);

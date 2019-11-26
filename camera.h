@@ -61,11 +61,11 @@ public:
     // Triggered Mode: 1
     int captureMode = 0;
 
-private:
+    // Frame Settings
+    int exposure=50000;
+    int gain=50;
 
-    // Exposure Settings
-    int curExposure=50000;
-    int curGain=50;
+private:
 
     // Session Info
     Argus::Status status;
@@ -140,6 +140,7 @@ private:
 signals:
 
     void finished();
+    void requestFrameSettings(int);
 
     //void returnQImage(QImage, int);
     void returnQDefectImage(QImage, int);
@@ -148,16 +149,16 @@ signals:
     void returnFrameFinished(bool);
     void returnFrameRate(double, int);
     void returnCurrFrameRate(double, int);
-    void returnExposureVal(int, int);
-    void returnGainVal(int, int);
+//    void returnExposureVal(int, int);
+//    void returnGainVal(int, int);
 
 public slots:
     bool initCam();
     void pauseRequest(bool);
     bool frameRequest();
     void saveRequest();
-    void setExposure(int);
-    void setGain(int);
+//    void setExposure(int);
+//    void setGain(int);
 };
 
 

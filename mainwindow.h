@@ -23,7 +23,6 @@ public:
 private slots:
 
     // Push Buttons
-    void on_stopButton_clicked();
     void on_exitButton_clicked();
     void on_pauseButton_clicked(bool checked);
 
@@ -33,14 +32,18 @@ private slots:
     void displayRes(int, int);
     void displayFrameRate(double, int);
     void displayCurrFrameRate(double, int);
-    void displayExposureVal(int, int);
-    void displayGainVal(int, int);
+//    void displayExposureVal(int, int);
+//    void displayGainVal(int, int);
 
     void startCamerasCts();
 //    void startCamerasTgr();
 
+    void setGain(int);
+    void setExposure(int);
+
 public slots:
     void camerasFinished();
+    void setupFrameSettings(int);
 
 private:
 
@@ -62,6 +65,9 @@ private:
     double BGR[];
     int frameFinished = 0;
     QMutex *mutex;
+
+    int exposure;
+    int gain;
 
     std::vector<QLabel *> images;
     std::vector<QLabel *> defectImages;

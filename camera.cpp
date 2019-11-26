@@ -28,7 +28,6 @@ using namespace std;
 
 Camera::Camera(int camDeviceIndex) {
     this->cameraDeviceIndex = camDeviceIndex;
-
 }
 
 bool Camera::initCam(){
@@ -229,7 +228,7 @@ bool Camera::runCts()
 
 bool Camera::frameRequest()
 {
-    cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
+    //cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
     if (this->captureMode == 1) {
         ///WAIT FOR EVENTS TO GET QUEUED
@@ -454,11 +453,13 @@ void Camera::saveRequest()
 void Camera::setExposure(int valueExposureSlider)
 {
     this->curExposure = valueExposureSlider*1000;
+    cout << "Setting Exposure" << endl;
     emit returnExposureVal(valueExposureSlider, this->cameraDeviceIndex);
 }
 
 void Camera::setGain(int valueGainSlider)
 {
     this->curGain = valueGainSlider;
+    cout << "Setting Gain" << endl;
     emit returnGainVal(valueGainSlider, this->cameraDeviceIndex);
 }

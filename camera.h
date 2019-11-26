@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QString>
 #include <QThread>
+#include <QAbstractEventDispatcher>
 #include <QObject>
 #include <QImage>
 #include <QDebug>

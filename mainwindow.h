@@ -50,27 +50,27 @@ public slots:
 
 private:
 
+    Ui_MainWindow *ui;
+
+    const int numTX2Cameras = 3;
+    std::vector<Camera *> TX2Cameras;
+    std::vector<QThread *> TX2CameraThreads;
+    Trigger *trigger;
+
     void assignLabels();
     void connectStart();
     void setupUiLayout();
 
     std::vector<bool> camerasRunning;
 
-    Ui_MainWindow *ui;
-
-    std::vector<Camera *> TX2Cameras;
-    std::vector<QThread *> TX2CameraThreads;
-    Trigger *trigger;
-
-    QImage image;
-    QImage defectImage;
-    int numTX2Cameras = 3;
-    double BGR[];
-    int frameFinished = 0;
-    QMutex *mutex;
-
     int exposure;
     int gain;
+    QImage image;
+    QImage defectImage;
+    double BGR[];
+
+//    int frameFinished = 0;
+//    QMutex *mutex;
 
     std::vector<QLabel *> images;
     std::vector<QLabel *> defectImages;

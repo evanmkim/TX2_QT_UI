@@ -28,6 +28,20 @@ using namespace std;
 
 Camera::Camera(int camDeviceIndex) {
     this->cameraDeviceIndex = camDeviceIndex;
+
+    this->stopButtonPressed = false;
+    this->pauseButtonPressed = false;
+    this->captureButtonPressed = false;
+    this->exitButtonPressed = false;
+
+    this->captureMode = 0;
+    this->gain = 0;
+    this->exposure = 0;
+
+    this->frameCaptureCount=0;
+
+    this->previousTimeStamp=0.0;
+    this->sensorTimeStamp=0.0;
 }
 
 bool Camera::initCam() {
@@ -164,7 +178,7 @@ bool Camera::initCam() {
 
 void Camera::endCapture() {
 
-    while (!stopButtonPressed) {}
+    //while (!stopButtonPressed) {}
     cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
 
     this->stopButtonPressed = false;
@@ -190,6 +204,10 @@ bool Camera::runCts() {
     while (!this->stopButtonPressed) {
         while(pauseButtonPressed){
             sleep(1);
+            // Stop Button is Pressed after Pause Button
+            if (this->stopButtonPressed) {
+                // FIX THIS
+            }
         }
         emit requestFrameSettings(this->cameraDeviceIndex);
 
@@ -229,35 +247,35 @@ bool Camera::frameRequest() {
 
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
-    if (this->captureMode == 1) {
-        ///WAIT FOR EVENTS TO GET QUEUED
-        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
-        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
+//    if (this->captureMode == 1) {
+//        ///WAIT FOR EVENTS TO GET QUEUED
+//        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
+//        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
 
-        ///GET EVENT CAPTURE
-        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
-        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
-        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
+//        ///GET EVENT CAPTURE
+//        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
+//        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
+//        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
 
-        ///GET METADATA
-        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
-        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
-        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
+//        ///GET METADATA
+//        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
+//        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
+//        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
-        ///SUPPORTED FRAME RATE
-        this->previousTimeStamp=this->sensorTimeStamp;
-        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
-        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
+//        ///SUPPORTED FRAME RATE
+//        this->previousTimeStamp=this->sensorTimeStamp;
+//        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+//        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
-        /// SET EXPOSURE TIME WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->exposure)),"Unable to set the Source Settings Exposure Time Range");
+//        /// SET EXPOSURE TIME WITH UI
+//        EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->exposure)),"Unable to set the Source Settings Exposure Time Range");
 
-        ///SET GAIN WITH UI
-        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->gain)), "Unable to set the Source Settings Gain Range");
+//        ///SET GAIN WITH UI
+//        EXIT_IF_NOT_OK(this->iSourceSettings->setGainRange(ArgusSamples::Range<float>(this->gain)), "Unable to set the Source Settings Gain Range");
 
-        ///FIX ISP GAIN MANUALLY
-        EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
-    }
+//        ///FIX ISP GAIN MANUALLY
+//        EXIT_IF_NOT_OK(this->iAutoControlSettings->setIspDigitalGainRange(ArgusSamples::Range<float>(1.0)), "Unable to Set ISP Gain Value");
+//    }
 
     /// START IMAGE GENERATION
 

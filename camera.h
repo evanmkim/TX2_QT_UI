@@ -53,30 +53,31 @@ public:
     Camera(int camDeviceIndex);
 
     // boolean flags set by MainWindow on_clicked methods
-    bool stopButtonPressed = false;
-    bool captureButtonPressed = false;
-    bool pauseButtonPressed = false;
+    bool stopButtonPressed;
+    bool captureButtonPressed;
+    bool pauseButtonPressed;
+    bool exitButtonPressed;
 
     // Continuous Mode: 0
     // Triggered Mode: 1
-    int captureMode = 0;
+    int captureMode;
 
     // Frame Settings
-    int exposure=0;
-    int gain=0;
+    int exposure;
+    int gain;
 
 private:
 
     // Session Info
     Argus::Status status;
     std::vector<CameraDevice *> cameraDevices;
-    int frameCaptureCount=0;
+    int frameCaptureCount;
     int cameraDeviceIndex;
 
     // Session Frame Rate
     const uint64_t ONE_SECOND = 1000000000;
-    float previousTimeStamp=0.0;
-    float sensorTimeStamp=0.0;
+    float previousTimeStamp;
+    float sensorTimeStamp;
 
     int frameCaptureLoop;
 

@@ -62,6 +62,7 @@ void MainWindow::startCamerasCts() {
 void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->stopButtonPressed = true;
+        this->camerasRunning[i] = false;
     }
 }
 
@@ -76,7 +77,6 @@ void MainWindow::pauseAllRequest(bool clicked) {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->pauseButtonPressed = clicked;
     }
-
     if (clicked) {
         ui->pauseButton->setText("Resume");
     }
@@ -87,6 +87,14 @@ void MainWindow::pauseAllRequest(bool clicked) {
 }
 
 void MainWindow::exitRequest() {
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->exitButtonPressed = true;
+    }
+    // Check if cameras are still running when the exit button is pressed
+    if (std::all_of(this->camerasRunning.begin(), this->camerasRunning.end(), [](int i){return i;}) ) {
+        // Cameras still running
+
+    }
     this->close();
 }
 
@@ -97,7 +105,7 @@ void MainWindow::setupUiLayout() {
     ui->pauseButton->setCheckable(true);
 
     connect(ui->pauseButton,   SIGNAL(clicked(bool)), this, SLOT(pauseAllRequest(bool)));
-    connect(ui->captureButton, SIGNAL(clicked()),     this, SLOT(saveAllRequest()));
+    connect(ui->captureButton, SIGNAL(clicked()),     this, SLOT(captureAllRequest()));
     connect(ui->stopButton,    SIGNAL(clicked()),     this, SLOT(stopAllRequest()));
 
     connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));

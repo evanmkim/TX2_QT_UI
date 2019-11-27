@@ -30,7 +30,7 @@ Camera::Camera(int camDeviceIndex) {
     this->cameraDeviceIndex = camDeviceIndex;
 }
 
-bool Camera::initCam(){
+bool Camera::initCam() {
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
@@ -44,8 +44,7 @@ bool Camera::initCam(){
     EXIT_IF_NOT_OK(this->status, "Failed to get camera devices");
     EXIT_IF_NULL(this->cameraDevices.size(), "No camera devices available");
     cout << "There are " << this->cameraDevices.size() << " camera ports detected. " <<  endl;
-    if (this->cameraDevices.size() <= this->cameraDeviceIndex)
-    {
+    if (this->cameraDevices.size() <= this->cameraDeviceIndex) {
         printf("Camera device specified on the command line is not available\n");
         return EXIT_FAILURE;
     }
@@ -187,10 +186,8 @@ void Camera::endCapture() {
     emit finished();
 }
 
-bool Camera::runCts()
-{
-    while (!this->stopButtonPressed)
-    {
+bool Camera::runCts() {
+    while (!this->stopButtonPressed) {
         while(pauseButtonPressed){
             sleep(1);
         }
@@ -228,8 +225,8 @@ bool Camera::runCts()
     }
 }
 
-bool Camera::frameRequest()
-{
+bool Camera::frameRequest() {
+
     cout << endl << "Camera " << this->cameraDeviceIndex << " Frame: " << this->frameCaptureCount << endl;
 
     if (this->captureMode == 1) {
@@ -354,21 +351,18 @@ bool Camera::frameRequest()
     Rect roi(330,0,320,540);
 
 
-    for(int m = roi.y; m < (roi.y + roi.height); m++)
-    {
+    for(int m = roi.y; m < (roi.y + roi.height); m++) {
 
-        for(int n = roi.x; n < (roi.x+roi.width); n++)
-        {
+        for(int n = roi.x; n < (roi.x+roi.width); n++) {
             int iPixel=imgFF.at<uchar>(m,n);
-            if(iPixel==255)
-            {
+
+            if(iPixel==255) {
+
                 int iArea=floodFill(imgFF,Point(n,m),Scalar(50),&ccomp);
-                if(iArea<75)
-                {
+                if(iArea<75) {
                     floodFill(imgFF,Point(n,m),Scalar(0));
                 }
-                else
-                {
+                else {
                     circle(imgProc,Point(ccomp.x+ccomp.width/2,ccomp.y+ccomp.height/2),40,Scalar(0,0,255),2,LINE_8);
                     this->defectFound = true;
                 }
@@ -402,8 +396,7 @@ bool Camera::frameRequest()
 
 
     //START UNMAPPING
-    if ((this->frameCaptureCount)%10 == 0)
-    {
+    if ((this->frameCaptureCount)%10 == 0) {
         this->iSession->repeat(this->request.get());
     }
 

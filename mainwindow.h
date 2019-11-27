@@ -22,10 +22,6 @@ public:
 
 private slots:
 
-    // Push Buttons
-//    void on_exitButton_clicked();
-//    void on_pauseButton_clicked(bool checked);
-
     // Display Data
     void displayQDefectImage(QImage, int);
     void displayQPrevDefectImage(QImage, int);
@@ -35,14 +31,18 @@ private slots:
 
     void startCamerasCts();
 //    void startCamerasTgr();
+
     void camerasFinished();
 
     void setGain(int);
     void setExposure(int);
 
+    // Buttons
     void stopAllRequest();
     void pauseAllRequest(bool);
     void captureAllRequest();
+    void exitRequest();
+
 
 public slots:
 

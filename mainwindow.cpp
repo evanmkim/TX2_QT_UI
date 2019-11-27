@@ -27,20 +27,17 @@ MainWindow::MainWindow(QWidget *parent)
     this->setupUiLayout();
 }
 
-void MainWindow::connectStart()
-{
+void MainWindow::connectStart() {
     connect(ui->ctsModeStartButton, SIGNAL(clicked()), this, SLOT(startCamerasCts()));
 }
 
-void MainWindow::camerasFinished()
-{
+void MainWindow::camerasFinished() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->camerasRunning[i] = false;
     }
 }
 
-void MainWindow::startCamerasCts()
-{
+void MainWindow::startCamerasCts() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
 
         if (this->camerasRunning[i]) {
@@ -62,8 +59,7 @@ void MainWindow::startCamerasCts()
     }
 }
 
-void MainWindow::stopAllRequest()
-{
+void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->stopButtonPressed = true;
     }
@@ -76,10 +72,9 @@ void MainWindow::captureAllRequest()
     }
 }
 
-void MainWindow::pauseAllRequest(bool clicked)
-{
+void MainWindow::pauseAllRequest(bool clicked) {
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->pauseButtonPressed = true;
+        this->TX2Cameras[i]->pauseButtonPressed = clicked;
     }
 
     if (clicked) {
@@ -91,29 +86,21 @@ void MainWindow::pauseAllRequest(bool clicked)
     }
 }
 
-//void MainWindow::on_exitButton_clicked()
-//{
-//    this->close();
-//}
-
-//void MainWindow::on_pauseButton_clicked(bool checked)
-//{
-//    if (checked) {
-//        ui->pauseButton->setText("Resume");
-//    }
-//    else {
-//        cout << "resume button pressed" << endl;
-//        ui->pauseButton->setText("Pause");
-//    }
-//}
+void MainWindow::exitRequest() {
+    this->close();
+}
 
 
 void MainWindow::setupUiLayout() {
 
     // Buttons
+    ui->pauseButton->setCheckable(true);
+
     connect(ui->pauseButton,   SIGNAL(clicked(bool)), this, SLOT(pauseAllRequest(bool)));
     connect(ui->captureButton, SIGNAL(clicked()),     this, SLOT(saveAllRequest()));
     connect(ui->stopButton,    SIGNAL(clicked()),     this, SLOT(stopAllRequest()));
+
+    connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
 
@@ -137,19 +124,17 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
 
-        //    //UI Trigger
-        //    connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+//        //UI Trigger
+//        connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
 
-        //    //Hardware Trigger
-        //    connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
-        //    connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
+//        //Hardware Trigger
+//        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+//        connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
 
 
     }
     //    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
     //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
-
-    ui->pauseButton->setCheckable(true);
 
     // Taymer Logo
     QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
@@ -185,24 +170,21 @@ void MainWindow::setupFrameSettings(int camIndex) {
     this->gainValues[camIndex]->setText(strGainTime);
 }
 
-void MainWindow::displayQDefectImage(QImage img_temp, int camIndex)
-{
+void MainWindow::displayQDefectImage(QImage img_temp, int camIndex) {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
     this->defectImages[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void MainWindow::displayQPrevDefectImage(QImage img_temp, int camIndex)
-{
+void MainWindow::displayQPrevDefectImage(QImage img_temp, int camIndex) {
     image=img_temp;
     QMatrix rm;
     rm.rotate(0);
     this->prevDefectImages[camIndex]->setPixmap(QPixmap::fromImage(image).transformed(rm).scaled(this->defectImages[camIndex]->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
-void MainWindow::displayRes(int sensorRes, int camIndex)
-{
+void MainWindow::displayRes(int sensorRes, int camIndex) {
     QString strExpTime=QString::number(sensorRes)+" p";
     this->resolutions[camIndex]->setText(strExpTime);
 }

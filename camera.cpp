@@ -48,6 +48,9 @@ bool Camera::initCam() {
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
+    // Ensure external library initialization is complete
+    this->thread()->msleep(3000);
+
     //CAMERA PROVIDER
     this->cameraProvider = UniqueObj<CameraProvider>(CameraProvider::create());
     this->iCameraProvider = interface_cast<ICameraProvider>(this->cameraProvider);
@@ -142,7 +145,7 @@ bool Camera::initCam() {
     EXIT_IF_NOT_OK(this->iRequest->enableOutputStream(stream.get()),"Failed to enable stream in capture request");
 
     //const uint64_t THIRD_OF_A_SECOND = 500000;
-    //EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(curExposure)),"Unable to set the Source Settings Exposure Time Range");
+    //EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(exposure)),"Unable to set the Source Settings Exposure Time Range");
 
     /// 3. GET THE GAIN RANGE FROM THE CHANGED EXPOSURE
     //ArgusSamples::Range<float> sensorModeAnalogGainRange = iSensorMode->getAnalogGainRange();
@@ -153,6 +156,7 @@ bool Camera::initCam() {
     //ArgusSamples::Range<long unsigned int> sensorFrameDurationRange = this->iSensorMode->getFrameDurationRange();
     //printf("-Frame Duration Range min %f, max %f\n", sensorFrameDurationRange.min(), sensorFrameDurationRange.max());
     //EXIT_IF_NOT_OK(this->iSourceSettings->setFrameDurationRange(ArgusSamples::Range<long unsigned int>(sensorFrameDurationRange.min())), "Unable to set the Frame Duration Range");
+
     EXIT_IF_NOT_OK(this->iSession->repeat(this->request.get()), "Unable to submit repeat() request");
 
     this->startTime = std::chrono::high_resolution_clock::now();
@@ -187,6 +191,9 @@ void Camera::endCapture() {
     this->iSession->waitForIdle();
 
     this->iStream->disconnect();
+
+    this->queue.reset();
+    this->queue.release();
 
     this->stream.reset();
     this->stream.release();

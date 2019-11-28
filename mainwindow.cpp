@@ -27,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
     this->setupUiLayout();
 }
 
+//MainWindow::~MainWindow() {
+//    delete this->ui;
+//}
+
 void MainWindow::connectStart() {
     connect(ui->ctsModeStartButton, SIGNAL(clicked()), this, SLOT(startCamerasCts()));
 }
@@ -66,6 +70,7 @@ void MainWindow::stopAllRequest() {
     }
 }
 
+
 void MainWindow::captureAllRequest()
 {
     for (int i = 0; i < this->numTX2Cameras; i++) {
@@ -95,7 +100,8 @@ void MainWindow::exitRequest() {
         // Cameras still running
 
     }
-    this->close();
+    //this->close();
+    QApplication::quit();
 }
 
 
@@ -111,7 +117,6 @@ void MainWindow::setupUiLayout() {
     connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
-
         connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
 
         // Sliders

@@ -32,7 +32,6 @@ Camera::Camera(int camDeviceIndex) {
     this->stopButtonPressed = false;
     this->pauseButtonPressed = false;
     this->captureButtonPressed = false;
-    this->exitButtonPressed = false;
 
     this->captureMode = 0;
     this->gain = 0;
@@ -47,9 +46,6 @@ Camera::Camera(int camDeviceIndex) {
 bool Camera::initCam() {
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
-
-    // Ensure external library initialization is complete
-    this->thread()->msleep(3000);
 
     //CAMERA PROVIDER
     this->cameraProvider = UniqueObj<CameraProvider>(CameraProvider::create());
@@ -182,8 +178,9 @@ bool Camera::initCam() {
 
 void Camera::endCapture() {
 
-    //while (!stopButtonPressed) {}
     cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
+
+    this->iRequest->disableOutputStream(this->stream.get());
 
     this->stopButtonPressed = false;
 
@@ -191,9 +188,6 @@ void Camera::endCapture() {
     this->iSession->waitForIdle();
 
     this->iStream->disconnect();
-
-    this->queue.reset();
-    this->queue.release();
 
     this->stream.reset();
     this->stream.release();
@@ -205,16 +199,14 @@ void Camera::endCapture() {
     cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
 
     emit finished();
+
 }
 
 bool Camera::runCts() {
-    while (!this->stopButtonPressed) {
+    while (!stopButtonPressed) {
+
         while(pauseButtonPressed){
             sleep(1);
-            // Stop Button is Pressed after Pause Button
-            if (this->stopButtonPressed) {
-                // FIX THIS
-            }
         }
         emit requestFrameSettings(this->cameraDeviceIndex);
 

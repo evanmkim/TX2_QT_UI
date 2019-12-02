@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent=0);
-//    ~MainWindow();
+    ~MainWindow();
 
 private slots:
 
@@ -62,7 +62,7 @@ private:
     void connectStart();
     void setupUiLayout();
 
-    std::vector<bool> camerasRunning;
+    int camerasRunning;
 
     int exposure;
     int gain;

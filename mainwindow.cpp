@@ -15,21 +15,22 @@ MainWindow::MainWindow(QWidget *parent)
       ui(new Ui::MainWindow)
 {
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->camerasRunning.push_back(false);
         this->TX2CameraThreads.push_back(new QThread());
         this->TX2Cameras.push_back(new Camera(i));
         this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
     }
+    this->camerasRunning = 0;
 
     ui->setupUi(this);
     this->assignLabels();
     this->connectStart();
     this->setupUiLayout();
+
 }
 
-//MainWindow::~MainWindow() {
-//    delete this->ui;
-//}
+MainWindow::~MainWindow() {
+    delete ui;
+}
 
 void MainWindow::connectStart() {
     connect(ui->ctsModeStartButton, SIGNAL(clicked()), this, SLOT(startCamerasCts()));
@@ -37,17 +38,12 @@ void MainWindow::connectStart() {
 
 void MainWindow::camerasFinished() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->camerasRunning[i] = false;
+        this->camerasRunning--;
     }
 }
 
 void MainWindow::startCamerasCts() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
-
-        if (this->camerasRunning[i]) {
-            QMessageBox::critical(this, "Error", "Count is already running!");
-            return;
-        }
 
         // Start worker method connections
         connect(this->TX2CameraThreads[i], SIGNAL(started()), this->TX2Cameras[i], SLOT(initCam()));
@@ -59,15 +55,19 @@ void MainWindow::startCamerasCts() {
         connect(this->TX2CameraThreads[i], SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(deleteLater()));
 
         this->TX2CameraThreads[i]->start();
-        this->camerasRunning[i] = true;
+        this->camerasRunning++;
     }
+    ui->exitButton->setEnabled(false);
+    ui->ctsModeStartButton->setEnabled(false);
 }
 
 void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->stopButtonPressed = true;
-        this->camerasRunning[i] = false;
+        this->camerasRunning--;
     }
+    ui->exitButton->setEnabled(true);
+    ui->ctsModeStartButton->setEnabled(true);
 }
 
 
@@ -92,16 +92,7 @@ void MainWindow::pauseAllRequest(bool clicked) {
 }
 
 void MainWindow::exitRequest() {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->exitButtonPressed = true;
-    }
-    // Check if cameras are still running when the exit button is pressed
-    if (std::all_of(this->camerasRunning.begin(), this->camerasRunning.end(), [](int i){return i;}) ) {
-        // Cameras still running
-
-    }
-    //this->close();
-    QApplication::quit();
+    this->close();
 }
 
 
@@ -109,10 +100,12 @@ void MainWindow::setupUiLayout() {
 
     // Buttons
     ui->pauseButton->setCheckable(true);
+    ui->exitButton->setEnabled(true);
+    ui->ctsModeStartButton->setEnabled(true);
 
-    connect(ui->pauseButton,   SIGNAL(clicked(bool)), this, SLOT(pauseAllRequest(bool)));
-    connect(ui->captureButton, SIGNAL(clicked()),     this, SLOT(captureAllRequest()));
-    connect(ui->stopButton,    SIGNAL(clicked()),     this, SLOT(stopAllRequest()));
+    connect(ui->pauseButton,   SIGNAL(clicked(bool)),   this, SLOT(pauseAllRequest(bool)));
+    connect(ui->captureButton, SIGNAL(clicked()),       this, SLOT(captureAllRequest()));
+    connect(ui->stopButton,    SIGNAL(clicked()),       this, SLOT(stopAllRequest()));
 
     connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));
 

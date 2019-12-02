@@ -56,7 +56,6 @@ public:
     bool stopButtonPressed;
     bool captureButtonPressed;
     bool pauseButtonPressed;
-    bool exitButtonPressed;
 
     // Continuous Mode: 0
     // Triggered Mode: 1

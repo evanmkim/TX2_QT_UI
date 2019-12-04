@@ -33,7 +33,7 @@ private slots:
     void startCamerasCts();
 //    void startCamerasTgr();
 
-    void camerasFinished();
+    //void camerasFinished();
 
     void setGain(int);
     void setExposure(int);
@@ -42,12 +42,18 @@ private slots:
     void stopAllRequest();
     void pauseAllRequest(bool);
     void captureAllRequest();
-    void exitRequest();
+    //void exitRequest();
+
+    void debugApp();
 
 
 public slots:
 
     void setupFrameSettings(int);
+
+signals:
+
+    void restartCapture();
 
 private:
 
@@ -62,7 +68,7 @@ private:
     void connectStart();
     void setupUiLayout();
 
-    int camerasRunning;
+    bool camerasRunning;
 
     int exposure;
     int gain;

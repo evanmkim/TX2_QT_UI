@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
         this->TX2Cameras.push_back(new Camera(i));
         this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
     }
-    this->camerasRunning = 0;
+    this->camerasRunning = false;
 
     ui->setupUi(this);
     this->assignLabels();
@@ -36,35 +36,39 @@ void MainWindow::connectStart() {
     connect(ui->ctsModeStartButton, SIGNAL(clicked()), this, SLOT(startCamerasCts()));
 }
 
-void MainWindow::camerasFinished() {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->camerasRunning--;
-    }
-}
 
 void MainWindow::startCamerasCts() {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
 
-        // Start worker method connections
-        connect(this->TX2CameraThreads[i], SIGNAL(started()), this->TX2Cameras[i], SLOT(initCam()));
+    if (!camerasRunning) {
+        for (int i = 0; i < this->numTX2Cameras; i++) {
+            // Start worker method connections
+            connect(this->TX2CameraThreads[i], SIGNAL(started()),        this->TX2Cameras[i], SLOT(startSession()));
+            connect(this                     , SIGNAL(restartCapture()), this->TX2Cameras[i], SLOT(restartSession()));
 
-        // Handle worker finishing connections
-        connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(quit()));
-        connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2Cameras[i],       SLOT(deleteLater()));
-        connect(this->TX2Cameras[i],       SIGNAL(finished()), this,                      SLOT(camerasFinished()));
-        connect(this->TX2CameraThreads[i], SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(deleteLater()));
+            //            // Handle worker finishing connections
+            //            connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(quit()));
+            //            connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2Cameras[i],       SLOT(deleteLater()));
+            //            connect(this->TX2CameraThreads[i], SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(deleteLater()));
 
-        this->TX2CameraThreads[i]->start();
-        this->camerasRunning++;
+            this->TX2CameraThreads[i]->start();
+        }
+    } else {
+        cout << "Restarting Capture" << endl;
+        emit restartCapture();
     }
+
+    this->camerasRunning = true;
     ui->exitButton->setEnabled(false);
     ui->ctsModeStartButton->setEnabled(false);
+}
+
+void MainWindow::debugApp() {
+    cout << "Finished" << endl;
 }
 
 void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->stopButtonPressed = true;
-        this->camerasRunning--;
     }
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
@@ -91,9 +95,9 @@ void MainWindow::pauseAllRequest(bool clicked) {
     }
 }
 
-void MainWindow::exitRequest() {
-    this->close();
-}
+//void MainWindow::exitRequest() {
+//    //this->close();
+//}
 
 
 void MainWindow::setupUiLayout() {
@@ -107,7 +111,7 @@ void MainWindow::setupUiLayout() {
     connect(ui->captureButton, SIGNAL(clicked()),       this, SLOT(captureAllRequest()));
     connect(ui->stopButton,    SIGNAL(clicked()),       this, SLOT(stopAllRequest()));
 
-    connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));
+    //connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
         connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
@@ -130,12 +134,12 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
 
-//        //UI Trigger
-//        connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+        //        //UI Trigger
+        //        connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
 
-//        //Hardware Trigger
-//        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
-//        connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
+        //        //Hardware Trigger
+        //        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
+        //        connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
 
 
     }

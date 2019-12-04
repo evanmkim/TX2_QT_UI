@@ -135,9 +135,9 @@ private:
     bool defectFound = false;
 
     bool frameRequest();
-
     bool runCts();
-    void endCapture();
+
+    bool restarted;
 
 signals:
 
@@ -155,7 +155,9 @@ signals:
 
 public slots:
 
-    bool initCam();
+    bool startSession();
+    bool restartSession();
+    void endSession();
 
 };
 

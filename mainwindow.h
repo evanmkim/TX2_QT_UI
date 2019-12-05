@@ -68,11 +68,12 @@ private:
 
     bool camerasRunning;
 
-    int exposure;
-    int gain;
     QImage image;
     QImage defectImage;
     double BGR[];
+
+    int gain;
+    int exposure;
 
 //    int frameFinished = 0;
 //    QMutex *mutex;
@@ -83,11 +84,10 @@ private:
     std::vector<QLabel *> resolutions;
     std::vector<QLabel *> frameRates;
     std::vector<QLabel *> currFrameRates;
-    std::vector<QLabel *> exposureValues;
-    std::vector<QLabel *> gainValues;
 
-    std::vector<QSlider *> exposureSliders;
-    std::vector<QSlider *> gainSliders;
+    const int dropDownOptionCount = 10;
+    std::vector<int> exposureValues;
+    std::vector<int> gainValues;
 };
 
 #endif // MAINWINDOW_H

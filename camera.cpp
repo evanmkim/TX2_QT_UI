@@ -155,7 +155,6 @@ bool Camera::startSession() {
     this->startTime = std::chrono::high_resolution_clock::now();
     this->finishTime = std::chrono::high_resolution_clock::now();
 
-
     //EVENT PROVIDER
     this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
     EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");

@@ -127,19 +127,37 @@ void MainWindow::setupUiLayout() {
     connect(ui->captureButton, SIGNAL(clicked()),    this,                SLOT(captureAllRequest()));
     connect(ui->stopButton,    SIGNAL(clicked()),    this,                SLOT(stopAllRequest()));
 
+//    // Sliders
+//    connect(ui->ExposureTimeSlider, SIGNAL(valueChanged(int)), this, SLOT(setExposure(int)));
+//    connect(ui->GainSlider,         SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
+
+//    ui->ExposureTimeSlider->setRange(30,130);
+//    ui->ExposureTimeSlider->setValue(30);
+    this->exposure = 30;
+//    ui->GainSlider->setRange(50,100);
+//    ui->GainSlider->setValue(50);
+    this->gain = 50;
+
+    // Drop Downs
+    for (int i = 0; i < dropDownOptionCount; i++) {
+
+        // Increments of 10
+        //this->exposureValues.push_back(exposure+(i*10));
+        ui->exposureDropDown->addItem(QString::number(exposure+(i*10)), exposure+(i*10));
+        //Increments of 5
+        //this->gainValues.push_back(gain+(i*5));
+        ui->gainDropDown->addItem(QString::number(gain+(i*5)), gain+(i*5));
+    }
+
+    connect(ui->exposureDropDown, SIGNAL(currentIndexChanged(int)), this, SLOT(setExposure(int)));
+    connect(ui->gainDropDown,     SIGNAL(currentIndexChanged(int)), this, SLOT(setGain(int)));
+
     for (int i = 0; i < this->numTX2Cameras; i++) {
+
+//        ui->exposureDropDown->addItem(QString::number(i), i);
+//        ui->gainDropDown->addItem(QString::number(i), i);
+
         connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
-
-        // Sliders
-        connect(this->exposureSliders[i], SIGNAL(valueChanged(int)), this, SLOT(setExposure(int)));
-        connect(this->gainSliders[i],     SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
-
-        this->exposureSliders[i]->setRange(30,1000);
-        this->exposureSliders[i]->setValue(50);
-        this->exposure = 50000;
-        this->gainSliders[i]->setRange(1,250);
-        this->gainSliders[i]->setValue(50);
-        this->gain = 50;
 
         // Display Data
         connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
@@ -173,13 +191,13 @@ void MainWindow::setupUiLayout() {
     }
 }
 
-void MainWindow::setGain(int newGain) {
-    this->gain = newGain;
+void MainWindow::setGain(int gainIndex) {
+    this->gain = ui->gainDropDown->itemData(gainIndex).toInt();
 }
 
 
-void MainWindow::setExposure(int newExposure) {
-    this->exposure = newExposure*1000;
+void MainWindow::setExposure(int exposureIndex) {
+    this->exposure = (ui->exposureDropDown->itemData(exposureIndex).toInt())*1000;
 }
 
 void MainWindow::setupFrameSettings(int camIndex) {
@@ -187,11 +205,11 @@ void MainWindow::setupFrameSettings(int camIndex) {
     this->TX2Cameras[camIndex]->gain = this->gain;
     this->TX2Cameras[camIndex]->exposure = this->exposure;
 
-    QString strExpTime=QString::number(this->exposure);
-    this->exposureValues[camIndex]->setText(strExpTime+" µs");
+//    QString strExpTime=QString::number(this->exposure);
+//    ui->ExposureLabel->setText(strExpTime+" µs");
 
-    QString strGainTime=QString::number(this->gain);
-    this->gainValues[camIndex]->setText(strGainTime);
+//    QString strGainTime=QString::number(this->gain);
+//    ui->GainLabel->setText(strGainTime);
 }
 
 void MainWindow::displayQDefectImage(QImage img_temp, int camIndex) {
@@ -245,22 +263,6 @@ void MainWindow::assignLabels() {
     this->currFrameRates.push_back(ui->labelCurrFrameRate);
     this->currFrameRates.push_back(ui->labelCurrFrameRate_2);
     this->currFrameRates.push_back(ui->labelCurrFrameRate_3);
-
-    this->exposureSliders.push_back(ui->ExposureTimeSlider);
-    this->exposureSliders.push_back(ui->ExposureTimeSlider_2);
-    this->exposureSliders.push_back(ui->ExposureTimeSlider_3);
-
-    this->gainSliders.push_back(ui->GainSlider);
-    this->gainSliders.push_back(ui->GainSlider_2);
-    this->gainSliders.push_back(ui->GainSlider_3);
-
-    this->exposureValues.push_back(ui->ExposureLabel);
-    this->exposureValues.push_back(ui->ExposureLabel_2);
-    this->exposureValues.push_back(ui->ExposureLabel_3);
-
-    this->gainValues.push_back(ui->GainLabel);
-    this->gainValues.push_back(ui->GainLabel_2);
-    this->gainValues.push_back(ui->GainLabel_3);
 }
 
 

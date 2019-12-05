@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
         this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
     }
     this->camerasRunning = false;
+    this->camerasFinished = 0;
 
     ui->setupUi(this);
     this->assignLabels();
@@ -36,19 +37,23 @@ void MainWindow::connectStart() {
     connect(ui->ctsModeStartButton, SIGNAL(clicked()), this, SLOT(startCamerasCts()));
 }
 
-
 void MainWindow::startCamerasCts() {
 
     if (!camerasRunning) {
         for (int i = 0; i < this->numTX2Cameras; i++) {
-            // Start worker method connections
-            connect(this->TX2CameraThreads[i], SIGNAL(started()),        this->TX2Cameras[i], SLOT(startSession()));
-            connect(this                     , SIGNAL(restartCapture()), this->TX2Cameras[i], SLOT(restartSession()));
 
-            //            // Handle worker finishing connections
-            //            connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(quit()));
-            //            connect(this->TX2Cameras[i],       SIGNAL(finished()), this->TX2Cameras[i],       SLOT(deleteLater()));
-            //            connect(this->TX2CameraThreads[i], SIGNAL(finished()), this->TX2CameraThreads[i], SLOT(deleteLater()));
+            connect(this->TX2CameraThreads[i], SIGNAL(started()),        this->TX2Cameras[i], SLOT(startSession()));
+            connect(this,                      SIGNAL(restartCapture()), this->TX2Cameras[i], SLOT(restartSession()));
+            connect(ui->exitButton,            SIGNAL(clicked()),        this->TX2Cameras[i], SLOT(endSession()));
+
+            // Handle worker finishing connections
+            // Worker finished signal will call quit() on the thread
+            // This will end the thread's event loop and initiate the thread's finished signal
+            connect(this->TX2Cameras[i],       SIGNAL(destroyed()), this,                      SLOT(closeUi()));
+            connect(this->TX2Cameras[i],       SIGNAL(destroyed()), this,                      SLOT(debugApp()));
+            connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(quit()));
+            connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2Cameras[i],       SLOT(deleteLater()));
+            connect(this->TX2CameraThreads[i], SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(deleteLater()));
 
             this->TX2CameraThreads[i]->start();
         }
@@ -58,6 +63,7 @@ void MainWindow::startCamerasCts() {
     }
 
     this->camerasRunning = true;
+    ui->stopButton->setEnabled(true);
     ui->exitButton->setEnabled(false);
     ui->ctsModeStartButton->setEnabled(false);
 }
@@ -72,6 +78,20 @@ void MainWindow::stopAllRequest() {
     }
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
+    ui->stopButton->setEnabled(false);
+
+    // Pause Button was Already Depressed
+    if (ui->pauseButton->isChecked()) {
+        ui->pauseButton->setText("Pause");
+        ui->pauseButton->setChecked(false);
+    }
+}
+
+void MainWindow::closeUi() {
+    this->camerasFinished++;
+    if (this->camerasFinished == 3) {
+        this->close();
+    }
 }
 
 
@@ -95,10 +115,6 @@ void MainWindow::pauseAllRequest(bool clicked) {
     }
 }
 
-//void MainWindow::exitRequest() {
-//    //this->close();
-//}
-
 
 void MainWindow::setupUiLayout() {
 
@@ -107,11 +123,9 @@ void MainWindow::setupUiLayout() {
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
 
-    connect(ui->pauseButton,   SIGNAL(clicked(bool)),   this, SLOT(pauseAllRequest(bool)));
-    connect(ui->captureButton, SIGNAL(clicked()),       this, SLOT(captureAllRequest()));
-    connect(ui->stopButton,    SIGNAL(clicked()),       this, SLOT(stopAllRequest()));
-
-    //connect(ui->exitButton,    SIGNAL(clicked()),     this, SLOT(exitRequest()));
+    connect(ui->pauseButton,   SIGNAL(clicked(bool)),this,                SLOT(pauseAllRequest(bool)));
+    connect(ui->captureButton, SIGNAL(clicked()),    this,                SLOT(captureAllRequest()));
+    connect(ui->stopButton,    SIGNAL(clicked()),    this,                SLOT(stopAllRequest()));
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
         connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));

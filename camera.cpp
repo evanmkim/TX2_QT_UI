@@ -160,7 +160,6 @@ bool Camera::startSession() {
 void Camera::endSession() {
 
     cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
-
     this->iRequest->disableOutputStream(this->stream.get());
 
     this->iSession->stopRepeat();
@@ -178,6 +177,7 @@ void Camera::endSession() {
     cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
 
     emit finished();
+
 }
 
 bool Camera::restartSession() {
@@ -209,8 +209,10 @@ bool Camera::runCts() {
     while (!stopButtonPressed) {
 
         while(pauseButtonPressed){
+            if (stopButtonPressed) {break;}
             sleep(1);
         }
+
         emit requestFrameSettings(this->cameraDeviceIndex);
 
         ///WAIT FOR EVENTS TO GET QUEUED

@@ -33,8 +33,6 @@ private slots:
     void startCamerasCts();
 //    void startCamerasTgr();
 
-    //void camerasFinished();
-
     void setGain(int);
     void setExposure(int);
 
@@ -42,9 +40,10 @@ private slots:
     void stopAllRequest();
     void pauseAllRequest(bool);
     void captureAllRequest();
-    //void exitRequest();
 
     void debugApp();
+
+    void closeUi();
 
 
 public slots:
@@ -60,6 +59,8 @@ private:
     Ui_MainWindow *ui;
 
     const int numTX2Cameras = 3;
+
+    int camerasFinished;
     std::vector<Camera *> TX2Cameras;
     std::vector<QThread *> TX2CameraThreads;
     Trigger *trigger;

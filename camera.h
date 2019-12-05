@@ -49,6 +49,7 @@ class Camera : public QObject
 {
     Q_OBJECT
 
+// Public members are modified at runtime by the main GUI thread
 public:
     Camera(int camDeviceIndex);
 
@@ -78,8 +79,6 @@ private:
     float previousTimeStamp;
     float sensorTimeStamp;
 
-    int frameCaptureLoop;
-
     chrono::high_resolution_clock::time_point startTime;
     chrono::high_resolution_clock::time_point finishTime;
 
@@ -87,41 +86,41 @@ private:
 
     // Session Interfaces
     Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
-    ICameraProvider *iCameraProvider = nullptr;
+    ICameraProvider *iCameraProvider;
 
     Argus::UniqueObj<Argus::CaptureSession> captureSession;
-    ICaptureSession *iSession = nullptr;
+    ICaptureSession *iSession;
 
     Argus::UniqueObj<Argus::OutputStreamSettings> streamSettings;
-    IOutputStreamSettings *iStreamSettings = nullptr;
+    IOutputStreamSettings *iStreamSettings;
 
     Argus::UniqueObj<Argus::OutputStream> stream;
-    IStream *iStream = nullptr;
+    IStream *iStream;
 
     Argus::UniqueObj<EGLStream::FrameConsumer> consumer;
-    EGLStream::IFrameConsumer *iFrameConsumer = nullptr;
+    EGLStream::IFrameConsumer *iFrameConsumer;
 
     Argus::UniqueObj<Argus::Request> request;
-    Argus::IRequest *iRequest = nullptr;
+    Argus::IRequest *iRequest;
 
     // Cts Session Interfaces
-    IEventProvider *iEventProvider = nullptr;
+    IEventProvider *iEventProvider;
 
     Argus::UniqueObj<Argus::EventQueue> queue;
-    IEventQueue *iQueue = nullptr;
+    IEventQueue *iQueue;
 
-    ISourceSettings *iSourceSettings = nullptr;
-    ICameraProperties *iCameraProperties = nullptr;
-    ISensorMode *iSensorMode = nullptr;
+    ISourceSettings *iSourceSettings;
+    ICameraProperties *iCameraProperties;
+    ISensorMode *iSensorMode;
 
-    IAutoControlSettings *iAutoControlSettings = nullptr;
+    IAutoControlSettings *iAutoControlSettings;
 
-    IDenoiseSettings *iDenoiseSettings = nullptr;
+    IDenoiseSettings *iDenoiseSettings;
 
-    const ICaptureMetadata *iMetadata = nullptr;
+    const ICaptureMetadata *iMetadata;
 
     Argus::UniqueObj<EGLStream::Frame> frame;
-    EGLStream::IFrame  *iFrame = nullptr;
+    EGLStream::IFrame  *iFrame;
 
     // CV Processing
     int DisplayIndex=1;
@@ -129,8 +128,8 @@ private:
     ArgusSamples::EGLDisplayHolder g_display;
 
     // Provides exclusive write access to frameFinished
-    QMutex *mutex;
-    int *frameFinished;
+//    QMutex *mutex;
+//    int *frameFinished;
 
     bool defectFound = false;
 

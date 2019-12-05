@@ -33,6 +33,7 @@ private slots:
     void startCamerasCts();
 //    void startCamerasTgr();
 
+    void setupFrameSettings(int);
     void setGain(int);
     void setExposure(int);
 
@@ -45,10 +46,6 @@ private slots:
 
     void closeUi();
 
-
-public slots:
-
-    void setupFrameSettings(int);
 
 signals:
 

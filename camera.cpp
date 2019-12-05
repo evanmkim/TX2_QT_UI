@@ -30,20 +30,34 @@ Camera::Camera(int camDeviceIndex) {
 
     this->cameraDeviceIndex = camDeviceIndex;
 
-    this->restarted = false;
-
-    this->stopButtonPressed = false;
-    this->pauseButtonPressed = false;
+    this->restarted            = false;
+    this->stopButtonPressed    = false;
+    this->pauseButtonPressed   = false;
     this->captureButtonPressed = false;
 
     this->captureMode = 0;
-    this->gain = 0;
-    this->exposure = 0;
+    this->gain        = 0;
+    this->exposure    = 0;
 
-    this->frameCaptureCount=0;
+    this->frameCaptureCount = 0;
+    this->previousTimeStamp = 0.0;
+    this->sensorTimeStamp   = 0.0;
 
-    this->previousTimeStamp=0.0;
-    this->sensorTimeStamp=0.0;
+    this->iCameraProvider      = nullptr;
+    this->iSession             = nullptr;
+    this->iStreamSettings      = nullptr;
+    this->iStream              = nullptr;
+    this->iFrameConsumer       = nullptr;
+    this->iRequest             = nullptr;
+    this->iEventProvider       = nullptr;
+    this->iQueue               = nullptr;
+    this->iSourceSettings      = nullptr;
+    this->iCameraProperties    = nullptr;
+    this->iSensorMode          = nullptr;
+    this->iAutoControlSettings = nullptr;
+    this->iDenoiseSettings     = nullptr;
+    this->iMetadata            = nullptr;
+    this->iFrame               = nullptr;
 }
 
 bool Camera::startSession() {
@@ -157,29 +171,6 @@ bool Camera::startSession() {
     runCts();
 }
 
-void Camera::endSession() {
-
-    cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
-    this->iRequest->disableOutputStream(this->stream.get());
-
-    this->iSession->stopRepeat();
-    this->iSession->waitForIdle();
-
-    this->iStream->disconnect();
-
-    this->stream.reset();
-    this->stream.release();
-
-    this->cameraProvider.reset();
-    this->cameraProvider.release();
-
-    this->g_display.cleanup();
-    cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
-
-    emit finished();
-
-}
-
 bool Camera::restartSession() {
 
     this->restarted = true;
@@ -203,6 +194,29 @@ bool Camera::restartSession() {
     cout << "About to restart Capture" << endl;
 
     this->startSession();
+}
+
+void Camera::endSession() {
+
+    cout << "Ending Capture Session " << this->cameraDeviceIndex << endl;
+    this->iRequest->disableOutputStream(this->stream.get());
+
+    this->iSession->stopRepeat();
+    this->iSession->waitForIdle();
+
+    this->iStream->disconnect();
+
+    this->stream.reset();
+    this->stream.release();
+
+    this->cameraProvider.reset();
+    this->cameraProvider.release();
+
+    this->g_display.cleanup();
+    cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;
+
+    emit finished();
+
 }
 
 bool Camera::runCts() {

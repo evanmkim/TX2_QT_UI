@@ -115,7 +115,6 @@ void MainWindow::pauseAllRequest(bool clicked) {
     }
 }
 
-
 void MainWindow::setupUiLayout() {
 
     // Buttons
@@ -123,39 +122,25 @@ void MainWindow::setupUiLayout() {
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
 
-    connect(ui->pauseButton,   SIGNAL(clicked(bool)),this,                SLOT(pauseAllRequest(bool)));
-    connect(ui->captureButton, SIGNAL(clicked()),    this,                SLOT(captureAllRequest()));
-    connect(ui->stopButton,    SIGNAL(clicked()),    this,                SLOT(stopAllRequest()));
-
-//    // Sliders
-//    connect(ui->ExposureTimeSlider, SIGNAL(valueChanged(int)), this, SLOT(setExposure(int)));
-//    connect(ui->GainSlider,         SIGNAL(valueChanged(int)), this, SLOT(setGain(int)));
-
-//    ui->ExposureTimeSlider->setRange(30,130);
-//    ui->ExposureTimeSlider->setValue(30);
-    this->exposure = 30;
-//    ui->GainSlider->setRange(50,100);
-//    ui->GainSlider->setValue(50);
-    this->gain = 50;
+    connect(ui->pauseButton,   SIGNAL(clicked(bool)),this, SLOT(pauseAllRequest(bool)));
+    connect(ui->captureButton, SIGNAL(clicked()),    this, SLOT(captureAllRequest()));
+    connect(ui->stopButton,    SIGNAL(clicked()),    this, SLOT(stopAllRequest()));
 
     // Drop Downs
+    this->exposure = 30000;
+    this->gain = 30;
+
     for (int i = 0; i < dropDownOptionCount; i++) {
 
-        // Increments of 10
-        //this->exposureValues.push_back(exposure+(i*10));
-        ui->exposureDropDown->addItem(QString::number(exposure+(i*10)), exposure+(i*10));
-        //Increments of 5
-        //this->gainValues.push_back(gain+(i*5));
-        ui->gainDropDown->addItem(QString::number(gain+(i*5)), gain+(i*5));
+        //addItem(displayedIndexValue, actualIndexValue) -> (microseconds, nanoseconds)
+        ui->exposureDropDown->addItem(QString::number((exposure/1000)+(i*10)), exposure+(i*10000));
+        ui->gainDropDown->addItem(QString::number(gain+(i*10)), gain+(i*10));
     }
 
     connect(ui->exposureDropDown, SIGNAL(currentIndexChanged(int)), this, SLOT(setExposure(int)));
     connect(ui->gainDropDown,     SIGNAL(currentIndexChanged(int)), this, SLOT(setGain(int)));
 
     for (int i = 0; i < this->numTX2Cameras; i++) {
-
-//        ui->exposureDropDown->addItem(QString::number(i), i);
-//        ui->gainDropDown->addItem(QString::number(i), i);
 
         connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
 
@@ -166,14 +151,12 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
 
-        //        //UI Trigger
+        //        //UI Trigger (For Testing)s
         //        connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
 
-        //        //Hardware Trigger
+        //        //Hardware GPIO Trigger
         //        connect(this->trigger.get(), &Trigger::captureRequest, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
         //        connect(this->TX2Cameras[i].get(), SIGNAL(returnFrameFinished, this->trigger.get(), &Trigger::captureComplete);
-
-
     }
     //    connect(ui->stopButton,SIGNAL(clicked()), this->trigger, &Trigger::stopRequest);
     //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
@@ -197,19 +180,12 @@ void MainWindow::setGain(int gainIndex) {
 
 
 void MainWindow::setExposure(int exposureIndex) {
-    this->exposure = (ui->exposureDropDown->itemData(exposureIndex).toInt())*1000;
+    this->exposure = (ui->exposureDropDown->itemData(exposureIndex).toInt());
 }
 
 void MainWindow::setupFrameSettings(int camIndex) {
-
     this->TX2Cameras[camIndex]->gain = this->gain;
     this->TX2Cameras[camIndex]->exposure = this->exposure;
-
-//    QString strExpTime=QString::number(this->exposure);
-//    ui->ExposureLabel->setText(strExpTime+" µs");
-
-//    QString strGainTime=QString::number(this->gain);
-//    ui->GainLabel->setText(strGainTime);
 }
 
 void MainWindow::displayQDefectImage(QImage img_temp, int camIndex) {

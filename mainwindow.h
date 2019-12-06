@@ -33,6 +33,7 @@ private slots:
     void displayRes(int, int);
     void displayFrameRate(double, int);
     void displayCurrFrameRate(double, int);
+    void displayFrameCount(int, int);
 
     // Push Buttons
     void stopAllRequest();
@@ -87,6 +88,7 @@ private:
     std::vector<QLabel *> resolutions;
     std::vector<QLabel *> frameRates;
     std::vector<QLabel *> currFrameRates;
+    std::vector<QLabel *> frameCounts;
 
     const int dropDownOptionCount = 10;
     std::vector<int> exposureValues;

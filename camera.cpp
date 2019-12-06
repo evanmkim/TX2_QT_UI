@@ -426,7 +426,7 @@ bool Camera::frameRequest() {
     //emit returnQImage(Qimg.rgbSwapped(), this->cameraDeviceIndex);
     emit returnQDefectImage(QImgDefect, this->cameraDeviceIndex);
 
-    if (this->defectFound) {
+    if (this->defectFound && this->displayIndex == 0) {
         emit returnQPrevDefectImage(QImgDefect, this->cameraDeviceIndex);
         this->defectFound = false;
     }
@@ -464,6 +464,7 @@ bool Camera::frameRequest() {
 
     emit returnFrameRate((this->frameCaptureCount*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
     emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
+    emit returnFrameCount(this->frameCaptureCount, this->cameraDeviceIndex);
     //}
 
     return true;

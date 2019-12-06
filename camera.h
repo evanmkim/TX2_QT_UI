@@ -150,7 +150,7 @@ signals:
     void returnFrameFinished(bool);
     void returnFrameRate(double, int);
     void returnCurrFrameRate(double, int);
-
+    void returnFrameCount(int,int);
 
 public slots:
 

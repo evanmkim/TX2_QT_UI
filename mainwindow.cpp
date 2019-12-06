@@ -50,7 +50,6 @@ void MainWindow::startCamerasCts() {
             // Worker finished signal will call quit() on the thread
             // This will end the thread's event loop and initiate the thread's finished signal
             connect(this->TX2Cameras[i],       SIGNAL(destroyed()), this,                      SLOT(closeUi()));
-            connect(this->TX2Cameras[i],       SIGNAL(destroyed()), this,                      SLOT(debugApp()));
             connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(quit()));
             connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2Cameras[i],       SLOT(deleteLater()));
             connect(this->TX2CameraThreads[i], SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(deleteLater()));
@@ -153,6 +152,8 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
+        connect(this->TX2Cameras[i], SIGNAL(returnFrameCount(int, int)),          this, SLOT(displayFrameCount(int, int)));
 
         //        //UI Trigger (For Testing)
         //        connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
@@ -165,7 +166,7 @@ void MainWindow::setupUiLayout() {
     //    connect(ui->pauseButton,SIGNAL(clicked()), this->trigger, &Trigger::pauseRequest);
 
     // Taymer Logo
-    QString filename = "/home/nvidia/ExposureUIQt/Assets/0.png";
+    QString filename = "/home/nvidia/ExposureUIQt/Assets/TaymerLogoCropped.png";
     ui->TaymerLogo->setAlignment(Qt::AlignCenter);
     QPixmap logo;
 
@@ -238,18 +239,23 @@ void MainWindow::displayQPrevDefectImage(QImage img_temp, int camIndex) {
 }
 
 void MainWindow::displayRes(int sensorRes, int camIndex) {
-    QString strExpTime=QString::number(sensorRes)+" p";
+    QString strExpTime = QString::number(sensorRes)+" p";
     this->resolutions[camIndex]->setText(strExpTime);
 }
 
 void MainWindow::displayFrameRate(double frameRate, int camIndex) {
-    QString strFrameRate=QString::number(frameRate)+"  fps";
+    QString strFrameRate = QString::number(frameRate)+"  fps";
     this->frameRates[camIndex]->setText(strFrameRate);
 }
 
 void MainWindow::displayCurrFrameRate(double currFrameRate, int camIndex) {
-    QString strFrameRate=QString::number(currFrameRate)+"  fps";
-    this->currFrameRates[camIndex]->setText(strFrameRate);
+    QString strCurrFrameRate = QString::number(currFrameRate)+"  fps";
+    this->currFrameRates[camIndex]->setText(strCurrFrameRate);
+}
+
+void MainWindow::displayFrameCount(int frameCount, int camIndex) {
+    QString strFrameCount = QString::number(frameCount);
+    this->frameCounts[camIndex]->setText(strFrameCount);
 }
 
 void MainWindow::assignLabels() {
@@ -274,6 +280,10 @@ void MainWindow::assignLabels() {
     this->currFrameRates.push_back(ui->labelCurrFrameRate);
     this->currFrameRates.push_back(ui->labelCurrFrameRate_2);
     this->currFrameRates.push_back(ui->labelCurrFrameRate_3);
+
+    this->frameCounts.push_back(ui->labelFrameCount);
+    this->frameCounts.push_back(ui->labelFrameCount_2);
+    this->frameCounts.push_back(ui->labelFrameCount_3);
 }
 
 

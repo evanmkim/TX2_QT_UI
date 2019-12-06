@@ -63,6 +63,7 @@ public:
     int captureMode;
 
     // Frame Settings
+    int displayIndex;
     int exposure;
     int gain;
 
@@ -123,8 +124,7 @@ private:
     EGLStream::IFrame  *iFrame;
 
     // CV Processing
-    int DisplayIndex=1;
-    Mat imShow[4][10]; //2D Array that saves frames in an array to display
+    Mat imShow[3][10]; //2D Array that saves frames in an array to display
     ArgusSamples::EGLDisplayHolder g_display;
 
     // Provides exclusive write access to frameFinished

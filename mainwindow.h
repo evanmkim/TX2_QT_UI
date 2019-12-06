@@ -23,6 +23,10 @@ public:
 
 private slots:
 
+    void startCamerasCts();
+//    void startCamerasTgr();
+    void setupFrameSettings(int);
+
     // Display Data
     void displayQDefectImage(QImage, int);
     void displayQPrevDefectImage(QImage, int);
@@ -30,22 +34,21 @@ private slots:
     void displayFrameRate(double, int);
     void displayCurrFrameRate(double, int);
 
-    void startCamerasCts();
-//    void startCamerasTgr();
-
-    void setupFrameSettings(int);
-    void setGain(int);
-    void setExposure(int);
-
-    // Buttons
+    // Push Buttons
     void stopAllRequest();
     void pauseAllRequest(bool);
     void captureAllRequest();
-
-    void debugApp();
-
     void closeUi();
 
+    // Radio Buttons
+    void displayNormal(bool);
+    void displayGreyscale(bool);
+    void displayThreshold(bool);
+    void displayFloodfill(bool);
+
+    // Drop Downs
+    void setGain(int);
+    void setExposure(int);
 
 signals:
 

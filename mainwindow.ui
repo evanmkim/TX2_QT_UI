@@ -699,7 +699,7 @@
       <x>90</x>
       <y>710</y>
       <width>401</width>
-      <height>221</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -731,9 +731,9 @@
      <property name="geometry">
       <rect>
        <x>200</x>
-       <y>10</y>
+       <y>20</y>
        <width>181</width>
-       <height>201</height>
+       <height>171</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -748,7 +748,7 @@
         <x>10</x>
         <y>10</y>
         <width>161</width>
-        <height>181</height>
+        <height>151</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -756,28 +756,28 @@
         <number>30</number>
        </property>
        <item>
-        <widget class="QRadioButton" name="radioButton_2">
+        <widget class="QRadioButton" name="normalRadioButton">
          <property name="text">
           <string>Normal</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton_3">
+        <widget class="QRadioButton" name="tHoldRadioButton">
          <property name="text">
           <string>Threshold</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton_4">
+        <widget class="QRadioButton" name="gScaleRadioButton">
          <property name="text">
           <string>Greyscale</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton">
+        <widget class="QRadioButton" name="fFillRadioButton">
          <property name="text">
           <string>Floodfill</string>
          </property>

@@ -39,6 +39,8 @@ Camera::Camera(int camDeviceIndex) {
     this->gain        = 0;
     this->exposure    = 0;
 
+    this->displayIndex = 0;
+
     this->frameCaptureCount = 0;
     this->previousTimeStamp = 0.0;
     this->sensorTimeStamp   = 0.0;
@@ -412,13 +414,13 @@ bool Camera::frameRequest() {
     }
 
     // Display different processed images by setting DisplayIndex (default to 1)
-    imShow[this->cameraDeviceIndex][1]=imgProc.clone();
-    imShow[this->cameraDeviceIndex][2]=imgTh.clone();
-    imShow[this->cameraDeviceIndex][3]=imgFF.clone();
-    imShow[this->cameraDeviceIndex][4]=imgGray.clone();
+    imShow[this->cameraDeviceIndex][0]=imgProc.clone();
+    imShow[this->cameraDeviceIndex][1]=imgTh.clone();
+    imShow[this->cameraDeviceIndex][2]=imgFF.clone();
+    imShow[this->cameraDeviceIndex][3]=imgGray.clone();
 
     //QImage  QImg((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888 );
-    Mat tej = imShow[this->cameraDeviceIndex][this->DisplayIndex](roi);
+    Mat tej = imShow[this->cameraDeviceIndex][this->displayIndex](roi);
     QImage QImgDefect = ASM::cvMatToQImage(tej);
 
     //emit returnQImage(Qimg.rgbSwapped(), this->cameraDeviceIndex);
@@ -428,7 +430,6 @@ bool Camera::frameRequest() {
         emit returnQPrevDefectImage(QImgDefect, this->cameraDeviceIndex);
         this->defectFound = false;
     }
-
 
     //START UNMAPPING
     if ((this->frameCaptureCount)%10 == 0) {

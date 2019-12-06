@@ -68,10 +68,6 @@ void MainWindow::startCamerasCts() {
     ui->ctsModeStartButton->setEnabled(false);
 }
 
-void MainWindow::debugApp() {
-    cout << "Finished" << endl;
-}
-
 void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->stopButtonPressed = true;
@@ -117,7 +113,7 @@ void MainWindow::pauseAllRequest(bool clicked) {
 
 void MainWindow::setupUiLayout() {
 
-    // Buttons
+    // Radio Buttons
     ui->pauseButton->setCheckable(true);
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
@@ -126,13 +122,20 @@ void MainWindow::setupUiLayout() {
     connect(ui->captureButton, SIGNAL(clicked()),    this, SLOT(captureAllRequest()));
     connect(ui->stopButton,    SIGNAL(clicked()),    this, SLOT(stopAllRequest()));
 
+    // Push Buttons
+    ui->normalRadioButton->setChecked(true);
+
+    connect(ui->normalRadioButton, SIGNAL(clicked(bool)), this, SLOT(displayNormal(bool)));
+    connect(ui->gScaleRadioButton, SIGNAL(clicked(bool)), this, SLOT(displayGreyscale(bool)));
+    connect(ui->fFillRadioButton,  SIGNAL(clicked(bool)), this, SLOT(displayFloodfill(bool)));
+    connect(ui->tHoldRadioButton,  SIGNAL(clicked(bool)), this, SLOT(displayThreshold(bool)));
+
     // Drop Downs
     this->exposure = 30000;
     this->gain = 30;
 
     for (int i = 0; i < dropDownOptionCount; i++) {
 
-        //addItem(displayedIndexValue, actualIndexValue) -> (microseconds, nanoseconds)
         ui->exposureDropDown->addItem(QString::number((exposure/1000)+(i*10)), exposure+(i*10000));
         ui->gainDropDown->addItem(QString::number(gain+(i*10)), gain+(i*10));
     }
@@ -151,7 +154,7 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
 
-        //        //UI Trigger (For Testing)s
+        //        //UI Trigger (For Testing)
         //        connect(ui->triggerButton, &PushButton::clicked, this->TX2Cameras[i].get(), SIGNAL(frameRequest);
 
         //        //Hardware GPIO Trigger
@@ -171,6 +174,38 @@ void MainWindow::setupUiLayout() {
         ui->TaymerLogo->setPixmap(logo);
     } else {
         cout << "Unable to load, bad filename" << endl;
+    }
+}
+
+void MainWindow::displayNormal(bool checked) {
+    if (checked) {
+        for(int i = 0; i < this->numTX2Cameras; i++) {
+            this->TX2Cameras[i]->displayIndex = 0;
+        }
+    }
+}
+
+void MainWindow::displayThreshold(bool checked) {
+    if (checked) {
+        for(int i = 0; i < this->numTX2Cameras; i++) {
+            this->TX2Cameras[i]->displayIndex = 1;
+        }
+    }
+}
+
+void MainWindow::displayFloodfill(bool checked) {
+    if (checked) {
+        for(int i = 0; i < this->numTX2Cameras; i++) {
+            this->TX2Cameras[i]->displayIndex = 2;
+        }
+    }
+}
+
+void MainWindow::displayGreyscale(bool checked) {
+    if (checked) {
+        for(int i = 0; i < this->numTX2Cameras; i++) {
+            this->TX2Cameras[i]->displayIndex = 3;
+        }
     }
 }
 

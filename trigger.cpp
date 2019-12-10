@@ -33,6 +33,7 @@ void Trigger::initGPIO()
         // Don't send a trigger signal unless the previous frame has finished and the pause button is not pressed.
         if ((frameFinished == 3) && !pauseButtonPressed)
         {
+            msleep(5);
             //gpioGetValue(pushButton, &value);
             if(prevValue == low) {
                 value = high;

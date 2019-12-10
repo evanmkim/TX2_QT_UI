@@ -28,7 +28,7 @@ private:
     bool stopButtonPressed = false;
     bool pauseButtonPressed = false;
     // Initialized to true before the first capture
-    bool frameFinished = true;
+    int frameFinished = 3;
 
 public:
     explicit Trigger(QObject *parent = 0);
@@ -38,12 +38,12 @@ protected:
     void run();
 
 signals:
-    void captureRequest(bool);
+    void captureRequest();
 
 public slots:
-    void stopRequest(bool);
+    void stopRequest();
     void pauseRequest(bool);
-    void captureComplete(bool);
+    void captureComplete();
 };
 
 #endif // TRIGGER

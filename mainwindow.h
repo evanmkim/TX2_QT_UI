@@ -24,7 +24,7 @@ public:
 private slots:
 
     void startCamerasCts();
-//    void startCamerasTgr();
+    void startCamerasTgr();
     void setupFrameSettings(int);
 
     // Display Data

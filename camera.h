@@ -132,8 +132,6 @@ private:
 //    int *frameFinished;
 
     bool defectFound = false;
-
-    bool frameRequest();
     bool runCts();
 
     bool restarted;
@@ -147,7 +145,7 @@ signals:
     void returnQDefectImage(QImage, int);
     void returnQPrevDefectImage(QImage, int);
     void returnRes(int, int);
-    void returnFrameFinished(bool);
+    void returnFrameFinished();
     void returnFrameRate(double, int);
     void returnCurrFrameRate(double, int);
     void returnFrameCount(int,int);
@@ -157,6 +155,7 @@ public slots:
     bool startSession();
     bool restartSession();
     void endSession();
+    bool frameRequest();
 
 };
 

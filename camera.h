@@ -158,6 +158,7 @@ public slots:
     bool startSession();
     bool restartSession();
     void endSession();
+
 };
 
 

@@ -128,26 +128,26 @@ bool Camera::startSession() {
     this->iDenoiseSettings->setDenoiseMode(DENOISE_MODE_OFF);
     this->iDenoiseSettings->setDenoiseStrength(0.0f);
 
-    //CAMERA PROPERTIES
-    this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
-    EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
+//    //CAMERA PROPERTIES
+//    this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
+//    EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
 
-    std::vector<SensorMode*> sensorModes;
-    this->iCameraProperties->getBasicSensorModes(&sensorModes);
-    std::vector<SensorMode*> modes;
-    this->iCameraProperties->getAllSensorModes(&modes);
-    if (sensorModes.size() == 0)
-        cout <<"Failed to get sensor modes"<<endl;
+//    std::vector<SensorMode*> sensorModes;
+//    this->iCameraProperties->getBasicSensorModes(&sensorModes);
+//    std::vector<SensorMode*> modes;
+//    this->iCameraProperties->getAllSensorModes(&modes);
+//    if (sensorModes.size() == 0)
+//        cout <<"Failed to get sensor modes"<<endl;
 
-    //SENSOR MODE
-    // Index as 2 is 60fps, 0 is 30 fps (fix at 0 for now)
-    SensorMode *sensorMode = sensorModes[0];
-    this->iSensorMode = interface_cast<ISensorMode>(sensorModes[0]);
-    EXIT_IF_NULL(this->iSensorMode, "Failed to get sensor mode interface");
+//    //SENSOR MODE
+//    // Index as 2 is 60fps, 0 is 30 fps (fix at 0 for now)
+//    SensorMode *sensorMode = sensorModes[0];
+//    this->iSensorMode = interface_cast<ISensorMode>(sensorModes[0]);
+//    EXIT_IF_NULL(this->iSensorMode, "Failed to get sensor mode interface");
 
-    emit returnRes(this->iSensorMode->getResolution().height(), this->cameraDeviceIndex);
+//    emit returnRes(this->iSensorMode->getResolution().height(), this->cameraDeviceIndex);
 
-    EXIT_IF_NOT_OK(this->iSourceSettings->setSensorMode(sensorMode),"Unable to set Sensor Mode");
+//    EXIT_IF_NOT_OK(this->iSourceSettings->setSensorMode(sensorMode),"Unable to set Sensor Mode");
 
     //INTIALIZES THE CAMERA PARAMETERS OF THE CAMERA STARTING
     EXIT_IF_NOT_OK(this->iRequest->enableOutputStream(stream.get()),"Failed to enable stream in capture request");
@@ -157,17 +157,18 @@ bool Camera::startSession() {
     this->startTime = std::chrono::high_resolution_clock::now();
     this->finishTime = std::chrono::high_resolution_clock::now();
 
-    //EVENT PROVIDER
-    this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
-    EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");
+//    //EVENT PROVIDER
+//    this->iEventProvider = interface_cast<IEventProvider>(this->captureSession);
+//    EXIT_IF_NULL(this->iEventProvider, "iEventProvider is NULL");
 
-    std::vector<EventType> eventTypes;
-    eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
+//    std::vector<EventType> eventTypes;
+//    eventTypes.push_back(EVENT_TYPE_CAPTURE_COMPLETE);
 
-    this->queue = UniqueObj<EventQueue>(this->iEventProvider->createEventQueue(eventTypes));
-    this->iQueue = interface_cast<IEventQueue>(this->queue);
-    EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
+//    this->queue = UniqueObj<EventQueue>(this->iEventProvider->createEventQueue(eventTypes));
+//    this->iQueue = interface_cast<IEventQueue>(this->queue);
+//    EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
 
+    cout << "About to start running" << endl;
 
     if (this->captureMode == 0) {
         runCts();
@@ -283,24 +284,24 @@ bool Camera::frameRequest() {
 
          emit requestFrameSettings(this->cameraDeviceIndex);
 
-        ///WAIT FOR EVENTS TO GET QUEUED
-        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
-        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
+//        ///WAIT FOR EVENTS TO GET QUEUED
+//        this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
+//        EXIT_IF_TRUE(this->iQueue->getSize() == 0, "No events in queue");
 
-        ///GET EVENT CAPTURE
-        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
-        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
-        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
+//        ///GET EVENT CAPTURE
+//        const Event* event = this->iQueue->getEvent(this->iQueue->getSize() - 1);
+//        const IEventCaptureComplete *iEventCaptureComplete = interface_cast<const IEventCaptureComplete>(event);
+//        EXIT_IF_NULL(iEventCaptureComplete, "Failed to get EventCaptureComplete Interface");
 
-        ///GET METADATA
-        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
-        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
-        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
+//        ///GET METADATA
+//        const CaptureMetadata *metaData = iEventCaptureComplete->getMetadata();
+//        this->iMetadata = interface_cast<const ICaptureMetadata>(metaData);
+//        EXIT_IF_NULL(iMetadata, "Failed to get CaptureMetadata Interface");
 
-        ///SUPPORTED FRAME RATE
-        this->previousTimeStamp=this->sensorTimeStamp;
-        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
-        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
+//        ///SUPPORTED FRAME RATE
+//        this->previousTimeStamp=this->sensorTimeStamp;
+//        this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+//        //printf("Frame Rate (Processing Time) %f\n", 1.0/(SensorTimestamp/1000000000.0-PreviousTimeStamp/1000000000.0));
 
         /// SET EXPOSURE TIME WITH UI
         EXIT_IF_NOT_OK(this->iSourceSettings->setExposureTimeRange(ArgusSamples::Range<uint64_t>(this->exposure)),"Unable to set the Source Settings Exposure Time Range");
@@ -463,7 +464,7 @@ bool Camera::frameRequest() {
     // Requests a new frame when all three frames have been displayed
     emit returnFrameFinished();
 
-    this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
+    //this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
 
     // Frame Rate Information
     finishTime = std::chrono::high_resolution_clock::now();
@@ -471,7 +472,7 @@ bool Camera::frameRequest() {
     float totalDuration= std::chrono::duration_cast<std::chrono::nanoseconds>(finishTime-startTime).count();
 
     emit returnFrameRate((this->frameCaptureCount*1.0)/(totalDuration/1000000000.0), this->cameraDeviceIndex);
-    emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
+    //emit returnCurrFrameRate(1.0/(this->sensorTimeStamp/1000000000.0-previousTimeStamp/1000000000.0), this->cameraDeviceIndex);
     emit returnFrameCount(this->frameCaptureCount, this->cameraDeviceIndex);
 
     return true;

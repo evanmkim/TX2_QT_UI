@@ -45,7 +45,7 @@ void Trigger::initGPIO()
                 //gpioSetValue(gLed,on);
                 this->frameFinished = 0;
                 emit captureRequest();
-                cout << "Sent Capture Request" << endl;
+                //cout << "Sent Capture Request" << endl;
 
             } else {
                 ledValue = low ;

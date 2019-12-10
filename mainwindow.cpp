@@ -105,6 +105,12 @@ void MainWindow::startCamerasTgr() {
     ui->ctsModeStartButton->setEnabled(false);
 }
 
+void MainWindow::frameRequest() {
+    for (int i = 0; i < this->numTX2Cameras; i++) {
+        this->TX2Cameras[i]->triggered = true;
+    }
+}
+
 
 void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
@@ -195,8 +201,8 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnFrameCount(int, int)),          this, SLOT(displayFrameCount(int, int)));
 
         // Hardware GPIO Trigger
-        connect(this->trigger,       SIGNAL(captureRequest()),      this->TX2Cameras[i], SLOT(frameRequest()));
-        connect(this->TX2Cameras[i], SIGNAL(returnFrameFinished()), this->trigger,       SLOT(captureComplete()));
+        connect(this->trigger,       SIGNAL(captureRequest()),      this,          SLOT(frameRequest()));
+        connect(this->TX2Cameras[i], SIGNAL(returnFrameFinished()), this->trigger, SLOT(captureComplete()));
     }
     connect(ui->stopButton,  SIGNAL(clicked()),     this->trigger, SLOT(stopRequest()));
     connect(ui->pauseButton, SIGNAL(clicked(bool)), this->trigger, SLOT(pauseRequest(bool)));

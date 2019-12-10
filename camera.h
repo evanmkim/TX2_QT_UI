@@ -58,6 +58,8 @@ public:
     bool captureButtonPressed;
     bool pauseButtonPressed;
 
+    bool triggered;
+
     // Continuous Mode: 0
     // Triggered Mode: 1
     int captureMode;
@@ -133,6 +135,7 @@ private:
 
     bool defectFound = false;
     bool runCts();
+    bool frameRequest();
 
     bool restarted;
 
@@ -155,8 +158,6 @@ public slots:
     bool startSession();
     bool restartSession();
     void endSession();
-    bool frameRequest();
-
 };
 
 

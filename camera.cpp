@@ -66,8 +66,6 @@ bool Camera::startSession() {
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
-    this->thread()->msleep(3000);
-
     if (!restarted) {
 
         //CAMERA PROVIDER
@@ -100,7 +98,7 @@ bool Camera::startSession() {
     this->iStream = interface_cast<IStream>(this->stream);
     EXIT_IF_NULL(this->iStream, "Cannot get OutputStream Interface");
 
-    Argus::UniqueObj<EGLStream::FrameConsumer> consumer(EGLStream::FrameConsumer::create(this->stream.get()));
+    this->consumer = UniqueObj<EGLStream::FrameConsumer>(EGLStream::FrameConsumer::create(this->stream.get()));
     this->iFrameConsumer = Argus::interface_cast<EGLStream::IFrameConsumer>(consumer);
     EXIT_IF_NULL(this->iFrameConsumer, "Failed to initialize Consumer");
 
@@ -170,10 +168,20 @@ bool Camera::startSession() {
     this->iQueue = interface_cast<IEventQueue>(this->queue);
     EXIT_IF_NULL(this->iQueue, "event queue interface is NULL");
 
-    cout << "About to start running" << endl;
 
     if (this->captureMode == 0) {
         runCts();
+    } else {
+        while (!stopButtonPressed) {
+            while(pauseButtonPressed){
+                if (stopButtonPressed) {break;}
+                sleep(1);
+            }
+            if (triggered) {
+                frameRequest();
+                this->triggered = false;
+            }
+        }
     }
 }
 
@@ -273,7 +281,7 @@ bool Camera::frameRequest() {
 
     if (this->captureMode == 1) {
 
-        cout << "HEREEHEREHHRHHE" << endl;
+         emit requestFrameSettings(this->cameraDeviceIndex);
 
         ///WAIT FOR EVENTS TO GET QUEUED
         this->iEventProvider->waitForEvents(this->queue.get(), 2*ONE_SECOND);
@@ -307,7 +315,7 @@ bool Camera::frameRequest() {
     /// START IMAGE GENERATION
 
     EXIT_IF_NULL(this->iFrameConsumer, "Frame Consumer Invalid")
-            Argus::UniqueObj<EGLStream::Frame> frame(this->iFrameConsumer->acquireFrame(this->status));
+            Argus::UniqueObj<EGLStream::Frame> frame(this->iFrameConsumer->acquireFrame(5000000000, &status));
     EXIT_IF_NOT_OK(this->status, "Failed to acquire frame");
     EGLStream::IFrame *iFrame = Argus::interface_cast<EGLStream::IFrame>(frame);
     EXIT_IF_NULL(iFrame, "Failed to get IFrame interface");

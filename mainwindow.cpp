@@ -20,7 +20,9 @@ MainWindow::MainWindow(QWidget *parent)
         this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
     }
 
+    this->triggerThread = new QThread();
     this->trigger = new Trigger();
+    this->trigger->moveToThread(this->triggerThread);
 
     this->camerasRunning = false;
     this->camerasFinished = 0;
@@ -79,6 +81,7 @@ void MainWindow::startCamerasTgr() {
 
             this->TX2Cameras[i]->captureMode = 1;
 
+            connect(this->TX2Cameras[i],       SIGNAL(frameFinished()), this, SLOT(captureComplete()));
             connect(this->TX2CameraThreads[i], SIGNAL(started()),        this->TX2Cameras[i], SLOT(startSession()));
             connect(this,                      SIGNAL(restartCapture()), this->TX2Cameras[i], SLOT(restartSession()));
             connect(ui->exitButton,            SIGNAL(clicked()),        this->TX2Cameras[i], SLOT(endSession()));
@@ -93,7 +96,14 @@ void MainWindow::startCamerasTgr() {
 
             this->TX2CameraThreads[i]->start();
         }
-        this->trigger->start();
+        connect(this->trigger,       SIGNAL(captureRequest()), this,                SLOT(frameRequest()));
+        connect(this->triggerThread, SIGNAL(started()),        this->trigger,       SLOT(startSession()));
+        connect(this->trigger,       SIGNAL(finished()),       this->triggerThread, SLOT(quit()));
+        connect(this->trigger,       SIGNAL(finished()),       this->trigger,       SLOT(deleteLater()));
+        connect(this->triggerThread, SIGNAL(finished()),       this->triggerThread, SLOT(deleteLater()));
+
+        this->triggerThread->start();
+
     } else {
         cout << "Restarting Capture" << endl;
         emit restartCapture();
@@ -103,6 +113,10 @@ void MainWindow::startCamerasTgr() {
     ui->stopButton->setEnabled(true);
     ui->exitButton->setEnabled(false);
     ui->ctsModeStartButton->setEnabled(false);
+}
+
+void MainWindow::captureComplete() {
+    this->trigger->frameFinished++;
 }
 
 void MainWindow::frameRequest() {
@@ -116,6 +130,8 @@ void MainWindow::stopAllRequest() {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->stopButtonPressed = true;
     }
+    this->trigger->stopButtonPressed = true;
+
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
     ui->stopButton->setEnabled(false);
@@ -146,6 +162,8 @@ void MainWindow::pauseAllRequest(bool clicked) {
     for (int i = 0; i < this->numTX2Cameras; i++) {
         this->TX2Cameras[i]->pauseButtonPressed = clicked;
     }
+    this->trigger->pauseButtonPressed = true;
+
     if (clicked) {
         ui->pauseButton->setText("Resume");
     }
@@ -199,13 +217,7 @@ void MainWindow::setupUiLayout() {
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
         connect(this->TX2Cameras[i], SIGNAL(returnFrameCount(int, int)),          this, SLOT(displayFrameCount(int, int)));
-
-        // Hardware GPIO Trigger
-        connect(this->trigger,       SIGNAL(captureRequest()),      this,          SLOT(frameRequest()));
-        connect(this->TX2Cameras[i], SIGNAL(returnFrameFinished()), this->trigger, SLOT(captureComplete()));
     }
-    connect(ui->stopButton,  SIGNAL(clicked()),     this->trigger, SLOT(stopRequest()));
-    connect(ui->pauseButton, SIGNAL(clicked(bool)), this->trigger, SLOT(pauseRequest(bool)));
 
     // Taymer Logo
     QString filename = "/home/nvidia/ExposureUIQt/Assets/TaymerLogoCropped.png";

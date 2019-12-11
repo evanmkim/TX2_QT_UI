@@ -25,6 +25,7 @@ private slots:
 
     void startCamerasCts();
     void startCamerasTgr();
+    void captureComplete();
     void frameRequest();
     void setupFrameSettings(int);
 
@@ -66,6 +67,7 @@ private:
     std::vector<Camera *> TX2Cameras;
     std::vector<QThread *> TX2CameraThreads;
     Trigger *trigger;
+    QThread *triggerThread;
 
     void assignLabels();
     void connectStart();

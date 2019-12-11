@@ -143,12 +143,12 @@ signals:
 
     void finished();
     void requestFrameSettings(int);
+    void frameFinished();
 
     //void returnQImage(QImage, int);
     void returnQDefectImage(QImage, int);
     void returnQPrevDefectImage(QImage, int);
     void returnRes(int, int);
-    void returnFrameFinished();
     void returnFrameRate(double, int);
     void returnCurrFrameRate(double, int);
     void returnFrameCount(int,int);

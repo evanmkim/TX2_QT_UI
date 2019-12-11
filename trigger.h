@@ -20,30 +20,26 @@
 #include <chrono> //for time
 #include <termios.h>
 
-class Trigger: public QThread
+class Trigger: public QObject
 {
     Q_OBJECT
 
-private:
-    bool stopButtonPressed = false;
-    bool pauseButtonPressed = false;
-    // Initialized to true before the first capture
-    int frameFinished = 3;
-
 public:
-    explicit Trigger(QObject *parent = 0);
-    void initGPIO();
+
+    Trigger();
+    int frameFinished;
+    bool stopButtonPressed;
+    bool pauseButtonPressed;
 
 protected:
     void run();
 
 signals:
     void captureRequest();
+    void finished();
 
 public slots:
-    void stopRequest();
-    void pauseRequest(bool);
-    void captureComplete();
+    void startSession();
 };
 
 #endif // TRIGGER

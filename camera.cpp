@@ -66,6 +66,8 @@ bool Camera::startSession() {
 
     cout << "cameraDeviceIndex " << this->cameraDeviceIndex << endl;
 
+    this->g_display.initialize();
+
     if (!restarted) {
 
         //CAMERA PROVIDER
@@ -462,7 +464,7 @@ bool Camera::frameRequest() {
     this->frameCaptureCount++;
 
     // Requests a new frame when all three frames have been displayed
-    emit returnFrameFinished();
+    emit frameFinished();
 
     //this->sensorTimeStamp = this->iMetadata->getSensorTimestamp();
 

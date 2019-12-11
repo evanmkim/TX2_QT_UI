@@ -129,7 +129,7 @@ bool Camera::startSession() {
 
     this->iDenoiseSettings->setDenoiseMode(DENOISE_MODE_OFF);
     this->iDenoiseSettings->setDenoiseStrength(0.0f);
-
+    // TEST
     //CAMERA PROPERTIES
     this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
     EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");

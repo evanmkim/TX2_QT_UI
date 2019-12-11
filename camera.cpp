@@ -26,9 +26,12 @@
 using namespace Argus;
 using namespace std;
 
-Camera::Camera(int camDeviceIndex) {
+Camera::Camera(int camDeviceIndex, ICameraProvider *iCameraProvider, QMutex *camMutex) {
 
     this->cameraDeviceIndex = camDeviceIndex;
+
+    this->iCameraProvider = iCameraProvider;
+    this->camMutex = camMutex;
 
     this->restarted            = false;
     this->stopButtonPressed    = false;
@@ -45,7 +48,6 @@ Camera::Camera(int camDeviceIndex) {
     this->previousTimeStamp = 0.0;
     this->sensorTimeStamp   = 0.0;
 
-    this->iCameraProvider      = nullptr;
     this->iSession             = nullptr;
     this->iStreamSettings      = nullptr;
     this->iStream              = nullptr;
@@ -69,23 +71,20 @@ bool Camera::startSession() {
     this->g_display.initialize();
 
     if (!restarted) {
-
-        //CAMERA PROVIDER
-        this->cameraProvider = UniqueObj<CameraProvider>(CameraProvider::create());
-        this->iCameraProvider = interface_cast<ICameraProvider>(this->cameraProvider);
-        EXIT_IF_NULL(this->iCameraProvider, "Cannot get core camera provider interface");
-
+        this->camMutex->lock();
         //CAMERA DEVICE
         this->status = this->iCameraProvider->getCameraDevices(&(this->cameraDevices));
         EXIT_IF_NOT_OK(this->status, "Failed to get camera devices");
         EXIT_IF_NULL(this->cameraDevices.size(), "No camera devices available");
         cout << "There are " << this->cameraDevices.size() << " camera ports detected. " <<  endl;
+        this->camMutex->unlock();
     }
-
+    this->camMutex->lock();
     //CAPTURE SESSION
     this->captureSession = UniqueObj<CaptureSession>(this->iCameraProvider->createCaptureSession(this->cameraDevices[this->cameraDeviceIndex]));
     this->iSession = interface_cast<ICaptureSession>(this->captureSession);
     EXIT_IF_NULL(this->iSession, "Cannot get Capture Session Interface");
+    this->camMutex->unlock();
 
     //OUTPUT STREAM SETTINGS
     this->streamSettings = UniqueObj<OutputStreamSettings>(this->iSession->createOutputStreamSettings());
@@ -129,7 +128,7 @@ bool Camera::startSession() {
 
     this->iDenoiseSettings->setDenoiseMode(DENOISE_MODE_OFF);
     this->iDenoiseSettings->setDenoiseStrength(0.0f);
-    // TEST
+
     //CAMERA PROPERTIES
     this->iCameraProperties = interface_cast<ICameraProperties>(this->cameraDevices[this->cameraDeviceIndex]);
     EXIT_IF_NULL(this->iCameraProperties, "Failed to get ICameraProperties interface");
@@ -188,7 +187,7 @@ bool Camera::startSession() {
     }
 }
 
-bool Camera::restartSession() {
+bool Camera::restartSession(int captureMode) {
 
     this->restarted = true;
 
@@ -196,7 +195,7 @@ bool Camera::restartSession() {
     this->pauseButtonPressed = false;
     this->captureButtonPressed = false;
 
-    this->captureMode = 0;
+    this->captureMode = captureMode;
     this->gain = 0;
     this->exposure = 0;
 
@@ -225,9 +224,6 @@ void Camera::endSession() {
 
     this->stream.reset();
     this->stream.release();
-
-    this->cameraProvider.reset();
-    this->cameraProvider.release();
 
     this->g_display.cleanup();
     cout << "Cleaning Up Display" << this->cameraDeviceIndex << endl;

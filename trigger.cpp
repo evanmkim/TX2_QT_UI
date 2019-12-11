@@ -32,6 +32,8 @@ void Trigger::startSession()
         {
             this->thread()->msleep(25);
             //gpioGetValue(pushButton, &value);
+
+            // Toggle trigger on and off
             if(prevValue == low) {
                 value = high;
             } else {
@@ -52,9 +54,19 @@ void Trigger::startSession()
             prevValue = value;
         }
     }
-
     gpioUnexport(gLed);     // unexport the LED
     gpioUnexport(pushButton);      // unexport the push button
+}
 
+void Trigger::endSession() {
     emit finished();
+}
+
+void Trigger::restartSession() {
+    this->stopButtonPressed = false;
+    this->pauseButtonPressed = false;
+    this->frameFinished = 3;
+
+    cout << "About to restart Trigger" << endl;
+    this->startSession();
 }

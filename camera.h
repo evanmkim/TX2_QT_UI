@@ -51,7 +51,7 @@ class Camera : public QObject
 
 // Public members are modified at runtime by the main GUI thread
 public:
-    Camera(int camDeviceIndex);
+    Camera(int camDeviceIndex, ICameraProvider *iCameraProvider, QMutex *camMutex);
 
     // boolean flags set by MainWindow on_clicked methods
     bool stopButtonPressed;
@@ -88,8 +88,8 @@ private:
     uint64_t previousFrameNum=0;
 
     // Session Interfaces
-    Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
     ICameraProvider *iCameraProvider;
+    QMutex *camMutex;
 
     Argus::UniqueObj<Argus::CaptureSession> captureSession;
     ICaptureSession *iSession;
@@ -106,7 +106,6 @@ private:
     Argus::UniqueObj<Argus::Request> request;
     Argus::IRequest *iRequest;
 
-    // Cts Session Interfaces
     IEventProvider *iEventProvider;
 
     Argus::UniqueObj<Argus::EventQueue> queue;
@@ -156,7 +155,7 @@ signals:
 public slots:
 
     bool startSession();
-    bool restartSession();
+    bool restartSession(int);
     void endSession();
 
 };

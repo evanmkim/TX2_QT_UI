@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <jetsonGPIO.h>
+#include <Argus/Argus.h>
 #include "camera.h"
 #include "trigger.h"
 #include "ui_mainwindow.h"
@@ -55,17 +56,23 @@ private slots:
 
 signals:
 
-    void restartCapture();
+    void restartCapture(int);
+    void restartTrigger();
 
 private:
 
     Ui_MainWindow *ui;
 
-    const int numTX2Cameras = 3;
+    const int numCameras = 3;
+
+    Argus::UniqueObj<Argus::CameraProvider> cameraProvider;
+    ICameraProvider *iCameraProvider;
+
+    QMutex *camMutex;
 
     int camerasFinished;
-    std::vector<Camera *> TX2Cameras;
-    std::vector<QThread *> TX2CameraThreads;
+    std::vector<Camera *> cameras;
+    std::vector<QThread *> cameraThreads;
     Trigger *trigger;
     QThread *triggerThread;
 

@@ -14,10 +14,15 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow)
 {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2CameraThreads.push_back(new QThread());
-        this->TX2Cameras.push_back(new Camera(i));
-        this->TX2Cameras[i]->moveToThread(this->TX2CameraThreads[i]);
+    this->cameraProvider = UniqueObj<CameraProvider>(CameraProvider::create());
+    this->iCameraProvider = interface_cast<ICameraProvider>(this->cameraProvider);
+
+    this->camMutex = new QMutex();
+
+    for (int i = 0; i < this->numCameras; i++) {
+        this->cameraThreads.push_back(new QThread());
+        this->cameras.push_back(new Camera(i, iCameraProvider, camMutex));
+        this->cameras[i]->moveToThread(this->cameraThreads[i]);
     }
 
     this->triggerThread = new QThread();
@@ -36,6 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
     delete ui;
+
+    this->cameraProvider.reset();
+    this->cameraProvider.release();
 }
 
 void MainWindow::connectStart() {
@@ -46,58 +54,55 @@ void MainWindow::connectStart() {
 void MainWindow::startCamerasCts() {
 
     if (!camerasRunning) {
-        for (int i = 0; i < this->numTX2Cameras; i++) {
+        for (int i = 0; i < this->numCameras; i++) {
 
-            this->TX2Cameras[i]->captureMode = 0;
+            this->cameras[i]->captureMode = 0;
 
-            connect(this->TX2CameraThreads[i], SIGNAL(started()),        this->TX2Cameras[i], SLOT(startSession()));
-            connect(this,                      SIGNAL(restartCapture()), this->TX2Cameras[i], SLOT(restartSession()));
-            connect(ui->exitButton,            SIGNAL(clicked()),        this->TX2Cameras[i], SLOT(endSession()));
+            connect(this->cameraThreads[i], SIGNAL(started()),           this->cameras[i], SLOT(startSession()));
+            connect(this,                   SIGNAL(restartCapture(int)), this->cameras[i], SLOT(restartSession(int)));
+            connect(ui->exitButton,         SIGNAL(clicked()),           this->cameras[i], SLOT(endSession()));
 
-            // Handle worker finishing connections
-            // Worker finished signal will call quit() on the thread
-            // This will end the thread's event loop and initiate the thread's finished signal
-            connect(this->TX2Cameras[i],       SIGNAL(destroyed()), this,                      SLOT(closeUi()));
-            connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(quit()));
-            connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2Cameras[i],       SLOT(deleteLater()));
-            connect(this->TX2CameraThreads[i], SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(deleteLater()));
+            connect(this->cameras[i],       SIGNAL(destroyed()), this,                      SLOT(closeUi()));
+            connect(this->cameras[i],       SIGNAL(finished()),  this->cameraThreads[i], SLOT(quit()));
+            connect(this->cameras[i],       SIGNAL(finished()),  this->cameras[i],       SLOT(deleteLater()));
+            connect(this->cameraThreads[i], SIGNAL(finished()),  this->cameraThreads[i], SLOT(deleteLater()));
 
-            this->TX2CameraThreads[i]->start();
+            this->cameraThreads[i]->start();
         }
     } else {
         cout << "Restarting Capture" << endl;
-        emit restartCapture();
+        emit restartCapture(0);
     }
 
     this->camerasRunning = true;
     ui->stopButton->setEnabled(true);
     ui->exitButton->setEnabled(false);
     ui->ctsModeStartButton->setEnabled(false);
+    ui->tgrModeStartButton->setEnabled(false);
 }
 
 void MainWindow::startCamerasTgr() {
     if (!camerasRunning) {
-        for (int i = 0; i < this->numTX2Cameras; i++) {
+        for (int i = 0; i < this->numCameras; i++) {
 
-            this->TX2Cameras[i]->captureMode = 1;
+            this->cameras[i]->captureMode = 1;
 
-            connect(this->TX2Cameras[i],       SIGNAL(frameFinished()), this, SLOT(captureComplete()));
-            connect(this->TX2CameraThreads[i], SIGNAL(started()),        this->TX2Cameras[i], SLOT(startSession()));
-            connect(this,                      SIGNAL(restartCapture()), this->TX2Cameras[i], SLOT(restartSession()));
-            connect(ui->exitButton,            SIGNAL(clicked()),        this->TX2Cameras[i], SLOT(endSession()));
+            connect(this->cameras[i],       SIGNAL(frameFinished()),     this,             SLOT(captureComplete()));
+            connect(this->cameraThreads[i], SIGNAL(started()),           this->cameras[i], SLOT(startSession()));
+            connect(this,                   SIGNAL(restartCapture(int)), this->cameras[i], SLOT(restartSession(int)));
+            connect(ui->exitButton,         SIGNAL(clicked()),           this->cameras[i], SLOT(endSession()));
 
-            // Handle worker finishing connections
-            // Worker finished signal will call quit() on the thread
-            // This will end the thread's event loop and initiate the thread's finished signal
-            connect(this->TX2Cameras[i],       SIGNAL(destroyed()), this,                      SLOT(closeUi()));
-            connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(quit()));
-            connect(this->TX2Cameras[i],       SIGNAL(finished()),  this->TX2Cameras[i],       SLOT(deleteLater()));
-            connect(this->TX2CameraThreads[i], SIGNAL(finished()),  this->TX2CameraThreads[i], SLOT(deleteLater()));
+            connect(this->cameras[i],       SIGNAL(destroyed()), this,                   SLOT(closeUi()));
+            connect(this->cameras[i],       SIGNAL(finished()),  this->cameraThreads[i], SLOT(quit()));
+            connect(this->cameras[i],       SIGNAL(finished()),  this->cameras[i],       SLOT(deleteLater()));
+            connect(this->cameraThreads[i], SIGNAL(finished()),  this->cameraThreads[i], SLOT(deleteLater()));
 
-            this->TX2CameraThreads[i]->start();
+            this->cameraThreads[i]->start();
         }
         connect(this->trigger,       SIGNAL(captureRequest()), this,                SLOT(frameRequest()));
         connect(this->triggerThread, SIGNAL(started()),        this->trigger,       SLOT(startSession()));
+        connect(this,                SIGNAL(restartTrigger()), this->trigger,       SLOT(restartSession()));
+        connect(ui->exitButton,      SIGNAL(clicked()),        this->trigger,       SLOT(endSession()));
         connect(this->trigger,       SIGNAL(finished()),       this->triggerThread, SLOT(quit()));
         connect(this->trigger,       SIGNAL(finished()),       this->trigger,       SLOT(deleteLater()));
         connect(this->triggerThread, SIGNAL(finished()),       this->triggerThread, SLOT(deleteLater()));
@@ -106,13 +111,15 @@ void MainWindow::startCamerasTgr() {
 
     } else {
         cout << "Restarting Capture" << endl;
-        emit restartCapture();
+        emit restartCapture(1);
+        emit restartTrigger();
     }
 
     this->camerasRunning = true;
     ui->stopButton->setEnabled(true);
     ui->exitButton->setEnabled(false);
     ui->ctsModeStartButton->setEnabled(false);
+    ui->tgrModeStartButton->setEnabled(false);
 }
 
 void MainWindow::captureComplete() {
@@ -120,20 +127,21 @@ void MainWindow::captureComplete() {
 }
 
 void MainWindow::frameRequest() {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->triggered = true;
+    for (int i = 0; i < this->numCameras; i++) {
+        this->cameras[i]->triggered = true;
     }
 }
 
 
 void MainWindow::stopAllRequest() {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->stopButtonPressed = true;
+    for (int i = 0; i < this->numCameras; i++) {
+        this->cameras[i]->stopButtonPressed = true;
     }
     this->trigger->stopButtonPressed = true;
 
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
+    ui->tgrModeStartButton->setEnabled(true);
     ui->stopButton->setEnabled(false);
 
     // Pause Button was Already Depressed
@@ -153,16 +161,16 @@ void MainWindow::closeUi() {
 
 void MainWindow::captureAllRequest()
 {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->captureButtonPressed = true;
+    for (int i = 0; i < this->numCameras; i++) {
+        this->cameras[i]->captureButtonPressed = true;
     }
 }
 
 void MainWindow::pauseAllRequest(bool clicked) {
-    for (int i = 0; i < this->numTX2Cameras; i++) {
-        this->TX2Cameras[i]->pauseButtonPressed = clicked;
+    for (int i = 0; i < this->numCameras; i++) {
+        this->cameras[i]->pauseButtonPressed = clicked;
     }
-    this->trigger->pauseButtonPressed = true;
+    this->trigger->pauseButtonPressed = clicked;
 
     if (clicked) {
         ui->pauseButton->setText("Resume");
@@ -179,6 +187,7 @@ void MainWindow::setupUiLayout() {
     ui->pauseButton->setCheckable(true);
     ui->exitButton->setEnabled(true);
     ui->ctsModeStartButton->setEnabled(true);
+    ui->tgrModeStartButton->setEnabled(true);
 
     connect(ui->pauseButton,   SIGNAL(clicked(bool)),this, SLOT(pauseAllRequest(bool)));
     connect(ui->captureButton, SIGNAL(clicked()),    this, SLOT(captureAllRequest()));
@@ -205,18 +214,18 @@ void MainWindow::setupUiLayout() {
     connect(ui->exposureDropDown, SIGNAL(currentIndexChanged(int)), this, SLOT(setExposure(int)));
     connect(ui->gainDropDown,     SIGNAL(currentIndexChanged(int)), this, SLOT(setGain(int)));
 
-    for (int i = 0; i < this->numTX2Cameras; i++) {
+    for (int i = 0; i < this->numCameras; i++) {
 
-        connect(this->TX2Cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
+        connect(this->cameras[i], SIGNAL(requestFrameSettings(int)), this, SLOT(setupFrameSettings(int)));
 
         // Display Data
-        connect(this->TX2Cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnQPrevDefectImage(QImage, int)), this, SLOT(displayQPrevDefectImage(QImage, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
-        connect(this->TX2Cameras[i], SIGNAL(returnFrameCount(int, int)),          this, SLOT(displayFrameCount(int, int)));
+        connect(this->cameras[i], SIGNAL(returnQDefectImage(QImage, int)),     this, SLOT(displayQDefectImage(QImage, int)));
+        connect(this->cameras[i], SIGNAL(returnQPrevDefectImage(QImage, int)), this, SLOT(displayQPrevDefectImage(QImage, int)));
+        connect(this->cameras[i], SIGNAL(returnRes(int, int)),                 this, SLOT(displayRes(int, int)));
+        connect(this->cameras[i], SIGNAL(returnFrameRate(double, int)),        this, SLOT(displayFrameRate(double, int)));
+        connect(this->cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
+        connect(this->cameras[i], SIGNAL(returnCurrFrameRate(double, int)),    this, SLOT(displayCurrFrameRate(double, int)));
+        connect(this->cameras[i], SIGNAL(returnFrameCount(int, int)),          this, SLOT(displayFrameCount(int, int)));
     }
 
     // Taymer Logo
@@ -234,32 +243,32 @@ void MainWindow::setupUiLayout() {
 
 void MainWindow::displayNormal(bool checked) {
     if (checked) {
-        for(int i = 0; i < this->numTX2Cameras; i++) {
-            this->TX2Cameras[i]->displayIndex = 0;
+        for(int i = 0; i < this->numCameras; i++) {
+            this->cameras[i]->displayIndex = 0;
         }
     }
 }
 
 void MainWindow::displayThreshold(bool checked) {
     if (checked) {
-        for(int i = 0; i < this->numTX2Cameras; i++) {
-            this->TX2Cameras[i]->displayIndex = 1;
+        for(int i = 0; i < this->numCameras; i++) {
+            this->cameras[i]->displayIndex = 1;
         }
     }
 }
 
 void MainWindow::displayFloodfill(bool checked) {
     if (checked) {
-        for(int i = 0; i < this->numTX2Cameras; i++) {
-            this->TX2Cameras[i]->displayIndex = 2;
+        for(int i = 0; i < this->numCameras; i++) {
+            this->cameras[i]->displayIndex = 2;
         }
     }
 }
 
 void MainWindow::displayGreyscale(bool checked) {
     if (checked) {
-        for(int i = 0; i < this->numTX2Cameras; i++) {
-            this->TX2Cameras[i]->displayIndex = 3;
+        for(int i = 0; i < this->numCameras; i++) {
+            this->cameras[i]->displayIndex = 3;
         }
     }
 }
@@ -274,8 +283,8 @@ void MainWindow::setExposure(int exposureIndex) {
 }
 
 void MainWindow::setupFrameSettings(int camIndex) {
-    this->TX2Cameras[camIndex]->gain = this->gain;
-    this->TX2Cameras[camIndex]->exposure = this->exposure;
+    this->cameras[camIndex]->gain = this->gain;
+    this->cameras[camIndex]->exposure = this->exposure;
 }
 
 void MainWindow::displayQDefectImage(QImage img_temp, int camIndex) {

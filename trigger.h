@@ -40,6 +40,8 @@ signals:
 
 public slots:
     void startSession();
+    void restartSession();
+    void endSession();
 };
 
 #endif // TRIGGER

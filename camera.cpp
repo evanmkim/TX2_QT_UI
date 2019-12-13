@@ -108,12 +108,6 @@ bool Camera::startSession() {
     this->iRequest = interface_cast<IRequest>(this->request);
     EXIT_IF_NULL(this->iRequest, "Failed to get capture request interface");
 
-    this->status = this->iRequest->enableOutputStream(this->stream.get());
-    EXIT_IF_NOT_OK(this->status, "Failed to enable stream in capture request");
-
-    uint32_t requestId = this->iSession->capture(this->request.get());
-    EXIT_IF_NULL(requestId, "Failed to submit capture request");
-
     //SETTINGS INTERFACE
     this->iSourceSettings = interface_cast<ISourceSettings>(this->iRequest->getSourceSettings());
     EXIT_IF_NULL(this->iSourceSettings, "Failed to get source settings interface");
